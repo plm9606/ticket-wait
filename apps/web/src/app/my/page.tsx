@@ -1,13 +1,20 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { Container } from "@/components/layout/Container";
 
 export default function MyPage() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { subscriptions, loading: subsLoading, fetch: fetchSubs } = useSubscriptions();
 
-  if (loading) {
+  useEffect(() => {
+    if (user) fetchSubs();
+  }, [user, fetchSubs]);
+
+  if (authLoading) {
     return (
       <section className="pt-8">
         <Container>
@@ -41,7 +48,7 @@ export default function MyPage() {
   }
 
   return (
-    <section className="pt-8">
+    <section className="pt-8 pb-24">
       <Container>
         {/* 프로필 */}
         <div className="flex items-center gap-4 mb-10">
@@ -66,19 +73,81 @@ export default function MyPage() {
           </div>
         </div>
 
-        {/* 구독 아티스트 (추후 Phase 2B에서 구현) */}
-        <h2 className="text-lg font-bold mb-6">내 구독</h2>
-        <div className="text-center py-16 border border-dashed border-gray-200 rounded-md">
-          <p className="text-gray-400 text-sm mb-4">
-            아직 구독한 아티스트가 없어요
-          </p>
+        {/* 구독 아티스트 */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-bold">
+            내 구독{" "}
+            <span className="text-gray-300 font-normal">
+              {subscriptions.length}
+            </span>
+          </h2>
           <Link
             href="/search"
-            className="text-sm font-medium text-black underline underline-offset-4"
+            className="text-xs text-gray-400 hover:text-black transition-colors"
           >
-            아티스트 검색하기
+            + 추가
           </Link>
         </div>
+
+        {subsLoading ? (
+          <div className="grid grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-square bg-gray-100 rounded-md" />
+                <div className="h-3 w-16 bg-gray-100 rounded mt-2" />
+              </div>
+            ))}
+          </div>
+        ) : subscriptions.length === 0 ? (
+          <div className="text-center py-16 border border-dashed border-gray-200 rounded-md">
+            <p className="text-gray-400 text-sm mb-4">
+              아직 구독한 아티스트가 없어요
+            </p>
+            <Link
+              href="/search"
+              className="text-sm font-medium text-black underline underline-offset-4"
+            >
+              아티스트 검색하기
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-4">
+            {subscriptions.map((sub) => (
+              <Link
+                key={sub.id}
+                href={`/artist/${sub.artistId}`}
+                className="group"
+              >
+                <div className="aspect-square bg-gray-50 rounded-md flex items-center justify-center overflow-hidden group-hover:opacity-80 transition-opacity">
+                  {sub.imageUrl ? (
+                    <img
+                      src={sub.imageUrl}
+                      alt={sub.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-gray-300 text-2xl">
+                      {sub.name[0]}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <div className="text-xs font-medium truncate">{sub.name}</div>
+                  {sub.nameEn && (
+                    <div className="text-[10px] text-gray-400 truncate">
+                      {sub.nameEn}
+                    </div>
+                  )}
+                  {sub.concertCount > 0 && (
+                    <div className="text-[10px] text-gray-300 mt-0.5">
+                      공연 {sub.concertCount}건
+                    </div>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </Container>
     </section>
   );

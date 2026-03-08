@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
+import { RecentConcerts } from "@/components/concert/RecentConcerts";
 
 export default function HomePage() {
   return (
@@ -50,6 +51,22 @@ export default function HomePage() {
               </p>
             </div>
           </div>
+        </Container>
+      </section>
+
+      {/* 최근 공연 */}
+      <section className="py-16 border-t border-gray-100">
+        <Container>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-bold">최근 등록된 공연</h2>
+            <Link
+              href="/concerts"
+              className="text-xs text-gray-400 hover:text-black transition-colors"
+            >
+              전체 보기
+            </Link>
+          </div>
+          <RecentConcerts />
         </Container>
       </section>
     </>
