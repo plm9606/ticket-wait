@@ -2,6 +2,7 @@ import axios, { type AxiosInstance } from "axios";
 import { prisma } from "../lib/prisma.js";
 import type { TicketSource, CrawlStatus } from "@prisma/client";
 import type { RawConcertData } from "@concert-alert/shared";
+import { classifyGenre } from "./matcher.js";
 
 const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY = 2000;
@@ -113,6 +114,7 @@ export abstract class BaseCrawler {
             sourceUrl: raw.sourceUrl,
             imageUrl: raw.imageUrl || null,
             rawTitle: raw.title,
+            genre: classifyGenre(raw.title),
           },
         });
 

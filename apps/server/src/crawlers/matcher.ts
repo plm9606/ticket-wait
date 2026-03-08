@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import type { ConcertGenre } from "@prisma/client";
 import { normalizeForMatch, removeConcertSuffixes } from "@concert-alert/shared";
 
 interface ArtistMatch {
@@ -174,6 +175,38 @@ export function extractArtistName(title: string): string | null {
 }
 
 /**
+ * 공연 제목에서 장르를 분류
+ */
+export function classifyGenre(title: string): ConcertGenre {
+  const t = title.toLowerCase();
+
+  // 뮤지컬
+  if (/뮤지컬|musical/i.test(title)) return "MUSICAL";
+
+  // 클래식/오케스트라
+  if (/클래식|오케스트라|교향|orchestra|symphony|리사이틀|recital|가곡|오페라|opera|chamber/i.test(title))
+    return "CLASSIC";
+
+  // 힙합
+  if (/힙합|hiphop|hip-hop|랩|rapper|rap\b|r&b|알앤비/i.test(title))
+    return "HIPHOP";
+
+  // 트로트
+  if (/트롯|트로트|미스터트롯|미스트롯|현역가왕|trot/i.test(title))
+    return "TROT";
+
+  // 페스티벌
+  if (/페스티벌|festival|페스타|festa|뮤직페스티벌/i.test(title))
+    return "FESTIVAL";
+
+  // 팬미팅
+  if (/팬미팅|fanmeeting|fan\s*meeting/i.test(title))
+    return "FANMEETING";
+
+  return "CONCERT";
+}
+
+/**
  * DB의 미매칭 공연들에 대해 아티스트 매칭 실행
  * 매칭 실패 시 제목에서 아티스트 이름을 추출하여 새 아티스트 생성
  */
@@ -236,4 +269,32 @@ export async function matchUnmatchedConcerts(): Promise<number> {
     `[Matcher] ${matched}/${unmatched.length} concerts matched (${created} new artists created)`
   );
   return matched;
+}
+
+/**
+ * 기존 공연 중 장르가 기본값(CONCERT)인 것들을 재분류
+ */
+export async function classifyUnclassifiedConcerts(): Promise<number> {
+  const concerts = await prisma.concert.findMany({
+    where: { genre: "CONCERT" },
+    select: { id: true, title: true },
+  });
+
+  let reclassified = 0;
+
+  for (const concert of concerts) {
+    const genre = classifyGenre(concert.title);
+    if (genre !== "CONCERT") {
+      await prisma.concert.update({
+        where: { id: concert.id },
+        data: { genre },
+      });
+      reclassified++;
+    }
+  }
+
+  if (reclassified > 0) {
+    console.log(`[Matcher] ${reclassified} concerts reclassified by genre`);
+  }
+  return reclassified;
 }

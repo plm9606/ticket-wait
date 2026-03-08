@@ -7,16 +7,18 @@ export default async function concertRoutes(fastify: FastifyInstance) {
     Querystring: {
       source?: string;
       status?: string;
+      genre?: string;
       limit?: string;
       cursor?: string;
     };
   }>("/concerts", async (request) => {
-    const { source, status, limit, cursor } = request.query;
+    const { source, status, genre, limit, cursor } = request.query;
     const take = Math.min(Number(limit) || 20, 50);
 
     const where: Record<string, unknown> = {};
     if (source) where.source = source;
     if (status) where.status = status;
+    if (genre) where.genre = genre;
 
     const concerts = await prisma.concert.findMany({
       where,
@@ -43,6 +45,7 @@ export default async function concertRoutes(fastify: FastifyInstance) {
         source: c.source,
         sourceUrl: c.sourceUrl,
         imageUrl: c.imageUrl,
+        genre: c.genre,
         status: c.status,
       })),
       nextCursor: hasMore ? items[items.length - 1].id : null,
@@ -83,6 +86,7 @@ export default async function concertRoutes(fastify: FastifyInstance) {
         source: concert.source,
         sourceUrl: concert.sourceUrl,
         imageUrl: concert.imageUrl,
+        genre: concert.genre,
         status: concert.status,
         artist: concert.artist
           ? {

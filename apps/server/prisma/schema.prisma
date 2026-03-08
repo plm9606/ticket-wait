@@ -51,6 +51,7 @@ model Concert {
   sourceUrl      String
   imageUrl       String?
   rawTitle       String
+  genre          ConcertGenre  @default(CONCERT)
   status         ConcertStatus @default(UPCOMING)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -61,6 +62,7 @@ model Concert {
   @@index([artistId])
   @@index([startDate])
   @@index([ticketOpenDate])
+  @@index([genre])
 }
 
 model Subscription {
@@ -113,6 +115,17 @@ enum TicketSource {
   MELON
   YES24
   INTERPARK
+}
+
+enum ConcertGenre {
+  CONCERT    // 일반 콘서트
+  FESTIVAL   // 페스티벌
+  FANMEETING // 팬미팅
+  MUSICAL    // 뮤지컬
+  CLASSIC    // 클래식/오케스트라
+  HIPHOP     // 힙합/R&B
+  TROT       // 트로트
+  OTHER      // 기타
 }
 
 enum ConcertStatus {

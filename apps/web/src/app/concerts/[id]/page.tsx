@@ -18,6 +18,7 @@ interface ConcertDetail {
   source: string;
   sourceUrl: string;
   imageUrl: string | null;
+  genre: string;
   status: string;
   artist: {
     id: string;
@@ -49,6 +50,20 @@ function sourceLabel(source: string) {
       return "멜론티켓";
     default:
       return source;
+  }
+}
+
+function genreLabel(genre: string) {
+  switch (genre) {
+    case "CONCERT": return "콘서트";
+    case "FESTIVAL": return "페스티벌";
+    case "FANMEETING": return "팬미팅";
+    case "MUSICAL": return "뮤지컬";
+    case "CLASSIC": return "클래식";
+    case "HIPHOP": return "힙합/R&B";
+    case "TROT": return "트로트";
+    case "OTHER": return "기타";
+    default: return genre;
   }
 }
 
@@ -190,6 +205,9 @@ export default function ConcertDetailPage({
           <div className="flex items-center justify-center gap-3 mt-4">
             <span className="text-xs text-gray-300">
               {sourceLabel(concert.source)}
+            </span>
+            <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500">
+              {genreLabel(concert.genre)}
             </span>
             <span className="text-xs text-gray-300">
               {statusLabel(concert.status)}

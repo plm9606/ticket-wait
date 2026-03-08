@@ -15,6 +15,7 @@ interface Concert {
   source: string;
   sourceUrl: string;
   imageUrl: string | null;
+  genre: string;
   status: string;
 }
 
@@ -41,17 +42,35 @@ function sourceLabel(source: string) {
   }
 }
 
+const GENRE_FILTERS = [
+  { value: "", label: "전체" },
+  { value: "CONCERT", label: "콘서트" },
+  { value: "FESTIVAL", label: "페스티벌" },
+  { value: "FANMEETING", label: "팬미팅" },
+  { value: "MUSICAL", label: "뮤지컬" },
+  { value: "CLASSIC", label: "클래식" },
+  { value: "HIPHOP", label: "힙합/R&B" },
+  { value: "TROT", label: "트로트" },
+  { value: "OTHER", label: "기타" },
+] as const;
+
+function genreLabel(genre: string) {
+  return GENRE_FILTERS.find((g) => g.value === genre)?.label ?? genre;
+}
+
 export default function ConcertsPage() {
   const [concerts, setConcerts] = useState<Concert[]>([]);
   const [loading, setLoading] = useState(true);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
+  const [genre, setGenre] = useState("");
 
-  const loadConcerts = useCallback(async (nextCursor?: string) => {
+  const loadConcerts = useCallback(async (nextCursor?: string, genreFilter?: string) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ limit: "20" });
       if (nextCursor) params.set("cursor", nextCursor);
+      if (genreFilter) params.set("genre", genreFilter);
       const data = await api<ConcertListResponse>(`/concerts?${params}`);
       setConcerts((prev) => nextCursor ? [...prev, ...data.items] : data.items);
       setCursor(data.nextCursor);
@@ -64,13 +83,32 @@ export default function ConcertsPage() {
   }, []);
 
   useEffect(() => {
-    loadConcerts();
-  }, [loadConcerts]);
+    setConcerts([]);
+    setCursor(null);
+    loadConcerts(undefined, genre);
+  }, [loadConcerts, genre]);
 
   return (
     <section className="pt-8 pb-24">
       <Container>
-        <h1 className="text-2xl font-bold mb-8">공연</h1>
+        <h1 className="text-2xl font-bold mb-6">공연</h1>
+
+        {/* 장르 필터 */}
+        <div className="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">
+          {GENRE_FILTERS.map((g) => (
+            <button
+              key={g.value}
+              onClick={() => setGenre(g.value)}
+              className={`shrink-0 px-3 py-1.5 text-xs font-medium border transition-colors ${
+                genre === g.value
+                  ? "bg-black text-white border-black"
+                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+              }`}
+            >
+              {g.label}
+            </button>
+          ))}
+        </div>
 
         {concerts.length === 0 && !loading && (
           <div className="text-center py-16">
@@ -113,8 +151,15 @@ export default function ConcertsPage() {
                     </span>
                   )}
                 </div>
-                <div className="text-[10px] text-gray-300 mt-1">
-                  {sourceLabel(concert.source)}
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[10px] text-gray-300">
+                    {sourceLabel(concert.source)}
+                  </span>
+                  {concert.genre && concert.genre !== "CONCERT" && (
+                    <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-500">
+                      {genreLabel(concert.genre)}
+                    </span>
+                  )}
                 </div>
               </div>
             </Link>
@@ -137,7 +182,7 @@ export default function ConcertsPage() {
 
         {hasMore && !loading && (
           <button
-            onClick={() => cursor && loadConcerts(cursor)}
+            onClick={() => cursor && loadConcerts(cursor, genre)}
             className="w-full mt-6 py-3 text-sm text-gray-400 hover:text-black border border-gray-100 hover:border-gray-300 transition-colors"
           >
             더 보기

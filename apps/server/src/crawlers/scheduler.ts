@@ -2,7 +2,7 @@ import cron from "node-cron";
 import { InterparkCrawler } from "./interpark.crawler.js";
 import { Yes24Crawler } from "./yes24.crawler.js";
 import { MelonCrawler } from "./melon.crawler.js";
-import { matchUnmatchedConcerts } from "./matcher.js";
+import { matchUnmatchedConcerts, classifyUnclassifiedConcerts } from "./matcher.js";
 import { notifyNewConcerts, sendTicketOpenReminders } from "../services/notification.service.js";
 import { prisma } from "../lib/prisma.js";
 import type { BaseCrawler } from "./base.crawler.js";
@@ -16,6 +16,7 @@ const melon = new MelonCrawler();
  */
 async function runCrawlPipeline(crawler: BaseCrawler) {
   await crawler.run();
+  await classifyUnclassifiedConcerts();
   const matched = await matchUnmatchedConcerts();
 
   // 매칭된 새 공연에 대해 알림 발송
