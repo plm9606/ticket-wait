@@ -1,16 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Container } from "@/components/layout/Container";
 import { useRouter } from "next/navigation";
+import { requestNotificationPermission } from "@/lib/fcm";
 
 export default function SettingsPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     router.push("/");
+  };
+
+  const handleEnablePush = async () => {
+    setPushLoading(true);
+    try {
+      const success = await requestNotificationPermission();
+      setPushEnabled(success);
+    } catch {
+      // ignore
+    } finally {
+      setPushLoading(false);
+    }
   };
 
   if (loading) {
@@ -48,12 +64,22 @@ export default function SettingsPage() {
             )}
           </div>
 
-          {/* 알림 설정 (추후 Phase 2C에서 구현) */}
+          {/* 알림 설정 */}
           <div className="py-5">
             <div className="text-xs text-gray-400 mb-2">알림</div>
-            <div className="text-sm text-gray-500">
-              푸시 알림 설정 (준비 중)
-            </div>
+            {pushEnabled ? (
+              <div className="text-sm text-gray-500">
+                푸시 알림이 활성화되었습니다
+              </div>
+            ) : (
+              <button
+                onClick={handleEnablePush}
+                disabled={pushLoading}
+                className="text-sm text-black font-medium hover:opacity-70 transition-opacity"
+              >
+                {pushLoading ? "설정 중..." : "푸시 알림 허용하기"}
+              </button>
+            )}
           </div>
 
           {/* 로그아웃 */}

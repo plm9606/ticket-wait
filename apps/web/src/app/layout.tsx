@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "공연알리미 - 좋아하는 아티스트의 공연을 놓치지 마세요",
   description:
     "좋아하는 아티스트를 구독하고, 새로운 공연이 등록되면 알림을 받으세요.",
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {

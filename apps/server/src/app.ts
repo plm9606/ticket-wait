@@ -6,6 +6,7 @@ import kakaoAuthRoutes from "./routes/auth/kakao.js";
 import artistRoutes from "./routes/artists/search.js";
 import subscriptionRoutes from "./routes/subscriptions/index.js";
 import concertRoutes from "./routes/concerts/index.js";
+import notificationRoutes from "./routes/notifications/index.js";
 import { env } from "./config/env.js";
 
 export async function buildApp() {
@@ -24,6 +25,7 @@ export async function buildApp() {
   await fastify.register(artistRoutes);
   await fastify.register(subscriptionRoutes);
   await fastify.register(concertRoutes);
+  await fastify.register(notificationRoutes);
 
   // 헬스체크
   fastify.get("/health", async () => ({ status: "ok" }));

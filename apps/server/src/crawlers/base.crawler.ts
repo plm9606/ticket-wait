@@ -68,6 +68,7 @@ export abstract class BaseCrawler {
   async run(): Promise<{
     itemsFound: number;
     newItems: number;
+    newConcertIds: string[];
     errors: string | null;
   }> {
     const crawlLog = await prisma.crawlLog.create({
@@ -78,6 +79,7 @@ export abstract class BaseCrawler {
     let errorMsg: string | null = null;
     let itemsFound = 0;
     let newItems = 0;
+    const newConcertIds: string[] = [];
 
     try {
       const rawConcerts = await this.fetchConcerts();
@@ -97,7 +99,7 @@ export abstract class BaseCrawler {
         if (existing) continue;
 
         // 새 공연 삽입
-        await prisma.concert.create({
+        const concert = await prisma.concert.create({
           data: {
             title: raw.title,
             venue: raw.venue || null,
@@ -114,6 +116,7 @@ export abstract class BaseCrawler {
           },
         });
 
+        newConcertIds.push(concert.id);
         newItems++;
       }
 
@@ -139,6 +142,6 @@ export abstract class BaseCrawler {
       },
     });
 
-    return { itemsFound, newItems, errors: errorMsg };
+    return { itemsFound, newItems, newConcertIds, errors: errorMsg };
   }
 }
