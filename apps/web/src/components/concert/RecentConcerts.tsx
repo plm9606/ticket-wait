@@ -50,12 +50,12 @@ export function RecentConcerts() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-10">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="animate-pulse">
-            <div className="aspect-[3/4] bg-gray-100 rounded-md" />
-            <div className="h-3 bg-gray-100 rounded mt-2 w-3/4" />
-            <div className="h-2.5 bg-gray-100 rounded mt-1 w-1/2" />
+            <div className="aspect-[3/4] bg-gray-100" />
+            <div className="h-2.5 bg-gray-100 rounded mt-4 w-3/4" />
+            <div className="h-2 bg-gray-50 rounded mt-2 w-1/2" />
           </div>
         ))}
       </div>
@@ -71,41 +71,41 @@ export function RecentConcerts() {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-10">
       {concerts.map((concert) => (
         <Link
           key={concert.id}
           href={`/concerts/${concert.id}`}
           className="group"
         >
-          <div className="aspect-[3/4] bg-gray-50 rounded-md overflow-hidden">
+          <div className="aspect-[3/4] bg-gray-100 overflow-hidden">
             {concert.imageUrl ? (
               <img
                 src={concert.imageUrl}
                 alt={concert.title}
-                className="w-full h-full object-cover group-hover:opacity-80 transition-opacity"
+                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-200 text-xs">
-                No Image
+              <div className="w-full h-full flex items-center justify-center text-gray-300 text-[11px] tracking-wider">
+                NO IMAGE
               </div>
             )}
           </div>
-          <div className="mt-2">
-            <div className="text-xs font-medium leading-snug line-clamp-2">
+          <div className="mt-4">
+            <div className="text-[12px] font-normal leading-relaxed line-clamp-2 text-gray-900">
               {concert.title}
             </div>
             {concert.artist && (
-              <div className="text-[10px] text-gray-500 mt-0.5">
+              <div className="text-[11px] font-light text-gray-400 mt-1.5">
                 {concert.artist.name}
               </div>
             )}
-            <div className="flex items-center gap-1 mt-0.5">
-              <span className="text-[10px] text-gray-300">
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <span className="text-[10px] font-light text-gray-300 tracking-wider">
                 {sourceLabel(concert.source)}
               </span>
               {concert.startDate && (
-                <span className="text-[10px] text-gray-300">
+                <span className="text-[10px] font-light text-gray-300">
                   · {formatDate(concert.startDate)}
                 </span>
               )}

@@ -25,13 +25,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 29cm 스타일: 부드러운 전환 */
+/* 부드러운 전환 */
 a, button {
-  transition: opacity 0.2s ease;
-}
-
-a:hover, button:hover {
-  opacity: 0.7;
+  transition: all 0.3s ease;
 }
 
 /* 스크롤바 미니멀 */
