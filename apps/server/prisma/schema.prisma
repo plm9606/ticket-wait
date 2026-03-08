@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  kakaoId       String         @unique
+  nickname      String
+  email         String?
+  profileImage  String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  subscriptions Subscription[]
+  fcmTokens     FcmToken[]
+  notifications Notification[]
+}
+
+model Artist {
+  id        String   @id @default(cuid())
+  name      String
+  nameEn    String?
+  aliases   String[] @default([])
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions Subscription[]
+  concerts      Concert[]
+
+  @@index([name])
+  @@index([nameEn])
+}
+
+model Concert {
+  id             String        @id @default(cuid())
+  title          String
+  artistId       String?
+  artist         Artist?       @relation(fields: [artistId], references: [id])
+  venue          String?
+  startDate      DateTime?
+  endDate        DateTime?
+  ticketOpenDate DateTime?
+  source         TicketSource
+  sourceId       String
+  sourceUrl      String
+  imageUrl       String?
+  rawTitle       String
+  status         ConcertStatus @default(UPCOMING)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  notifications Notification[]
+
+  @@unique([source, sourceId])
+  @@index([artistId])
+  @@index([startDate])
+  @@index([ticketOpenDate])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artistId  String
+  artist    Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, artistId])
+  @@index([artistId])
+}
+
+model FcmToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  device    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  concertId String
+  concert   Concert          @relation(fields: [concertId], references: [id])
+  type      NotificationType
+  sentAt    DateTime         @default(now())
+  readAt    DateTime?
+
+  @@index([userId, sentAt])
+}
+
+model CrawlLog {
+  id          String       @id @default(cuid())
+  source      TicketSource
+  startedAt   DateTime     @default(now())
+  completedAt DateTime?
+  itemsFound  Int          @default(0)
+  newItems    Int          @default(0)
+  errors      String?
+  status      CrawlStatus  @default(RUNNING)
+}
+
+enum TicketSource {
+  MELON
+  YES24
+  INTERPARK
+}
+
+enum ConcertStatus {
+  UPCOMING
+  ON_SALE
+  SOLD_OUT
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  NEW_CONCERT
+  TICKET_OPEN_SOON
+}
+
+enum CrawlStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
