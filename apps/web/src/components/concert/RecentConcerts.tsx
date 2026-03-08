@@ -50,11 +50,11 @@ export function RecentConcerts() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-10">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
+        {[...Array(8)].map((_, i) => (
           <div key={i} className="animate-pulse">
             <div className="aspect-[3/4] bg-gray-100" />
-            <div className="h-2.5 bg-gray-100 rounded mt-4 w-3/4" />
+            <div className="h-2.5 bg-gray-100 rounded mt-5 w-3/4" />
             <div className="h-2 bg-gray-50 rounded mt-2 w-1/2" />
           </div>
         ))}
@@ -71,7 +71,7 @@ export function RecentConcerts() {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-10">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
       {concerts.map((concert) => (
         <Link
           key={concert.id}
@@ -83,25 +83,25 @@ export function RecentConcerts() {
               <img
                 src={concert.imageUrl}
                 alt={concert.title}
-                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-300 text-[11px] tracking-wider">
+              <div className="w-full h-full flex items-center justify-center text-gray-300 text-[10px] tracking-[0.2em]">
                 NO IMAGE
               </div>
             )}
           </div>
-          <div className="mt-4">
-            <div className="text-[12px] font-normal leading-relaxed line-clamp-2 text-gray-900">
+          <div className="mt-5">
+            <div className="text-[13px] font-light leading-[1.6] line-clamp-2 text-gray-900">
               {concert.title}
             </div>
             {concert.artist && (
-              <div className="text-[11px] font-light text-gray-400 mt-1.5">
+              <div className="text-[11px] font-light text-gray-400 mt-2">
                 {concert.artist.name}
               </div>
             )}
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <span className="text-[10px] font-light text-gray-300 tracking-wider">
+            <div className="flex items-center gap-1.5 mt-2">
+              <span className="text-[10px] font-light text-gray-300 tracking-[0.1em]">
                 {sourceLabel(concert.source)}
               </span>
               {concert.startDate && (

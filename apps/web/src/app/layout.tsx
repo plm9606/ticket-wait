@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "@/styles/globals.css";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -25,10 +24,22 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@300;400;500;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>
         <AuthProvider>
           <Header />
-          <main className="min-h-screen">{children}</main>
+          <main className="min-h-screen pt-14">{children}</main>
           <BottomNav />
         </AuthProvider>
       </body>
