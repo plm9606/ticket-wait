@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { Container } from "@/components/layout/Container";
+import { API_URL } from "@/lib/constants";
 
 export default function MyPage() {
   const { user, loading: authLoading } = useAuth();
@@ -36,7 +37,7 @@ export default function MyPage() {
               로그인하고 좋아하는 아티스트를 구독하세요
             </p>
             <Link
-              href={`${process.env.NEXT_PUBLIC_API_URL}/auth/kakao`}
+              href={`${API_URL}/auth/kakao`}
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#FEE500] text-[#191919] text-sm font-medium rounded-md"
             >
               카카오로 시작하기

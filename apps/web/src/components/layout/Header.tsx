@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotificationCount } from "@/hooks/useNotificationCount";
+import { API_URL } from "@/lib/constants";
 
 export function Header() {
   const { user } = useAuth();
@@ -50,7 +51,7 @@ export function Header() {
             </div>
           ) : (
             <Link
-              href={`${process.env.NEXT_PUBLIC_API_URL}/auth/kakao`}
+              href={`${API_URL}/auth/kakao`}
               className="text-sm font-medium text-black"
             >
               로그인

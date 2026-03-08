@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
+import { API_URL } from "@/lib/constants";
 import { api } from "@/lib/api";
 
 interface Concert {
@@ -169,7 +170,7 @@ export default function ArtistDetailPage({
             </button>
           ) : (
             <Link
-              href={`${process.env.NEXT_PUBLIC_API_URL}/auth/kakao`}
+              href={`${API_URL}/auth/kakao`}
               className="mt-6 inline-block px-8 py-2.5 bg-black text-white text-sm font-medium hover:opacity-80 transition-opacity"
             >
               로그인하고 구독하기
