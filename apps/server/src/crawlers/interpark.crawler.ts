@@ -2,91 +2,67 @@ import { BaseCrawler } from "./base.crawler.js";
 import type { TicketSource } from "@prisma/client";
 import type { RawConcertData } from "@concert-alert/shared";
 
-interface InterparkItem {
+interface InterparkOpenNoticeItem {
+  noticeId: number;
+  title: string;
+  openDateStr: string; // "2026-03-09 09:00:00"
+  venueName: string;
+  goodsGenre: number;
+  goodsGenreEngStr: string; // "CONCERT" | "MUSICAL" 등
+  goodsRegion: number;
+  posterImageUrl: string;
   goodsCode: string;
-  goodsName: string;
-  placeName: string;
-  playStartDate: string; // "20260404"
-  playEndDate: string;
-  imageUrl: string; // "//ticketimage.interpark.com/..."
-  url: string; // "//ticket.interpark.com/..."
-}
-
-interface InterparkRankingResponse {
-  concert?: InterparkItem[];
-  [key: string]: InterparkItem[] | undefined;
+  isHot: boolean;
+  viewCount: number;
 }
 
 export class InterparkCrawler extends BaseCrawler {
   source: TicketSource = "INTERPARK";
 
-  private readonly BASE_URL = "https://tickets.interpark.com/api";
+  private readonly BASE_URL = "https://tickets.interpark.com";
 
   async fetchConcerts(): Promise<RawConcertData[]> {
+    const items = await this.fetchWithRetry<InterparkOpenNoticeItem[]>(
+      `${this.BASE_URL}/contents/api/open-notice/notice-list`,
+      {
+        params: {
+          goodsGenre: "ALL",
+          goodsRegion: "ALL",
+          offset: 0,
+          pageSize: 50,
+          sorting: "OPEN_ASC",
+        },
+        headers: {
+          Accept: "application/json",
+          Referer: `${this.BASE_URL}/`,
+        },
+      }
+    );
+
     const results: RawConcertData[] = [];
 
-    // 일간/주간/월간 랭킹 크롤링
-    for (const period of ["D", "W", "M"]) {
-      try {
-        const data = await this.fetchWithRetry<InterparkRankingResponse>(
-          `${this.BASE_URL}/ranking`,
-          {
-            params: {
-              genre: "concert",
-              period,
-              page: 1,
-              pageSize: 50,
-            },
-            headers: {
-              Accept: "application/json",
-              Referer: "https://tickets.interpark.com/",
-            },
-          }
-        );
+    for (const item of items) {
+      if (!item.goodsCode || !item.title) continue;
 
-        const concerts = data.concert || [];
+      let imageUrl = item.posterImageUrl || "";
+      if (imageUrl.startsWith("//")) imageUrl = `https:${imageUrl}`;
 
-        for (const item of concerts) {
-          results.push({
-            title: item.goodsName,
-            venue: item.placeName,
-            startDate: this.parseDate(item.playStartDate),
-            endDate: this.parseDate(item.playEndDate),
-            sourceId: item.goodsCode,
-            sourceUrl: item.url.startsWith("//")
-              ? `https:${item.url}`
-              : item.url,
-            imageUrl: item.imageUrl.startsWith("//")
-              ? `https:${item.imageUrl}`
-              : item.imageUrl,
-          });
-        }
-
-        await this.delay(2000);
-      } catch (err) {
-        console.warn(
-          `[INTERPARK] Failed to fetch ${period} ranking:`,
-          err instanceof Error ? err.message : err
-        );
-      }
+      results.push({
+        title: item.title.trim(),
+        venue: item.venueName || undefined,
+        ticketOpenDate: this.parseOpenDate(item.openDateStr),
+        sourceId: item.goodsCode,
+        sourceUrl: `${this.BASE_URL}/goods/${item.goodsCode}`,
+        imageUrl: imageUrl || undefined,
+      });
     }
 
-    // sourceId 기준 중복 제거
-    const unique = new Map<string, RawConcertData>();
-    for (const item of results) {
-      if (!unique.has(item.sourceId)) {
-        unique.set(item.sourceId, item);
-      }
-    }
-
-    return Array.from(unique.values());
+    return results;
   }
 
-  private parseDate(dateStr: string): string | undefined {
-    if (!dateStr || dateStr.length !== 8) return undefined;
-    const y = dateStr.slice(0, 4);
-    const m = dateStr.slice(4, 6);
-    const d = dateStr.slice(6, 8);
-    return `${y}-${m}-${d}`;
+  /** "2026-03-09 09:00:00" → "2026-03-09T09:00:00" */
+  private parseOpenDate(dateStr: string): string | undefined {
+    if (!dateStr) return undefined;
+    return dateStr.replace(" ", "T");
   }
 }
