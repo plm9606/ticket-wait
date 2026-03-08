@@ -4,5 +4,6 @@ dist/
 .turbo/
 .env
 *.log
+*.tsbuildinfo
 .DS_Store
 .context/
