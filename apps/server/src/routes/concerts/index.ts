@@ -57,7 +57,14 @@ export default async function concertRoutes(fastify: FastifyInstance) {
         where: { id: request.params.id },
         include: {
           artist: {
-            select: { id: true, name: true, nameEn: true, imageUrl: true },
+            select: {
+              id: true,
+              name: true,
+              nameEn: true,
+              imageUrl: true,
+              aliases: true,
+              _count: { select: { subscriptions: true } },
+            },
           },
         },
       });
@@ -66,7 +73,28 @@ export default async function concertRoutes(fastify: FastifyInstance) {
         return reply.status(404).send({ error: "Concert not found" });
       }
 
-      return concert;
+      return {
+        id: concert.id,
+        title: concert.title,
+        venue: concert.venue,
+        startDate: concert.startDate,
+        endDate: concert.endDate,
+        ticketOpenDate: concert.ticketOpenDate,
+        source: concert.source,
+        sourceUrl: concert.sourceUrl,
+        imageUrl: concert.imageUrl,
+        status: concert.status,
+        artist: concert.artist
+          ? {
+              id: concert.artist.id,
+              name: concert.artist.name,
+              nameEn: concert.artist.nameEn,
+              imageUrl: concert.artist.imageUrl,
+              aliases: concert.artist.aliases,
+              subscriberCount: concert.artist._count.subscriptions,
+            }
+          : null,
+      };
     }
   );
 

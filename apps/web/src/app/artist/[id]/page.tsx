@@ -191,11 +191,9 @@ export default function ArtistDetailPage({
           ) : (
             <div className="space-y-4">
               {artist.concerts.map((concert) => (
-                <a
+                <Link
                   key={concert.id}
-                  href={concert.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={`/concerts/${concert.id}`}
                   className="block border border-gray-100 p-4 hover:border-gray-300 transition-colors"
                 >
                   <div className="flex gap-4">
@@ -228,7 +226,7 @@ export default function ArtistDetailPage({
                       </div>
                     </div>
                   </div>
-                </a>
+                </Link>
               ))}
             </div>
           )}

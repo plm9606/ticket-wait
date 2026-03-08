@@ -80,11 +80,9 @@ export default function ConcertsPage() {
 
         <div className="space-y-3">
           {concerts.map((concert) => (
-            <a
+            <Link
               key={concert.id}
-              href={concert.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`/concerts/${concert.id}`}
               className="flex gap-4 p-3 border border-gray-100 hover:border-gray-300 transition-colors"
             >
               {concert.imageUrl && (
@@ -101,13 +99,9 @@ export default function ConcertsPage() {
                   {concert.title}
                 </div>
                 {concert.artist && (
-                  <Link
-                    href={`/artist/${concert.artist.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-xs text-gray-500 hover:text-black mt-1 inline-block"
-                  >
+                  <div className="text-xs text-gray-500 mt-1">
                     {concert.artist.name}
-                  </Link>
+                  </div>
                 )}
                 <div className="flex items-center gap-2 mt-1">
                   {concert.venue && (
@@ -123,7 +117,7 @@ export default function ConcertsPage() {
                   {sourceLabel(concert.source)}
                 </div>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
 

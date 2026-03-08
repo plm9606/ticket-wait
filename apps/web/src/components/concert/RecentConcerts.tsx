@@ -73,11 +73,9 @@ export function RecentConcerts() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {concerts.map((concert) => (
-        <a
+        <Link
           key={concert.id}
-          href={concert.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={`/concerts/${concert.id}`}
           className="group"
         >
           <div className="aspect-[3/4] bg-gray-50 rounded-md overflow-hidden">
@@ -98,13 +96,9 @@ export function RecentConcerts() {
               {concert.title}
             </div>
             {concert.artist && (
-              <Link
-                href={`/artist/${concert.artist.id}`}
-                onClick={(e) => e.stopPropagation()}
-                className="text-[10px] text-gray-500 hover:text-black mt-0.5 inline-block"
-              >
+              <div className="text-[10px] text-gray-500 mt-0.5">
                 {concert.artist.name}
-              </Link>
+              </div>
             )}
             <div className="flex items-center gap-1 mt-0.5">
               <span className="text-[10px] text-gray-300">
@@ -117,7 +111,7 @@ export function RecentConcerts() {
               )}
             </div>
           </div>
-        </a>
+        </Link>
       ))}
     </div>
   );
