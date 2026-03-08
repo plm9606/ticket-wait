@@ -66,7 +66,46 @@ export class MelonCrawler extends BaseCrawler {
       );
     }
 
+    // 상세 페이지에서 출연진 정보 추출
+    for (const item of results) {
+      try {
+        await this.delay(2000);
+        const artists = await this.fetchArtistsFromDetail(item.sourceId);
+        if (artists.length > 0) {
+          item.artistNames = artists;
+          console.log(`[MELON] ${item.sourceId}: 출연진 ${artists.join(", ")}`);
+        }
+      } catch {
+        // 상세 페이지 접근 실패 시 무시
+      }
+    }
+
     return results;
+  }
+
+  /**
+   * 상세 페이지에서 출연진 정보 추출
+   * 셀렉터: .box_artist_checking .list_artist li strong.singer
+   */
+  private async fetchArtistsFromDetail(prodId: string): Promise<string[]> {
+    const html = await this.fetchWithRetry<string>(
+      `${this.BASE_URL}/performance/index.htm?prodId=${prodId}`,
+      {
+        headers: {
+          Referer: `${this.BASE_URL}/concert/index.htm`,
+          Accept: "text/html",
+        },
+        responseType: "text",
+      }
+    );
+
+    const $ = cheerio.load(html);
+    const artists: string[] = [];
+    $(".box_artist_checking .list_artist li").each((_, el) => {
+      const name = $(el).find("strong.singer").text().trim();
+      if (name) artists.push(name);
+    });
+    return artists;
   }
 
   private parseHtml(html: string): RawConcertData[] {

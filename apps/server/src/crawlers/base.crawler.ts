@@ -2,7 +2,7 @@ import axios, { type AxiosInstance } from "axios";
 import { prisma } from "../lib/prisma.js";
 import type { TicketSource, CrawlStatus } from "@prisma/client";
 import type { RawConcertData } from "@concert-alert/shared";
-import { classifyGenre } from "./matcher.js";
+import { classifyGenre, matchArtist } from "./matcher.js";
 
 const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY = 2000;
@@ -99,6 +99,15 @@ export abstract class BaseCrawler {
 
         if (existing) continue;
 
+        // 출연진 이름으로 아티스트 매칭 시도
+        let artistId: string | null = null;
+        if (raw.artistNames && raw.artistNames.length > 0) {
+          for (const name of raw.artistNames) {
+            artistId = await matchArtist(name);
+            if (artistId) break;
+          }
+        }
+
         // 새 공연 삽입
         const concert = await prisma.concert.create({
           data: {
@@ -115,6 +124,7 @@ export abstract class BaseCrawler {
             imageUrl: raw.imageUrl || null,
             rawTitle: raw.title,
             genre: classifyGenre(raw.title),
+            artistId,
           },
         });
 

@@ -33,4 +33,6 @@ export interface RawConcertData {
   sourceId: string;
   sourceUrl: string;
   imageUrl?: string;
+  /** 상세 페이지에서 추출한 출연진 이름 */
+  artistNames?: string[];
 }
