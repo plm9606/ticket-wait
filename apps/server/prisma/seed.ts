@@ -123,22 +123,174 @@ const artists = [
   { name: "후지이 카제", nameEn: "Fujii Kaze", aliases: ["藤井風"] },
 ];
 
+// 샘플 공연 데이터
+function generateConcerts(artistMap: Map<string, string>) {
+  const venues = [
+    "KSPO DOME", "올림픽공원 올림픽홀", "잠실종합운동장 주경기장",
+    "고척스카이돔", "세종문화회관 대극장", "블루스퀘어 마스터카드홀",
+    "YES24 LIVE HALL", "롤링홀", "무신사 개러지",
+    "인터파크 유니플렉스", "경희대 평화의 전당", "연세대 노천극장",
+    "부산 벡스코", "대구 엑스코", "광주 김대중컨벤션센터",
+  ];
+
+  const now = new Date();
+  const concerts: {
+    title: string;
+    artistName: string;
+    venue: string;
+    startDate: Date;
+    endDate: Date | null;
+    ticketOpenDate: Date | null;
+    source: "MELON" | "YES24" | "INTERPARK";
+    sourceId: string;
+    sourceUrl: string;
+    img: string;
+    rawTitle: string;
+    genre: string;
+    status: string;
+  }[] = [];
+
+  // picsum 이미지 (시드 고정, 공연 포스터 비율 3:4)
+  const img = (id: number) => `https://picsum.photos/seed/concert${id}/600/800`;
+
+  const concertData = [
+    { artistName: "아이유", title: "2026 IU CONCERT : The Winning", venue: "잠실종합운동장 주경기장", genre: "CONCERT", daysFromNow: 30, img: img(1) },
+    { artistName: "방탄소년단", title: "BTS WORLD TOUR 'LOVE YOURSELF' SEOUL", venue: "잠실종합운동장 주경기장", genre: "CONCERT", daysFromNow: 45, img: img(2) },
+    { artistName: "블랙핑크", title: "BLACKPINK WORLD TOUR [BORN PINK] FINALE IN SEOUL", venue: "고척스카이돔", genre: "CONCERT", daysFromNow: 60, img: img(3) },
+    { artistName: "뉴진스", title: "NewJeans 1st Fan Meeting 'Bunnies Camp'", venue: "KSPO DOME", genre: "FANMEETING", daysFromNow: 14, img: img(4) },
+    { artistName: "에스파", title: "aespa LIVE TOUR - SYNK : PARALLEL LINE", venue: "KSPO DOME", genre: "CONCERT", daysFromNow: 20, img: img(5) },
+    { artistName: "세븐틴", title: "SEVENTEEN TOUR 'FOLLOW' AGAIN IN SEOUL", venue: "고척스카이돔", genre: "CONCERT", daysFromNow: 35, img: img(6) },
+    { artistName: "데이식스", title: "DAY6 CONCERT <FOREVER YOUNG>", venue: "올림픽공원 올림픽홀", genre: "CONCERT", daysFromNow: 10, img: img(7) },
+    { artistName: "잔나비", title: "잔나비 소극장 콘서트 '가을밤에 든 생각'", venue: "블루스퀘어 마스터카드홀", genre: "CONCERT", daysFromNow: 7, img: img(8) },
+    { artistName: "임영웅", title: "임영웅 전국투어 콘서트 IM HERO", venue: "KSPO DOME", genre: "CONCERT", daysFromNow: 25, img: img(9) },
+    { artistName: "콜드플레이", title: "Coldplay : Music of the Spheres World Tour in Seoul", venue: "잠실종합운동장 주경기장", genre: "CONCERT", daysFromNow: 90, img: img(10) },
+    { artistName: "브루노 마스", title: "Bruno Mars Live in Seoul 2026", venue: "고척스카이돔", genre: "CONCERT", daysFromNow: 50, img: img(11) },
+    { artistName: "르세라핌", title: "LE SSERAFIM FAN MEETING 'FEARNADA'", venue: "KSPO DOME", genre: "FANMEETING", daysFromNow: 18, img: img(12) },
+    { artistName: "스트레이 키즈", title: "Stray Kids 5TH FANMEETING 'SKZ'S MAGIC SCHOOL'", venue: "KSPO DOME", genre: "FANMEETING", daysFromNow: 22, img: img(13) },
+    { artistName: "혁오", title: "혁오 단독 콘서트 '24'", venue: "YES24 LIVE HALL", genre: "CONCERT", daysFromNow: 5, img: img(14) },
+    { artistName: "실리카겔", title: "실리카겔 단독 공연 'POWER ROCK'", venue: "무신사 개러지", genre: "CONCERT", daysFromNow: 3, img: img(15) },
+    { artistName: "지코", title: "ZICO LIVE : SPOT! IN SEOUL", venue: "올림픽공원 올림픽홀", genre: "HIPHOP", daysFromNow: 12, img: img(16) },
+    { artistName: "태연", title: "TAEYEON CONCERT - The ODD Of LOVE", venue: "KSPO DOME", genre: "CONCERT", daysFromNow: 40, img: img(17) },
+    { artistName: "아이브", title: "IVE THE 1ST WORLD TOUR 'SHOW WHAT I HAVE' IN SEOUL", venue: "KSPO DOME", genre: "CONCERT", daysFromNow: 55, img: img(18) },
+    { artistName: "10cm", title: "10cm 콘서트 <Hello, Goodbye>", venue: "블루스퀘어 마스터카드홀", genre: "CONCERT", daysFromNow: 8, img: img(19) },
+    { artistName: "악뮤", title: "AKMU 전국투어 콘서트 '항해'", venue: "경희대 평화의 전당", genre: "CONCERT", daysFromNow: 28, img: img(20) },
+    // 이미 지난 공연들 (COMPLETED)
+    { artistName: "엑소", title: "EXO PLANET #6 - THE EXO'rdium IN SEOUL", venue: "고척스카이돔", genre: "CONCERT", daysFromNow: -10, img: img(21) },
+    { artistName: "트와이스", title: "TWICE 5TH WORLD TOUR 'READY TO BE' IN SEOUL", venue: "KSPO DOME", genre: "CONCERT", daysFromNow: -20, img: img(22) },
+    { artistName: "QWER", title: "QWER 1st Concert '알밤'", venue: "YES24 LIVE HALL", genre: "CONCERT", daysFromNow: -5, img: img(23) },
+    // 티켓 오픈 임박
+    { artistName: "박효신", title: "2026 박효신 콘서트 SOULS", venue: "세종문화회관 대극장", genre: "CONCERT", daysFromNow: 70, img: img(24) },
+    { artistName: "성시경", title: "성시경 연말 콘서트 '축제'", venue: "올림픽공원 올림픽홀", genre: "CONCERT", daysFromNow: 80, img: img(25) },
+    // 페스티벌
+    { artistName: "에스파", title: "2026 서울재즈페스티벌", venue: "올림픽공원", genre: "FESTIVAL", daysFromNow: 65, img: img(26) },
+    { artistName: "혁오", title: "2026 펜타포트 록 페스티벌", venue: "인천 송도 달빛축제공원", genre: "FESTIVAL", daysFromNow: 75, img: img(27) },
+    // 뮤지컬
+    { artistName: "윤하", title: "뮤지컬 '빈센트 반 고흐' (윤하 출연)", venue: "블루스퀘어 마스터카드홀", genre: "MUSICAL", daysFromNow: 15, img: img(28) },
+  ];
+
+  const sources: ("MELON" | "YES24" | "INTERPARK")[] = ["MELON", "YES24", "INTERPARK"];
+
+  concertData.forEach((c, i) => {
+    const startDate = new Date(now);
+    startDate.setDate(startDate.getDate() + c.daysFromNow);
+
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + (Math.random() > 0.5 ? 1 : 0));
+
+    const ticketOpenDate = new Date(startDate);
+    ticketOpenDate.setDate(ticketOpenDate.getDate() - 14);
+
+    const source = sources[i % 3];
+    const status = c.daysFromNow < 0 ? "COMPLETED" : c.daysFromNow <= 14 ? "ON_SALE" : "UPCOMING";
+
+    concerts.push({
+      title: c.title,
+      artistName: c.artistName,
+      venue: c.venue,
+      startDate,
+      endDate,
+      ticketOpenDate: ticketOpenDate > now ? ticketOpenDate : null,
+      source,
+      sourceId: `seed-${source.toLowerCase()}-${i + 1}`,
+      sourceUrl: `https://ticket.example.com/${source.toLowerCase()}/${i + 1}`,
+      img: c.img,
+      rawTitle: c.title,
+      genre: c.genre,
+      status,
+    });
+  });
+
+  return concerts;
+}
+
 async function main() {
   console.log("Seeding artists...");
 
+  const artistMap = new Map<string, string>();
+
   for (const artist of artists) {
-    await prisma.artist.upsert({
-      where: { id: artist.nameEn ?? artist.name },
-      update: {},
+    const created = await prisma.artist.upsert({
+      where: {
+        id: `seed-${artist.nameEn?.toLowerCase().replace(/[^a-z0-9]/g, "-") ?? artist.name}`,
+      },
+      update: {
+        name: artist.name,
+        nameEn: artist.nameEn,
+        aliases: artist.aliases,
+      },
       create: {
+        id: `seed-${artist.nameEn?.toLowerCase().replace(/[^a-z0-9]/g, "-") ?? artist.name}`,
         name: artist.name,
         nameEn: artist.nameEn,
         aliases: artist.aliases,
       },
     });
+    artistMap.set(artist.name, created.id);
   }
 
   console.log(`Seeded ${artists.length} artists.`);
+
+  console.log("Seeding concerts...");
+
+  const concerts = generateConcerts(artistMap);
+
+  for (const concert of concerts) {
+    const artistId = artistMap.get(concert.artistName) ?? null;
+    await prisma.concert.upsert({
+      where: {
+        source_sourceId: {
+          source: concert.source,
+          sourceId: concert.sourceId,
+        },
+      },
+      update: {
+        title: concert.title,
+        venue: concert.venue,
+        startDate: concert.startDate,
+        endDate: concert.endDate,
+        ticketOpenDate: concert.ticketOpenDate,
+        status: concert.status as any,
+        genre: concert.genre as any,
+      },
+      create: {
+        title: concert.title,
+        artistId,
+        venue: concert.venue,
+        startDate: concert.startDate,
+        endDate: concert.endDate,
+        ticketOpenDate: concert.ticketOpenDate,
+        source: concert.source,
+        sourceId: concert.sourceId,
+        sourceUrl: concert.sourceUrl,
+        imageUrl: concert.img,
+        rawTitle: concert.rawTitle,
+        genre: concert.genre as any,
+        status: concert.status as any,
+      },
+    });
+  }
+
+  console.log(`Seeded ${concerts.length} concerts.`);
 }
 
 main()
