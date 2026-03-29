@@ -1,5 +1,6 @@
 import admin from "firebase-admin";
 import { env } from "../config/env.js";
+import { prisma } from "./prisma.js";
 
 let initialized = false;
 
@@ -53,6 +54,20 @@ export async function sendPush(token: string, message: PushMessage): Promise<boo
           link: message.data?.url || "/",
         },
       },
+      android: {
+        notification: {
+          channelId: "concerts",
+          sound: "default",
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: "default",
+            badge: 1,
+          },
+        },
+      },
     });
     return true;
   } catch (err: unknown) {
@@ -62,7 +77,8 @@ export async function sendPush(token: string, message: PushMessage): Promise<boo
       error.code === "messaging/registration-token-not-registered" ||
       error.code === "messaging/invalid-registration-token"
     ) {
-      console.warn(`[FCM] Invalid token, should remove: ${token.substring(0, 20)}...`);
+      console.warn(`[FCM] Removing invalid token: ${token.substring(0, 20)}...`);
+      await prisma.fcmToken.delete({ where: { token } }).catch(() => {});
     } else {
       console.error("[FCM] Send error:", err);
     }

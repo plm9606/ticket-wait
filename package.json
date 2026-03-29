@@ -10,7 +10,11 @@
     "db:studio": "pnpm --filter server prisma studio",
     "crawl:test": "pnpm --filter server tsx src/crawlers/test.ts",
     "seed:musicbrainz": "pnpm --filter server seed:musicbrainz",
-    "enrich:artists": "pnpm --filter server enrich:artists"
+    "enrich:artists": "pnpm --filter server enrich:artists",
+    "mobile:dev": "pnpm --filter mobile expo start",
+    "mobile:build:dev": "pnpm --filter mobile eas build --profile development",
+    "mobile:build:preview": "pnpm --filter mobile eas build --profile preview",
+    "mobile:build:prod": "pnpm --filter mobile eas build --profile production"
   },
   "devDependencies": {
     "turbo": "^2.4.0",

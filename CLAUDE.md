@@ -17,7 +17,8 @@
 | 백엔드 | Fastify 5, Prisma 6, PostgreSQL 16 |
 | 크롤러 | cheerio (HTML 파싱), axios, node-cron (스케줄링) |
 | 인증 | 카카오 OAuth → JWT (httpOnly cookie, 30일 만료) |
-| 푸시 알림 | Firebase Cloud Messaging (FCM) |
+| 모바일 앱 | Expo (React Native), WebView 래퍼 |
+| 푸시 알림 | Firebase Cloud Messaging (FCM) — 웹(Service Worker) + 네이티브(APNs/FCM) |
 | 공유 패키지 | `packages/shared` — 타입, 한글 정규화 유틸 |
 
 ---
@@ -28,7 +29,8 @@
 warsaw/
 ├── apps/
 │   ├── web/          # Next.js 프론트엔드 (포트 3000)
-│   └── server/       # Fastify API 서버 (포트 4000)
+│   ├── server/       # Fastify API 서버 (포트 4000)
+│   └── mobile/       # Expo React Native 앱 (WebView 래퍼)
 ├── packages/
 │   └── shared/       # 공유 타입 & 유틸리티
 ├── docker-compose.yml  # PostgreSQL 16
@@ -72,6 +74,47 @@ warsaw/
 
 ### 8. 설정 (`/settings`)
 - 계정 정보, 푸시 알림 설정, 로그아웃
+
+---
+
+## 모바일 앱 아키텍처
+
+### 개요
+
+모바일 앱(`apps/mobile`)은 Expo 기반 React Native 앱으로, 현재 Next.js 웹앱을 WebView로 감싸는 구조이다. 별도의 React Native 화면 없이 WebView 단일 화면으로 동작하며, 네이티브 푸시 알림과 딥링킹만 네이티브로 처리한다.
+
+- **앱 이름**: Backstage
+- **URL scheme**: `backstage://`
+- **번들 ID**: `com.backstage.app`
+
+### WebView ↔ Native 브릿지
+
+웹과 네이티브 간 `postMessage` 기반 통신 프로토콜:
+
+| 방향 | type | 설명 |
+|------|------|------|
+| Web → Native | `READY` | 웹 hydration 완료 |
+| Web → Native | `REQUEST_PUSH_TOKEN` | 네이티브 FCM 토큰 요청 |
+| Native → Web | `PUSH_TOKEN` | FCM/APNs 토큰 전달 (token, platform) |
+| Native → Web | `NAVIGATE` | 딥링크 경로 전달 (path) |
+
+### 푸시 알림 (네이티브)
+
+- `expo-notifications`의 `getDevicePushTokenAsync()`로 raw FCM/APNs 토큰 발급
+- 웹 브릿지를 통해 `POST /notifications/register-token`으로 서버에 등록 (device: "ios" | "android")
+- 서버 FCM은 `webpush`/`android`/`apns` 설정을 모두 포함하여 플랫폼별 자동 분기
+- 무효 토큰은 발송 실패 시 DB에서 자동 삭제
+
+### 핵심 파일
+
+| 파일 | 역할 |
+|------|------|
+| `apps/mobile/src/components/WebViewScreen.tsx` | WebView 래퍼 (쿠키, SafeArea, URL 필터링, 에러 화면) |
+| `apps/mobile/src/hooks/usePushNotifications.ts` | 네이티브 푸시 토큰 발급, 알림 탭 핸들링 |
+| `apps/mobile/src/hooks/useDeepLink.ts` | `backstage://` 딥링크 수신 |
+| `apps/mobile/src/lib/bridge.ts` | postMessage 프로토콜 타입 & 헬퍼 |
+| `apps/web/src/lib/native-bridge.ts` | 웹 측 네이티브 앱 감지 & 메시지 유틸 |
+| `apps/web/src/components/layout/NativeBridgeProvider.tsx` | READY 전송, PUSH_TOKEN/NAVIGATE 수신 처리 |
 
 ---
 
@@ -191,6 +234,9 @@ pnpm db:migrate
 
 # 개발 서버 실행 (web + server 동시)
 pnpm dev
+
+# 모바일 앱 개발 서버
+pnpm mobile:dev
 ```
 
 ---
@@ -203,3 +249,5 @@ pnpm dev
 - `JWT_SECRET` — JWT 서명 키
 - `FIREBASE_*` — FCM 푸시 알림 (선택)
 - `NEXT_PUBLIC_API_URL` — 프론트에서 API 서버 URL
+- `EXPO_PUBLIC_WEB_URL` — 모바일 WebView가 로드할 웹앱 URL (기본: http://localhost:3000)
+- `EXPO_PUBLIC_API_URL` — 모바일에서 API 서버 URL (기본: http://localhost:4000)

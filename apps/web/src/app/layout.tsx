@@ -6,6 +6,7 @@ import "@/styles/globals.css";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { AuthProvider } from "@/components/layout/AuthProvider";
+import { NativeBridgeProvider } from "@/components/layout/NativeBridgeProvider";
 import { Toast } from "@/components/ui/Toast";
 
 const manrope = Manrope({
@@ -51,10 +52,12 @@ export default function RootLayout({
       </head>
       <body className={`${manrope.variable} ${inter.variable}`}>
         <AuthProvider>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <BottomNav />
-          <Toast />
+          <NativeBridgeProvider>
+            <Header />
+            <main className="min-h-screen">{children}</main>
+            <BottomNav />
+            <Toast />
+          </NativeBridgeProvider>
         </AuthProvider>
       </body>
     </html>

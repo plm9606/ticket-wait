@@ -1,4 +1,5 @@
 import { api } from "./api";
+import { isNativeApp, postToNative } from "./native-bridge";
 
 /**
  * FCM 토큰을 서버에 등록
@@ -14,6 +15,12 @@ async function registerToken(token: string) {
  * 브라우저 푸시 알림 권한 요청 + FCM 토큰 등록
  */
 export async function requestNotificationPermission(): Promise<boolean> {
+  // 네이티브 앱에서는 브릿지를 통해 네이티브 푸시 토큰 요청
+  if (isNativeApp()) {
+    postToNative({ type: "REQUEST_PUSH_TOKEN" });
+    return true;
+  }
+
   if (!("Notification" in window)) {
     console.warn("This browser does not support notifications");
     return false;
