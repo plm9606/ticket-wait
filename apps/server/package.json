@@ -7,7 +7,9 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "seed:musicbrainz": "tsx src/scripts/seed-from-musicbrainz.ts",
+    "enrich:artists": "tsx src/scripts/enrich-artists.ts"
   },
   "dependencies": {
     "@concert-alert/shared": "workspace:*",

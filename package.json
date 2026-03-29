@@ -8,7 +8,9 @@
     "db:migrate": "pnpm --filter server prisma migrate dev",
     "db:seed": "pnpm --filter server prisma db seed",
     "db:studio": "pnpm --filter server prisma studio",
-    "crawl:test": "pnpm --filter server tsx src/crawlers/test.ts"
+    "crawl:test": "pnpm --filter server tsx src/crawlers/test.ts",
+    "seed:musicbrainz": "pnpm --filter server seed:musicbrainz",
+    "enrich:artists": "pnpm --filter server enrich:artists"
   },
   "devDependencies": {
     "turbo": "^2.4.0",
