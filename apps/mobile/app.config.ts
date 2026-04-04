@@ -9,7 +9,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: "./assets/icon.png",
   scheme: "concertalert",
   userInterfaceStyle: "light",
-  newArchEnabled: false,
+  newArchEnabled: true,
   splash: {
     image: "./assets/splash-icon.png",
     resizeMode: "contain",
@@ -30,6 +30,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-router",
     "expo-secure-store",
+    "expo-font",
     [
       "expo-notifications",
       {
