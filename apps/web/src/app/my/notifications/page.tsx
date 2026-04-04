@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
+import { EditorialHeadline } from "@/components/shared/EditorialHeadline";
 import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 
@@ -108,23 +109,22 @@ export default function NotificationsPage() {
   }
 
   return (
-    <section className="pt-8 pb-24">
+    <section className="pb-24">
+      <EditorialHeadline title="Alerts" subtitle="놓치지 않는 알림" />
       <Container>
-        <h1 className="text-xl font-bold mb-6">알림</h1>
-
         {notifications.length === 0 && !loading && (
-          <div className="text-center py-16">
-            <p className="text-gray-400 text-sm mb-4">아직 알림이 없습니다</p>
+          <div className="text-center py-16 bg-surface-container-low rounded-xl">
+            <p className="text-on-surface-variant text-sm mb-4">아직 알림이 없습니다</p>
             <Link
               href="/search"
-              className="text-sm text-black underline underline-offset-4"
+              className="text-sm font-bold text-primary underline underline-offset-4"
             >
               아티스트를 구독해보세요
             </Link>
           </div>
         )}
 
-        <div className="divide-y divide-gray-100">
+        <div className="space-y-3">
           {notifications.map((n) => (
             <a
               key={n.id}
@@ -132,33 +132,12 @@ export default function NotificationsPage() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => !n.read && markAsRead(n.id)}
-              className={`flex gap-3 py-4 transition-colors ${
+              className={`flex gap-4 p-5 bg-surface-container-low rounded-2xl hover:bg-surface-container-high transition-colors ${
                 n.read ? "opacity-60" : ""
               }`}
             >
-              {!n.read && (
-                <div className="w-1.5 h-1.5 bg-black rounded-full mt-2 shrink-0" />
-              )}
-              <div className={`flex-1 min-w-0 ${n.read ? "ml-3" : ""}`}>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-[10px] font-medium px-1.5 py-0.5 bg-gray-100 text-gray-500">
-                    {typeLabel(n.type)}
-                  </span>
-                  <span className="text-[10px] text-gray-300">
-                    {timeAgo(n.createdAt)}
-                  </span>
-                </div>
-                <div className="text-sm font-medium leading-snug line-clamp-2">
-                  {n.concert.title}
-                </div>
-                {n.concert.artist && (
-                  <div className="text-xs text-gray-400 mt-0.5">
-                    {n.concert.artist.name}
-                  </div>
-                )}
-              </div>
               {n.concert.imageUrl && (
-                <div className="w-12 h-16 shrink-0 bg-gray-50 overflow-hidden rounded-sm">
+                <div className="w-14 h-14 shrink-0 bg-surface-container rounded-xl overflow-hidden">
                   <img
                     src={n.concert.imageUrl}
                     alt=""
@@ -166,14 +145,35 @@ export default function NotificationsPage() {
                   />
                 </div>
               )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="bg-secondary-container text-on-secondary-container rounded-full px-2 py-0.5 text-[10px] font-bold uppercase">
+                    {typeLabel(n.type)}
+                  </span>
+                  <span className="text-[10px] text-outline">
+                    {timeAgo(n.createdAt)}
+                  </span>
+                </div>
+                <div className="text-sm font-bold tracking-tight text-on-surface leading-snug line-clamp-2">
+                  {n.concert.title}
+                </div>
+                {n.concert.artist && (
+                  <div className="text-xs text-on-surface-variant mt-0.5">
+                    {n.concert.artist.name}
+                  </div>
+                )}
+              </div>
+              {!n.read && (
+                <div className="w-2 h-2 bg-primary rounded-full mt-2 shrink-0" />
+              )}
             </a>
           ))}
         </div>
 
         {loading && (
-          <div className="space-y-4 mt-4">
+          <div className="space-y-3 mt-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="animate-pulse h-16 bg-gray-100 rounded" />
+              <div key={i} className="animate-pulse h-20 bg-surface-container-low rounded-2xl" />
             ))}
           </div>
         )}
@@ -181,7 +181,7 @@ export default function NotificationsPage() {
         {hasMore && !loading && (
           <button
             onClick={() => cursor && load(cursor)}
-            className="w-full mt-4 py-3 text-sm text-gray-400 hover:text-black border border-gray-100 hover:border-gray-300 transition-colors"
+            className="w-full mt-6 py-3.5 text-sm font-medium text-on-surface-variant bg-surface-container-high rounded-xl hover:bg-surface-variant transition-colors"
           >
             더 보기
           </button>

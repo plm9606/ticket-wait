@@ -54,7 +54,12 @@ export default function MyScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.headline}>
+        <Text style={styles.headlineTitle}>My</Text>
+        <Text style={styles.headlineSubtitle}>나의 공간</Text>
+      </View>
+
       {/* 프로필 */}
       <View style={styles.profileRow}>
         <View style={styles.profileAvatar}>
@@ -166,8 +171,24 @@ export default function MyScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     paddingHorizontal: containerPadding,
+  },
+  headline: {
+    paddingTop: 32,
+    paddingBottom: 24,
+  },
+  headlineTitle: {
+    fontFamily: "Manrope-ExtraBold",
+    fontSize: 42,
+    letterSpacing: -1,
+    color: colors.primary,
+  },
+  headlineSubtitle: {
+    fontFamily: "Inter-Medium",
+    fontSize: 16,
+    color: colors.onSurfaceVariant,
+    marginTop: 12,
   },
   loginPrompt: {
     flex: 1,
@@ -177,7 +198,8 @@ const styles = StyleSheet.create({
   },
   loginText: {
     fontSize: 14,
-    color: colors.gray[500],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
     marginBottom: 24,
   },
   kakaoButton: {
@@ -187,39 +209,45 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEE500",
     paddingHorizontal: 24,
     paddingVertical: 14,
-    borderRadius: 6,
+    borderRadius: 12,
   },
   kakaoButtonText: {
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: "Inter-Bold",
     color: "#191919",
   },
   profileRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 24,
   },
   profileAvatar: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.gray[100],
+    backgroundColor: colors.surfaceContainer,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
   },
   profileAvatarText: {
     fontSize: 18,
-    color: colors.gray[400],
+    fontFamily: "Inter-Medium",
+    color: colors.onSurfaceVariant,
   },
   profileName: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "Manrope-Bold",
+    color: colors.primary,
   },
   profileEmail: {
     fontSize: 12,
-    color: colors.gray[400],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
     marginTop: 2,
   },
   menuRow: {
@@ -229,13 +257,14 @@ const styles = StyleSheet.create({
   },
   menuItem: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.gray[200],
+    paddingVertical: 10,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 12,
   },
   menuText: {
     fontSize: 13,
-    color: colors.gray[600],
+    fontFamily: "Inter-Medium",
+    color: colors.onSurface,
   },
   subHeader: {
     flexDirection: "row",
@@ -245,74 +274,87 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: "Manrope-Bold",
+    color: colors.onSurface,
   },
   subCount: {
-    color: colors.gray[300],
-    fontWeight: "400",
+    color: colors.onSurfaceVariant,
+    fontFamily: "Inter",
   },
   addText: {
     fontSize: 12,
-    color: colors.gray[400],
+    fontFamily: "Inter-Bold",
+    color: colors.onSurfaceVariant,
   },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 16,
+    gap: 24,
   },
   gridRow: {
-    gap: 16,
+    gap: 24,
   },
   gridList: {
-    gap: 16,
+    gap: 32,
     paddingBottom: 40,
   },
   gridItem: {
     flex: 1,
     maxWidth: "31%",
+    alignItems: "center",
   },
   gridAvatar: {
-    aspectRatio: 1,
-    backgroundColor: colors.gray[50],
-    borderRadius: 6,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.surfaceContainerLow,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
   },
   gridAvatarText: {
-    fontSize: 24,
-    color: colors.gray[300],
+    fontSize: 20,
+    fontFamily: "Inter-Medium",
+    color: colors.onSurfaceVariant,
   },
   gridName: {
     fontSize: 12,
-    fontWeight: "500",
+    fontFamily: "Manrope-Bold",
+    color: colors.primary,
     marginTop: 8,
+    textAlign: "center",
   },
   gridNameEn: {
     fontSize: 10,
-    color: colors.gray[400],
+    fontFamily: "Inter-Bold",
+    color: colors.onSurfaceVariant,
+    textTransform: "uppercase" as const,
+    letterSpacing: 1,
+    textAlign: "center",
   },
   gridConcertCount: {
     fontSize: 10,
-    color: colors.gray[300],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
     marginTop: 2,
+    textAlign: "center",
   },
   emptySubs: {
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    borderStyle: "dashed",
-    borderRadius: 6,
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 12,
     paddingVertical: 64,
     alignItems: "center",
   },
   emptySubsText: {
     fontSize: 14,
-    color: colors.gray[400],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
     marginBottom: 16,
   },
   searchLink: {
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: "Inter-Bold",
+    color: colors.primary,
     textDecorationLine: "underline",
   },
 });

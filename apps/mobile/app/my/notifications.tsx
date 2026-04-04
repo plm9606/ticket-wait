@@ -112,14 +112,27 @@ export default function NotificationsScreen() {
       data={notifications}
       keyExtractor={(item) => item.id}
       contentContainerStyle={styles.listContent}
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
+      ListHeaderComponent={
+        <View style={styles.headline}>
+          <Text style={styles.headlineTitle}>Alerts</Text>
+          <Text style={styles.headlineSubtitle}>놓치지 않는 알림</Text>
+        </View>
+      }
       renderItem={({ item }) => (
         <Pressable
-          style={[styles.row, item.read && styles.readRow]}
+          style={[styles.card, item.read && styles.readCard]}
           onPress={() => handlePress(item)}
         >
-          {!item.read && <View style={styles.unreadDot} />}
-          <View style={[styles.content, item.read && styles.readContent]}>
+          {item.concert.imageUrl && (
+            <View style={styles.thumbnail}>
+              <Image
+                source={{ uri: item.concert.imageUrl }}
+                style={StyleSheet.absoluteFill}
+                contentFit="cover"
+              />
+            </View>
+          )}
+          <View style={styles.content}>
             <View style={styles.tagRow}>
               <View style={styles.typeBadge}>
                 <Text style={styles.typeText}>{typeLabel(item.type)}</Text>
@@ -133,15 +146,7 @@ export default function NotificationsScreen() {
               <Text style={styles.artist}>{item.concert.artist.name}</Text>
             )}
           </View>
-          {item.concert.imageUrl && (
-            <View style={styles.thumbnail}>
-              <Image
-                source={{ uri: item.concert.imageUrl }}
-                style={StyleSheet.absoluteFill}
-                contentFit="cover"
-              />
-            </View>
-          )}
+          {!item.read && <View style={styles.unreadDot} />}
         </Pressable>
       )}
       ListEmptyComponent={
@@ -158,7 +163,7 @@ export default function NotificationsScreen() {
         loading ? (
           <ActivityIndicator
             style={styles.loader}
-            color={colors.gray[400]}
+            color={colors.onSurfaceVariant}
           />
         ) : hasMore ? (
           <Pressable
@@ -178,85 +183,108 @@ const styles = StyleSheet.create({
     paddingHorizontal: containerPadding,
     paddingBottom: 40,
   },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.gray[100],
+  headline: {
+    paddingTop: 32,
+    paddingBottom: 24,
   },
-  row: {
+  headlineTitle: {
+    fontFamily: "Manrope-ExtraBold",
+    fontSize: 42,
+    letterSpacing: -1,
+    color: colors.primary,
+  },
+  headlineSubtitle: {
+    fontFamily: "Inter-Medium",
+    fontSize: 16,
+    color: colors.onSurfaceVariant,
+    marginTop: 12,
+  },
+  card: {
     flexDirection: "row",
-    gap: 12,
-    paddingVertical: 16,
+    gap: 16,
+    padding: 20,
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 16,
     alignItems: "flex-start",
+    marginBottom: 12,
   },
-  readRow: {
+  readCard: {
     opacity: 0.6,
   },
   unreadDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.black,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.primary,
     marginTop: 8,
   },
   content: {
     flex: 1,
   },
-  readContent: {
-    marginLeft: 18,
-  },
   tagRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   typeBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    backgroundColor: colors.gray[100],
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    backgroundColor: colors.secondaryContainer,
+    borderRadius: 9999,
   },
   typeText: {
     fontSize: 10,
-    fontWeight: "500",
-    color: colors.gray[500],
+    fontFamily: "Inter-Bold",
+    color: colors.onSecondaryContainer,
+    textTransform: "uppercase" as const,
   },
   timeText: {
     fontSize: 10,
-    color: colors.gray[300],
+    fontFamily: "Inter",
+    color: colors.outline,
   },
   title: {
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: "Manrope-Bold",
+    letterSpacing: -0.3,
     lineHeight: 18,
+    color: colors.onSurface,
   },
   artist: {
     fontSize: 12,
-    color: colors.gray[400],
-    marginTop: 2,
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
+    marginTop: 4,
   },
   thumbnail: {
-    width: 48,
-    height: 64,
-    backgroundColor: colors.gray[50],
+    width: 56,
+    height: 56,
+    backgroundColor: colors.surfaceContainer,
     overflow: "hidden",
-    borderRadius: 2,
+    borderRadius: 12,
   },
   emptyContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
   },
   emptySection: {
     paddingVertical: 64,
     alignItems: "center",
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 12,
   },
   emptyText: {
     fontSize: 14,
-    color: colors.gray[400],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
   },
   searchLink: {
     fontSize: 14,
+    fontFamily: "Inter-Bold",
+    color: colors.primary,
     textDecorationLine: "underline",
     marginTop: 16,
   },
@@ -266,12 +294,13 @@ const styles = StyleSheet.create({
   loadMore: {
     marginTop: 16,
     paddingVertical: 14,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.gray[100],
+    backgroundColor: colors.surfaceContainerHigh,
+    borderRadius: 12,
     alignItems: "center",
   },
   loadMoreText: {
     fontSize: 14,
-    color: colors.gray[400],
+    fontFamily: "Inter-Medium",
+    color: colors.onSurfaceVariant,
   },
 });

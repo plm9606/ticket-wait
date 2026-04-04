@@ -1,37 +1,9 @@
 import { Tabs } from "expo-router";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import { useNotificationCount } from "@/hooks/useNotificationCount";
 import { useAuth } from "@/hooks/useAuth";
 import { colors } from "@/theme/colors";
-
-function TabIcon({
-  icon,
-  label,
-  focused,
-  showBadge,
-}: {
-  icon: string;
-  label: string;
-  focused: boolean;
-  showBadge?: boolean;
-}) {
-  return (
-    <View style={styles.tabItem}>
-      <Text style={[styles.tabIcon, { color: focused ? colors.black : colors.gray[400] }]}>
-        {icon}
-      </Text>
-      <Text
-        style={[
-          styles.tabLabel,
-          { color: focused ? colors.black : colors.gray[400] },
-        ]}
-      >
-        {label}
-      </Text>
-      {showBadge && <View style={styles.badge} />}
-    </View>
-  );
-}
+import { Ionicons } from "@expo/vector-icons";
 
 export default function TabLayout() {
   const { count } = useNotificationCount();
@@ -43,39 +15,50 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
-        tabBarShowLabel: false,
+        tabBarActiveTintColor: colors.white,
+        tabBarInactiveTintColor: colors.gray[400],
+        tabBarActiveBackgroundColor: colors.gray[900],
+        tabBarItemStyle: styles.tabItem,
+        tabBarLabelStyle: styles.tabLabel,
+        tabBarIconStyle: styles.tabIcon,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="⌂" label="홈" focused={focused} />
+          tabBarLabel: "홈",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="◎" label="검색" focused={focused} />
+          tabBarLabel: "검색",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="concerts"
         options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="♪" label="공연" focused={focused} />
+          tabBarLabel: "공연",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="musical-notes" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="my"
         options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon="♡" label="MY" focused={focused} showBadge={showBadge} />
+          tabBarLabel: "MY",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="heart" size={size} color={color} />
           ),
+          tabBarBadge: showBadge ? "" : undefined,
+          tabBarBadgeStyle: showBadge ? styles.badge : undefined,
         }}
       />
     </Tabs>
@@ -84,31 +67,39 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: colors.white,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.gray[100],
+    position: "absolute",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderTopWidth: 0,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     height: 80,
-    paddingTop: 8,
+    paddingTop: 4,
+    paddingBottom: Platform.OS === "ios" ? 24 : 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 24,
+    elevation: 8,
   },
   tabItem: {
-    alignItems: "center",
-    gap: 2,
-    position: "relative",
-  },
-  tabIcon: {
-    fontSize: 20,
+    borderRadius: 12,
+    marginHorizontal: 4,
+    marginVertical: 4,
   },
   tabLabel: {
+    fontFamily: "Manrope-Medium",
     fontSize: 10,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
+    textTransform: "uppercase" as const,
+  },
+  tabIcon: {
+    marginBottom: -2,
   },
   badge: {
-    position: "absolute",
-    top: -2,
-    right: -6,
-    width: 6,
-    height: 6,
+    backgroundColor: colors.gray[900],
+    minWidth: 6,
+    maxHeight: 6,
     borderRadius: 3,
-    backgroundColor: colors.black,
+    fontSize: 0,
   },
 });

@@ -82,8 +82,11 @@ export default function ConcertsScreen() {
   }, [loadConcerts, genre]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
-      <Text style={styles.pageTitle}>공연</Text>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.headline}>
+        <Text style={styles.headlineTitle}>Concerts</Text>
+        <Text style={styles.headlineSubtitle}>오늘의 공연 라인업</Text>
+      </View>
 
       {/* 장르 필터 */}
       <ScrollView
@@ -120,7 +123,7 @@ export default function ConcertsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => <ConcertCard concert={item} />}
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         ListEmptyComponent={
           !loading ? (
             <View style={styles.empty}>
@@ -132,7 +135,7 @@ export default function ConcertsScreen() {
           loading ? (
             <ActivityIndicator
               style={styles.loader}
-              color={colors.gray[400]}
+              color={colors.onSurfaceVariant}
             />
           ) : hasMore ? (
             <Pressable
@@ -151,44 +154,54 @@ export default function ConcertsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     paddingHorizontal: containerPadding,
   },
-  pageTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 16,
+  headline: {
+    paddingTop: 32,
+    paddingBottom: 24,
+  },
+  headlineTitle: {
+    fontFamily: "Manrope-ExtraBold",
+    fontSize: 42,
+    letterSpacing: -1,
+    color: colors.primary,
+  },
+  headlineSubtitle: {
+    fontFamily: "Inter-Medium",
+    fontSize: 16,
+    color: colors.onSurfaceVariant,
+    marginTop: 12,
   },
   filterScroll: {
     flexGrow: 0,
-    marginBottom: 16,
+    marginBottom: 24,
   },
   filterRow: {
-    gap: 8,
+    gap: 10,
     paddingRight: 8,
   },
   filterChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 9999,
   },
   filterActive: {
-    backgroundColor: colors.black,
-    borderColor: colors.black,
+    backgroundColor: colors.primary,
   },
   filterInactive: {
-    backgroundColor: colors.white,
-    borderColor: colors.gray[200],
+    backgroundColor: colors.surfaceContainerHighest,
   },
   filterText: {
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 14,
+    fontFamily: "Inter-Medium",
   },
   filterTextActive: {
-    color: colors.white,
+    color: colors.onPrimary,
+    fontFamily: "Inter-SemiBold",
   },
   filterTextInactive: {
-    color: colors.gray[500],
+    color: colors.onSurface,
   },
   list: {
     paddingBottom: 40,
@@ -199,7 +212,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: colors.gray[400],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
   },
   loader: {
     paddingVertical: 24,
@@ -207,12 +221,13 @@ const styles = StyleSheet.create({
   loadMore: {
     marginTop: 24,
     paddingVertical: 14,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.gray[100],
+    backgroundColor: colors.surfaceContainerHigh,
+    borderRadius: 12,
     alignItems: "center",
   },
   loadMoreText: {
     fontSize: 14,
-    color: colors.gray[400],
+    fontFamily: "Inter-Medium",
+    color: colors.onSurfaceVariant,
   },
 });

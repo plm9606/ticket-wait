@@ -1,10 +1,17 @@
 import { API_URL } from "./constants";
 import { getToken } from "./auth";
 
+const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK === "true";
+
 export async function api<T>(
   path: string,
   options?: RequestInit
 ): Promise<T> {
+  if (USE_MOCK) {
+    const { mockApi } = await import("@concert-alert/shared");
+    return mockApi<T>(path, options);
+  }
+
   const token = await getToken();
 
   const headers: Record<string, string> = {

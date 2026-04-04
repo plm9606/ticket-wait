@@ -48,8 +48,13 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.headline}>
+        <Text style={styles.headlineTitle}>Settings</Text>
+        <Text style={styles.headlineSubtitle}>환경 설정</Text>
+      </View>
+
       {/* 계정 */}
-      <View style={styles.section}>
+      <View style={styles.card}>
         <Text style={styles.sectionLabel}>계정</Text>
         <Text style={styles.sectionValue}>{user.nickname}</Text>
         {user.email && (
@@ -57,17 +62,17 @@ export default function SettingsScreen() {
         )}
       </View>
 
-      <View style={styles.divider} />
-
       {/* 알림 */}
-      <View style={styles.section}>
+      <View style={styles.card}>
         <Text style={styles.sectionLabel}>알림</Text>
         {pushEnabled ? (
-          <Text style={styles.pushEnabled}>
-            푸시 알림이 활성화되었습니다
-          </Text>
+          <View style={styles.pushCard}>
+            <Text style={styles.pushEnabled}>
+              푸시 알림이 활성화되었습니다
+            </Text>
+          </View>
         ) : (
-          <Pressable onPress={handleEnablePush} disabled={pushLoading}>
+          <Pressable style={styles.pushCard} onPress={handleEnablePush} disabled={pushLoading}>
             <Text style={styles.pushButton}>
               {pushLoading ? "설정 중..." : "푸시 알림 허용하기"}
             </Text>
@@ -75,10 +80,8 @@ export default function SettingsScreen() {
         )}
       </View>
 
-      <View style={styles.divider} />
-
       {/* 로그아웃 */}
-      <View style={styles.section}>
+      <View style={styles.logoutSection}>
         <Pressable onPress={handleLogout}>
           <Text style={styles.logoutText}>로그아웃</Text>
         </Pressable>
@@ -90,45 +93,76 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     paddingHorizontal: containerPadding,
-    paddingTop: 16,
   },
-  section: {
-    paddingVertical: 20,
+  headline: {
+    paddingTop: 32,
+    paddingBottom: 24,
+  },
+  headlineTitle: {
+    fontFamily: "Manrope-ExtraBold",
+    fontSize: 42,
+    letterSpacing: -1,
+    color: colors.primary,
+  },
+  headlineSubtitle: {
+    fontFamily: "Inter-Medium",
+    fontSize: 16,
+    color: colors.onSurfaceVariant,
+    marginTop: 12,
+  },
+  card: {
+    backgroundColor: colors.surfaceContainerLow,
+    padding: 24,
+    borderRadius: 12,
+    marginBottom: 16,
   },
   sectionLabel: {
-    fontSize: 12,
-    color: colors.gray[400],
-    marginBottom: 8,
+    fontSize: 11,
+    fontFamily: "Inter-Bold",
+    color: colors.onSurfaceVariant,
+    textTransform: "uppercase" as const,
+    letterSpacing: 3,
+    marginBottom: 12,
   },
   sectionValue: {
     fontSize: 14,
+    fontFamily: "Inter-Bold",
+    color: colors.onSurface,
   },
   sectionSub: {
     fontSize: 12,
-    color: colors.gray[400],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
     marginTop: 4,
   },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.gray[100],
+  pushCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    padding: 16,
+    borderRadius: 8,
   },
   pushEnabled: {
     fontSize: 14,
-    color: colors.gray[500],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
   },
   pushButton: {
     fontSize: 14,
-    fontWeight: "500",
-    color: colors.black,
+    fontFamily: "Inter-Bold",
+    color: colors.primary,
+  },
+  logoutSection: {
+    paddingTop: 16,
   },
   logoutText: {
     fontSize: 14,
-    color: colors.gray[500],
+    fontFamily: "Inter-Medium",
+    color: colors.onSurfaceVariant,
   },
   emptyText: {
     fontSize: 14,
-    color: colors.gray[400],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
   },
 });

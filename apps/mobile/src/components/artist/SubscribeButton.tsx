@@ -50,25 +50,25 @@ export function SubscribeButton({ artistId }: SubscribeButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 12,
   },
   subscribed: {
-    borderWidth: 1,
-    borderColor: colors.gray[200],
+    backgroundColor: colors.surfaceContainerHigh,
   },
   notSubscribed: {
-    backgroundColor: colors.black,
+    backgroundColor: colors.primary,
   },
   text: {
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: "Inter-Bold",
     textAlign: "center",
   },
   subscribedText: {
-    color: colors.gray[500],
+    color: colors.onSurface,
   },
   notSubscribedText: {
-    color: colors.white,
+    color: colors.onPrimary,
   },
 });
