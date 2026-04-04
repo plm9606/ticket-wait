@@ -6,7 +6,7 @@ import * as Linking from "expo-linking";
 import { API_URL } from "@/lib/constants";
 
 interface User {
-  id: string;
+  id: number;
   nickname: string;
   email: string | null;
   profileImage: string | null;

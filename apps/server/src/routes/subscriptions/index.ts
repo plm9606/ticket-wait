@@ -37,11 +37,11 @@ export default async function subscriptionRoutes(fastify: FastifyInstance) {
   });
 
   // 구독 추가
-  fastify.post<{ Body: { artistId: string } }>(
+  fastify.post<{ Body: { artistId: number } }>(
     "/subscriptions",
     async (request, reply) => {
       const { userId } = request.user;
-      const { artistId } = request.body;
+      const artistId = Number(request.body.artistId);
 
       if (!artistId) {
         return reply.status(400).send({ error: "artistId is required" });
@@ -80,7 +80,7 @@ export default async function subscriptionRoutes(fastify: FastifyInstance) {
     "/subscriptions/:artistId",
     async (request, reply) => {
       const { userId } = request.user;
-      const { artistId } = request.params;
+      const artistId = Number(request.params.artistId);
 
       const subscription = await prisma.subscription.findUnique({
         where: { userId_artistId: { userId, artistId } },
@@ -103,7 +103,7 @@ export default async function subscriptionRoutes(fastify: FastifyInstance) {
     "/subscriptions/check/:artistId",
     async (request) => {
       const { userId } = request.user;
-      const { artistId } = request.params;
+      const artistId = Number(request.params.artistId);
 
       const subscription = await prisma.subscription.findUnique({
         where: { userId_artistId: { userId, artistId } },

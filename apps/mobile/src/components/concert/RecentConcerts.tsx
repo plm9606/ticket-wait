@@ -13,9 +13,9 @@ import { api } from "@/lib/api";
 import { colors } from "@/theme/colors";
 
 interface Performance {
-  id: string;
+  id: number;
   title: string;
-  artist: { id: string; name: string; nameEn: string | null } | null;
+  artist: { id: number; name: string; nameEn: string | null } | null;
   venue: string | null;
   startDate: string | null;
   source: string;

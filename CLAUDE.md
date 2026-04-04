@@ -60,4 +60,3 @@ pnpm workspaces + Turborepo 모노레포. `apps/web` (Next.js 15), `apps/server`
 - **디자인**: 미니멀 에디토리얼 톤. 텍스트 크기 `text-[11px]`~`text-[15px]`, 자간 `tracking-[0.2em]`~`[0.3em]`
 - **폰트**: Gothic A1 (웹), Pretendard (모바일), font-weight 300 기본
 - **커밋 메시지**: 한글, `feat:` / `fix:` / `docs:` 등 prefix 사용
-- **새 크롤러 추가 시**: `base.crawler.ts` 상속 후 `fetchConcerts()` 구현, `scheduler.ts`에 cron 등록

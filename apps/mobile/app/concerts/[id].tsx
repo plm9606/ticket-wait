@@ -22,7 +22,7 @@ import { containerPadding } from "@/theme/spacing";
 const { width: screenWidth } = Dimensions.get("window");
 
 interface PerformanceDetail {
-  id: string;
+  id: number;
   title: string;
   venue: string | null;
   startDate: string | null;
@@ -34,7 +34,7 @@ interface PerformanceDetail {
   genre: string;
   status: string;
   artist: {
-    id: string;
+    id: number;
     name: string;
     nameEn: string | null;
     imageUrl: string | null;

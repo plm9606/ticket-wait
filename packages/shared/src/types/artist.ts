@@ -1,5 +1,5 @@
 export interface Artist {
-  id: string;
+  id: number;
   name: string;
   nameEn: string | null;
   aliases: string[];
@@ -9,9 +9,9 @@ export interface Artist {
 }
 
 export interface Subscription {
-  id: string;
-  userId: string;
-  artistId: string;
+  id: number;
+  userId: number;
+  artistId: number;
   createdAt: Date;
   artist?: Artist;
 }

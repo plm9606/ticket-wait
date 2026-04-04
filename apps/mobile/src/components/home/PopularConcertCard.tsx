@@ -6,9 +6,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/theme/colors";
 
 interface Performance {
-  id: string;
+  id: number;
   title: string;
-  artist: { id: string; name: string; nameEn: string | null } | null;
+  artist: { id: number; name: string; nameEn: string | null } | null;
   venue: string | null;
   startDate: string | null;
   imageUrl: string | null;

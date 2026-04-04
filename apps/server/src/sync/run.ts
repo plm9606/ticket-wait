@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { syncVenues, syncPerformances } from "./kopis-sync.js";
 
 async function main() {

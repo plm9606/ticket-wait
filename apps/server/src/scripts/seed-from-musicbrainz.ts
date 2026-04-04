@@ -38,7 +38,7 @@ async function buildExistingArtistIndex() {
     select: { id: true, name: true, nameEn: true, musicbrainzId: true },
   });
 
-  const index = new Map<string, string>(); // normalizedName -> id
+  const index = new Map<string, number>(); // normalizedName -> id
   const mbIdSet = new Set<string>(); // 이미 연결된 musicbrainzId
 
   for (const a of artists) {
@@ -52,8 +52,8 @@ async function buildExistingArtistIndex() {
 
 function findExistingArtist(
   mapped: ReturnType<typeof mapArtist>,
-  index: Map<string, string>
-): string | null {
+  index: Map<string, number>
+): number | null {
   // 한글 이름으로 매칭
   const byName = index.get(normalizeForMatch(mapped.name));
   if (byName) return byName;
@@ -134,7 +134,7 @@ async function main() {
         updated++;
       } else {
         // 새 아티스트 생성
-        await prisma.artist.create({
+        const newArtist = await prisma.artist.create({
           data: {
             name: mapped.name,
             nameEn: mapped.nameEn,
@@ -145,10 +145,9 @@ async function main() {
         created++;
 
         // 인덱스 업데이트
-        const newId = mapped.musicbrainzId;
-        index.set(normalizeForMatch(mapped.name), newId);
+        index.set(normalizeForMatch(mapped.name), newArtist.id);
         if (mapped.nameEn)
-          index.set(normalizeForMatch(mapped.nameEn), newId);
+          index.set(normalizeForMatch(mapped.nameEn), newArtist.id);
       }
 
       mbIdSet.add(mapped.musicbrainzId);

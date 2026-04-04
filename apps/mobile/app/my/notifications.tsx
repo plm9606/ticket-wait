@@ -16,15 +16,15 @@ import { colors } from "@/theme/colors";
 import { containerPadding } from "@/theme/spacing";
 
 interface NotificationItem {
-  id: string;
+  id: number;
   type: string;
   performance: {
-    id: string;
+    id: number;
     title: string;
     source: string;
     sourceUrl: string;
     imageUrl: string | null;
-    artist: { id: string; name: string; nameEn: string | null } | null;
+    artist: { id: number; name: string; nameEn: string | null } | null;
   };
   read: boolean;
   createdAt: string;

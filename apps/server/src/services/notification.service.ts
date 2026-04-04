@@ -4,7 +4,7 @@ import { sendPushBatch } from "../lib/fcm.js";
 /**
  * 새로 매칭된 공연에 대해 구독자에게 알림 발송
  */
-export async function notifyNewPerformance(performanceId: string): Promise<number> {
+export async function notifyNewPerformance(performanceId: number): Promise<number> {
   const performance = await prisma.performance.findUnique({
     where: { id: performanceId },
     include: { artist: true },
@@ -47,8 +47,8 @@ export async function notifyNewPerformance(performanceId: string): Promise<numbe
         imageUrl: performance.imageUrl || undefined,
         data: {
           type: "NEW_CONCERT",
-          performanceId: performance.id,
-          artistId: performance.artistId,
+          performanceId: String(performance.id),
+          artistId: String(performance.artistId),
           url: `/artist/${performance.artistId}`,
         },
       });
@@ -63,7 +63,7 @@ export async function notifyNewPerformance(performanceId: string): Promise<numbe
  * 새로 발견된 공연들에 대해 알림 발송
  * (매칭된 공연 중 아직 알림이 안 간 것들)
  */
-export async function notifyNewPerformances(performanceIds: string[]): Promise<number> {
+export async function notifyNewPerformances(performanceIds: number[]): Promise<number> {
   let total = 0;
   for (const id of performanceIds) {
     // 이미 알림이 간 공연인지 확인
@@ -133,7 +133,7 @@ export async function sendTicketOpenReminders(): Promise<number> {
           imageUrl: perf.imageUrl || undefined,
           data: {
             type: "TICKET_OPEN_SOON",
-            performanceId: perf.id,
+            performanceId: String(perf.id),
             url: perf.sourceUrl,
           },
         });

@@ -77,7 +77,7 @@ export default async function artistRoutes(fastify: FastifyInstance) {
     "/artists/:id",
     async (request, reply) => {
       const artist = await prisma.artist.findUnique({
-        where: { id: request.params.id },
+        where: { id: Number(request.params.id) },
         include: {
           _count: { select: { subscriptions: true } },
           performances: {

@@ -52,7 +52,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
         },
         orderBy: { sentAt: "desc" },
         take: take + 1,
-        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        ...(cursor ? { cursor: { id: Number(cursor) }, skip: 1 } : {}),
       });
 
       const hasMore = notifications.length > take;
@@ -76,7 +76,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     "/notifications/:id/read",
     async (request, reply) => {
       const { userId } = request.user;
-      const { id } = request.params;
+      const id = Number(request.params.id);
 
       const notification = await prisma.notification.findFirst({
         where: { id, userId },
@@ -107,10 +107,10 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
   });
 
   // 테스트 알림 발송 (개발용)
-  fastify.post<{ Body: { performanceId: string } }>(
+  fastify.post<{ Body: { performanceId: number } }>(
     "/notifications/test-send",
     async (request, reply) => {
-      const { performanceId } = request.body;
+      const performanceId = Number(request.body.performanceId);
       if (!performanceId) {
         return reply.status(400).send({ error: "performanceId is required" });
       }

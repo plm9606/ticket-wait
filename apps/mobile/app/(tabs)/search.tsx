@@ -15,7 +15,7 @@ import { colors } from "@/theme/colors";
 import { containerPadding } from "@/theme/spacing";
 
 interface Artist {
-  id: string;
+  id: number;
   name: string;
   nameEn: string | null;
   imageUrl: string | null;

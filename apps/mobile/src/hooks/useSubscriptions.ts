@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { api } from "@/lib/api";
 
 interface SubscribedArtist {
-  id: string;
+  id: number;
   artistId: string;
   name: string;
   nameEn: string | null;

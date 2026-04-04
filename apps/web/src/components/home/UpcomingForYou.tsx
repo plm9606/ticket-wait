@@ -5,9 +5,9 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 
 interface Performance {
-  id: string;
+  id: number;
   title: string;
-  artist: { id: string; name: string; nameEn: string | null } | null;
+  artist: { id: number; name: string; nameEn: string | null } | null;
   venue: string | null;
   startDate: string | null;
   source: string;
