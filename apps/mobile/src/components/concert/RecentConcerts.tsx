@@ -12,7 +12,7 @@ import { useRouter } from "expo-router";
 import { api } from "@/lib/api";
 import { colors } from "@/theme/colors";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist: { id: string; name: string; nameEn: string | null } | null;
@@ -43,15 +43,15 @@ const screenWidth = Dimensions.get("window").width;
 const itemWidth = (screenWidth - 40 - COLUMN_GAP * (COLUMNS - 1)) / COLUMNS;
 
 export function RecentConcerts() {
-  const [concerts, setConcerts] = useState<Concert[]>([]);
+  const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await api<{ items: Concert[] }>("/concerts?limit=8");
-        setConcerts(data.items);
+        const data = await api<{ items: Performance[] }>("/performances?limit=8");
+        setPerformances(data.items);
       } catch {
         // ignore
       } finally {
@@ -75,7 +75,7 @@ export function RecentConcerts() {
     );
   }
 
-  if (concerts.length === 0) {
+  if (performances.length === 0) {
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyText}>아직 등록된 공연이 없습니다</Text>
@@ -85,7 +85,7 @@ export function RecentConcerts() {
 
   return (
     <FlatList
-      data={concerts}
+      data={performances}
       numColumns={2}
       scrollEnabled={false}
       columnWrapperStyle={styles.row}

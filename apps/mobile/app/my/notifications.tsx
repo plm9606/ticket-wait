@@ -18,7 +18,7 @@ import { containerPadding } from "@/theme/spacing";
 interface NotificationItem {
   id: string;
   type: string;
-  concert: {
+  performance: {
     id: string;
     title: string;
     source: string;
@@ -96,7 +96,7 @@ export default function NotificationsScreen() {
 
   const handlePress = (item: NotificationItem) => {
     if (!item.read) markAsRead(item.id);
-    Linking.openURL(item.concert.sourceUrl);
+    Linking.openURL(item.performance.sourceUrl);
   };
 
   if (!user) {
@@ -123,10 +123,10 @@ export default function NotificationsScreen() {
           style={[styles.card, item.read && styles.readCard]}
           onPress={() => handlePress(item)}
         >
-          {item.concert.imageUrl && (
+          {item.performance.imageUrl && (
             <View style={styles.thumbnail}>
               <Image
-                source={{ uri: item.concert.imageUrl }}
+                source={{ uri: item.performance.imageUrl }}
                 style={StyleSheet.absoluteFill}
                 contentFit="cover"
               />
@@ -140,10 +140,10 @@ export default function NotificationsScreen() {
               <Text style={styles.timeText}>{timeAgo(item.createdAt)}</Text>
             </View>
             <Text style={styles.title} numberOfLines={2}>
-              {item.concert.title}
+              {item.performance.title}
             </Text>
-            {item.concert.artist && (
-              <Text style={styles.artist}>{item.concert.artist.name}</Text>
+            {item.performance.artist && (
+              <Text style={styles.artist}>{item.performance.artist.name}</Text>
             )}
           </View>
           {!item.read && <View style={styles.unreadDot} />}

@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { colors } from "@/theme/colors";
 import { UpcomingConcertCard } from "./UpcomingConcertCard";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist: { id: string; name: string; nameEn: string | null } | null;
@@ -22,7 +22,7 @@ interface UpcomingForYouProps {
 
 export function UpcomingForYou({ genre }: UpcomingForYouProps) {
   const router = useRouter();
-  const [concerts, setConcerts] = useState<Concert[]>([]);
+  const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,10 +30,10 @@ export function UpcomingForYou({ genre }: UpcomingForYouProps) {
       setLoading(true);
       try {
         const genreParam = genre ? `&genre=${genre}` : "";
-        const data = await api<{ items: Concert[] }>(
-          `/concerts?limit=10${genreParam}`
+        const data = await api<{ items: Performance[] }>(
+          `/performances?limit=10${genreParam}`
         );
-        setConcerts(data.items);
+        setPerformances(data.items);
       } catch {
         // ignore
       } finally {
@@ -61,7 +61,7 @@ export function UpcomingForYou({ genre }: UpcomingForYouProps) {
             <View key={i} style={styles.skeletonCard} />
           ))}
         </View>
-      ) : concerts.length === 0 ? (
+      ) : performances.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyText}>공연이 없습니다</Text>
         </View>
@@ -69,10 +69,10 @@ export function UpcomingForYou({ genre }: UpcomingForYouProps) {
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
-          data={concerts}
+          data={performances}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
-          renderItem={({ item }) => <UpcomingConcertCard concert={item} />}
+          renderItem={({ item }) => <UpcomingConcertCard performance={item} />}
         />
       )}
     </View>

@@ -155,9 +155,9 @@ export default function MyScreen() {
                   {item.nameEn}
                 </Text>
               )}
-              {item.concertCount > 0 && (
+              {item.performanceCount > 0 && (
                 <Text style={styles.gridConcertCount}>
-                  공연 {item.concertCount}건
+                  공연 {item.performanceCount}건
                 </Text>
               )}
             </Pressable>

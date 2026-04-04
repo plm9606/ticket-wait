@@ -3,7 +3,7 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { colors } from "@/theme/colors";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist?: { id: string; name: string; nameEn: string | null } | null;
@@ -40,18 +40,18 @@ const GENRE_LABELS: Record<string, string> = {
   OTHER: "기타",
 };
 
-export function ConcertCard({ concert }: { concert: Concert }) {
+export function ConcertCard({ performance }: { performance: Performance }) {
   const router = useRouter();
 
   return (
     <Pressable
       style={styles.card}
-      onPress={() => router.push(`/concerts/${concert.id}`)}
+      onPress={() => router.push(`/concerts/${performance.id}`)}
     >
-      {concert.imageUrl && (
+      {performance.imageUrl && (
         <View style={styles.thumbnail}>
           <Image
-            source={{ uri: concert.imageUrl }}
+            source={{ uri: performance.imageUrl }}
             style={StyleSheet.absoluteFill}
             contentFit="cover"
           />
@@ -59,25 +59,25 @@ export function ConcertCard({ concert }: { concert: Concert }) {
       )}
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
-          {concert.title}
+          {performance.title}
         </Text>
-        {concert.artist && (
-          <Text style={styles.artist}>{concert.artist.name}</Text>
+        {performance.artist && (
+          <Text style={styles.artist}>{performance.artist.name}</Text>
         )}
         <View style={styles.metaRow}>
-          {concert.venue && (
-            <Text style={styles.metaText}>{concert.venue}</Text>
+          {performance.venue && (
+            <Text style={styles.metaText}>{performance.venue}</Text>
           )}
-          {concert.startDate && (
-            <Text style={styles.metaText}>{formatDate(concert.startDate)}</Text>
+          {performance.startDate && (
+            <Text style={styles.metaText}>{formatDate(performance.startDate)}</Text>
           )}
         </View>
         <View style={styles.tagRow}>
-          <Text style={styles.sourceText}>{sourceLabel(concert.source)}</Text>
-          {concert.genre && concert.genre !== "CONCERT" && (
+          <Text style={styles.sourceText}>{sourceLabel(performance.source)}</Text>
+          {performance.genre && performance.genre !== "CONCERT" && (
             <View style={styles.genreBadge}>
               <Text style={styles.genreText}>
-                {GENRE_LABELS[concert.genre] ?? concert.genre}
+                {GENRE_LABELS[performance.genre] ?? performance.genre}
               </Text>
             </View>
           )}

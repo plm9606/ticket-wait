@@ -21,7 +21,7 @@ import { containerPadding } from "@/theme/spacing";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-interface ConcertDetail {
+interface PerformanceDetail {
   id: string;
   title: string;
   venue: string | null;
@@ -81,21 +81,21 @@ const STATUS_LABELS: Record<string, string> = {
   COMPLETED: "종료", CANCELLED: "취소",
 };
 
-export default function ConcertDetailScreen() {
+export default function PerformanceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
   const { fetch: fetchSubs } = useSubscriptions();
-  const [concert, setConcert] = useState<ConcertDetail | null>(null);
+  const [performance, setPerformance] = useState<PerformanceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await api<ConcertDetail>(`/concerts/${id}`);
-        setConcert(data);
+        const data = await api<PerformanceDetail>(`/performances/${id}`);
+        setPerformance(data);
       } catch {
-        setConcert(null);
+        setPerformance(null);
       } finally {
         setLoading(false);
       }
@@ -117,7 +117,7 @@ export default function ConcertDetailScreen() {
     );
   }
 
-  if (!concert) {
+  if (!performance) {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>공연을 찾을 수 없습니다</Text>
@@ -128,7 +128,7 @@ export default function ConcertDetailScreen() {
     );
   }
 
-  const dday = getDday(concert.ticketOpenDate);
+  const dday = getDday(performance.ticketOpenDate);
 
   return (
     <ScrollView
@@ -137,9 +137,9 @@ export default function ConcertDetailScreen() {
     >
       {/* 풀블리드 히어로 */}
       <View style={styles.hero}>
-        {concert.imageUrl ? (
+        {performance.imageUrl ? (
           <Image
-            source={{ uri: concert.imageUrl }}
+            source={{ uri: performance.imageUrl }}
             style={[StyleSheet.absoluteFill, styles.heroImage]}
             contentFit="cover"
           />
@@ -153,18 +153,18 @@ export default function ConcertDetailScreen() {
         <View style={styles.heroContent}>
           <View style={styles.genreBadge}>
             <Text style={styles.genreBadgeText}>
-              {GENRE_LABELS[concert.genre] ?? concert.genre}
+              {GENRE_LABELS[performance.genre] ?? performance.genre}
             </Text>
           </View>
-          <Text style={styles.heroTitle}>{concert.title}</Text>
+          <Text style={styles.heroTitle}>{performance.title}</Text>
           <View style={styles.heroMeta}>
-            {concert.startDate && (
+            {performance.startDate && (
               <Text style={styles.heroMetaText}>
-                {formatDate(concert.startDate)}
+                {formatDate(performance.startDate)}
               </Text>
             )}
-            {concert.venue && (
-              <Text style={styles.heroMetaText}>{concert.venue}</Text>
+            {performance.venue && (
+              <Text style={styles.heroMetaText}>{performance.venue}</Text>
             )}
           </View>
         </View>
@@ -177,14 +177,14 @@ export default function ConcertDetailScreen() {
           <View style={styles.statusValue}>
             <View style={styles.pulseDot} />
             <Text style={styles.statusText}>
-              {STATUS_LABELS[concert.status] ?? concert.status}
+              {STATUS_LABELS[performance.status] ?? performance.status}
             </Text>
           </View>
         </View>
         <View style={styles.actionButtons}>
           <Pressable
             style={styles.bookButton}
-            onPress={() => Linking.openURL(concert.sourceUrl)}
+            onPress={() => Linking.openURL(performance.sourceUrl)}
           >
             <Text style={styles.bookButtonText}>예매하기</Text>
           </Pressable>
@@ -192,11 +192,11 @@ export default function ConcertDetailScreen() {
       </View>
 
       {/* 티켓 오픈일 */}
-      {concert.ticketOpenDate && (
+      {performance.ticketOpenDate && (
         <View style={styles.ticketOpenSection}>
           <Text style={styles.sectionLabel}>TICKET OPEN</Text>
           <Text style={styles.ticketOpenDate}>
-            {formatDate(concert.ticketOpenDate)}
+            {formatDate(performance.ticketOpenDate)}
           </Text>
           {dday && <Text style={styles.ddayText}>{dday}</Text>}
         </View>
@@ -204,61 +204,61 @@ export default function ConcertDetailScreen() {
 
       {/* 공연 정보 */}
       <View style={styles.infoSection}>
-        {concert.venue && (
+        {performance.venue && (
           <View style={styles.infoItem}>
             <Text style={styles.sectionLabel}>VENUE</Text>
-            <Text style={styles.infoValue}>{concert.venue}</Text>
+            <Text style={styles.infoValue}>{performance.venue}</Text>
           </View>
         )}
         <View style={styles.infoItem}>
           <Text style={styles.sectionLabel}>SOURCE</Text>
-          <Text style={styles.infoValue}>{sourceLabel(concert.source)}</Text>
+          <Text style={styles.infoValue}>{sourceLabel(performance.source)}</Text>
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.sectionLabel}>DATE</Text>
           <Text style={styles.infoValue}>
-            {formatDate(concert.startDate)}
-            {concert.endDate && concert.endDate !== concert.startDate
-              ? ` — ${formatDate(concert.endDate)}`
+            {formatDate(performance.startDate)}
+            {performance.endDate && performance.endDate !== performance.startDate
+              ? ` — ${formatDate(performance.endDate)}`
               : ""}
           </Text>
         </View>
       </View>
 
       {/* 아티스트 섹션 */}
-      {concert.artist && (
+      {performance.artist && (
         <View style={styles.artistSection}>
           <Text style={styles.sectionLabel}>ARTIST</Text>
           <View style={styles.artistRow}>
-            <Pressable onPress={() => router.push(`/artist/${concert.artist!.id}`)}>
+            <Pressable onPress={() => router.push(`/artist/${performance.artist!.id}`)}>
               <View style={styles.artistAvatar}>
-                {concert.artist.imageUrl ? (
+                {performance.artist.imageUrl ? (
                   <Image
-                    source={{ uri: concert.artist.imageUrl }}
+                    source={{ uri: performance.artist.imageUrl }}
                     style={StyleSheet.absoluteFill}
                     contentFit="cover"
                   />
                 ) : (
                   <Text style={styles.avatarText}>
-                    {concert.artist.name[0]}
+                    {performance.artist.name[0]}
                   </Text>
                 )}
               </View>
             </Pressable>
             <View style={styles.artistInfo}>
-              <Pressable onPress={() => router.push(`/artist/${concert.artist!.id}`)}>
-                <Text style={styles.artistName}>{concert.artist.name}</Text>
+              <Pressable onPress={() => router.push(`/artist/${performance.artist!.id}`)}>
+                <Text style={styles.artistName}>{performance.artist.name}</Text>
               </Pressable>
-              {concert.artist.nameEn && (
+              {performance.artist.nameEn && (
                 <Text style={styles.artistNameEn}>
-                  {concert.artist.nameEn}
+                  {performance.artist.nameEn}
                 </Text>
               )}
               <Text style={styles.subscriberCount}>
-                구독자 {concert.artist.subscriberCount}명
+                구독자 {performance.artist.subscriberCount}명
               </Text>
             </View>
-            <SubscribeButton artistId={concert.artist.id} />
+            <SubscribeButton artistId={performance.artist.id} />
           </View>
         </View>
       )}

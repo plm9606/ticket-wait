@@ -14,7 +14,7 @@ import { ConcertCard } from "@/components/concert/ConcertCard";
 import { colors } from "@/theme/colors";
 import { containerPadding } from "@/theme/spacing";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist: { id: string; name: string; nameEn: string | null } | null;
@@ -28,8 +28,8 @@ interface Concert {
   status: string;
 }
 
-interface ConcertListResponse {
-  items: Concert[];
+interface PerformanceListResponse {
+  items: Performance[];
   nextCursor: string | null;
 }
 
@@ -46,22 +46,22 @@ const GENRE_FILTERS = [
 ] as const;
 
 export default function ConcertsScreen() {
-  const [concerts, setConcerts] = useState<Concert[]>([]);
+  const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(true);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [genre, setGenre] = useState("");
   const insets = useSafeAreaInsets();
 
-  const loadConcerts = useCallback(
+  const loadPerformances = useCallback(
     async (nextCursor?: string, genreFilter?: string) => {
       setLoading(true);
       try {
         const params = new URLSearchParams({ limit: "20" });
         if (nextCursor) params.set("cursor", nextCursor);
         if (genreFilter) params.set("genre", genreFilter);
-        const data = await api<ConcertListResponse>(`/concerts?${params}`);
-        setConcerts((prev) =>
+        const data = await api<PerformanceListResponse>(`/performances?${params}`);
+        setPerformances((prev) =>
           nextCursor ? [...prev, ...data.items] : data.items
         );
         setCursor(data.nextCursor);
@@ -76,10 +76,10 @@ export default function ConcertsScreen() {
   );
 
   useEffect(() => {
-    setConcerts([]);
+    setPerformances([]);
     setCursor(null);
-    loadConcerts(undefined, genre);
-  }, [loadConcerts, genre]);
+    loadPerformances(undefined, genre);
+  }, [loadPerformances, genre]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -119,10 +119,10 @@ export default function ConcertsScreen() {
       </ScrollView>
 
       <FlatList
-        data={concerts}
+        data={performances}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => <ConcertCard concert={item} />}
+        renderItem={({ item }) => <ConcertCard performance={item} />}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         ListEmptyComponent={
           !loading ? (
@@ -140,7 +140,7 @@ export default function ConcertsScreen() {
           ) : hasMore ? (
             <Pressable
               style={styles.loadMore}
-              onPress={() => cursor && loadConcerts(cursor, genre)}
+              onPress={() => cursor && loadPerformances(cursor, genre)}
             >
               <Text style={styles.loadMoreText}>더 보기</Text>
             </Pressable>

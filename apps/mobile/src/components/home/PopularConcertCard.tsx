@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/theme/colors";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist: { id: string; name: string; nameEn: string | null } | null;
@@ -25,18 +25,18 @@ function formatDay(dateStr: string | null): string {
   return new Date(dateStr).getDate().toString().padStart(2, "0");
 }
 
-export function PopularConcertCard({ concert }: { concert: Concert }) {
+export function PopularConcertCard({ performance }: { performance: Performance }) {
   const router = useRouter();
 
   return (
     <Pressable
-      onPress={() => router.push(`/concerts/${concert.id}`)}
+      onPress={() => router.push(`/concerts/${performance.id}`)}
       style={styles.card}
     >
       <View style={styles.imageContainer}>
-        {concert.imageUrl ? (
+        {performance.imageUrl ? (
           <Image
-            source={{ uri: concert.imageUrl }}
+            source={{ uri: performance.imageUrl }}
             style={StyleSheet.absoluteFill}
             contentFit="cover"
           />
@@ -49,13 +49,13 @@ export function PopularConcertCard({ concert }: { concert: Concert }) {
           />
         )}
 
-        {concert.startDate && (
+        {performance.startDate && (
           <View style={styles.dateBadge}>
             <Text style={styles.dateMonth}>
-              {formatMonth(concert.startDate)}
+              {formatMonth(performance.startDate)}
             </Text>
             <Text style={styles.dateDay}>
-              {formatDay(concert.startDate)}
+              {formatDay(performance.startDate)}
             </Text>
           </View>
         )}
@@ -63,22 +63,22 @@ export function PopularConcertCard({ concert }: { concert: Concert }) {
 
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
-          {concert.title}
+          {performance.title}
         </Text>
-        {concert.venue && (
+        {performance.venue && (
           <View style={styles.venueRow}>
             <Ionicons
               name="location-sharp"
               size={14}
               color={colors.onSurfaceVariant}
             />
-            <Text style={styles.venue}>{concert.venue}</Text>
+            <Text style={styles.venue}>{performance.venue}</Text>
           </View>
         )}
 
-        {concert.artist && (
+        {performance.artist && (
           <View style={styles.artistRow}>
-            <Text style={styles.artistName}>{concert.artist.name}</Text>
+            <Text style={styles.artistName}>{performance.artist.name}</Text>
           </View>
         )}
       </View>
