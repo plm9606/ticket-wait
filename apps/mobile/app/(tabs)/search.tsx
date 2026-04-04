@@ -52,13 +52,18 @@ export default function SearchScreen() {
   }, [query]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.headline}>
+        <Text style={styles.headlineTitle}>Search</Text>
+        <Text style={styles.headlineSubtitle}>아티스트를 찾아보세요</Text>
+      </View>
+
       <View style={styles.inputWrap}>
         <TextInput
           value={query}
           onChangeText={setQuery}
           placeholder="아티스트 이름을 검색하세요"
-          placeholderTextColor={colors.gray[300]}
+          placeholderTextColor={colors.outline}
           style={styles.input}
           autoFocus
           autoCapitalize="none"
@@ -80,10 +85,12 @@ export default function SearchScreen() {
       <FlatList
         data={results}
         keyExtractor={(item) => item.id}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        numColumns={3}
+        columnWrapperStyle={styles.gridRow}
+        contentContainerStyle={styles.gridContent}
         renderItem={({ item }) => (
           <Pressable
-            style={styles.row}
+            style={styles.gridItem}
             onPress={() => router.push(`/artist/${item.id}`)}
           >
             <View style={styles.avatar}>
@@ -97,12 +104,10 @@ export default function SearchScreen() {
                 <Text style={styles.avatarText}>{item.name[0]}</Text>
               )}
             </View>
-            <View>
-              <Text style={styles.name}>{item.name}</Text>
-              {item.nameEn && (
-                <Text style={styles.nameEn}>{item.nameEn}</Text>
-              )}
-            </View>
+            <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+            {item.nameEn && (
+              <Text style={styles.nameEn} numberOfLines={1}>{item.nameEn}</Text>
+            )}
           </Pressable>
         )}
       />
@@ -113,23 +118,41 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     paddingHorizontal: containerPadding,
   },
+  headline: {
+    paddingTop: 32,
+    paddingBottom: 24,
+  },
+  headlineTitle: {
+    fontFamily: "Manrope-ExtraBold",
+    fontSize: 42,
+    letterSpacing: -1,
+    color: colors.primary,
+  },
+  headlineSubtitle: {
+    fontFamily: "Inter-Medium",
+    fontSize: 16,
+    color: colors.onSurfaceVariant,
+    marginTop: 12,
+  },
   inputWrap: {
-    marginBottom: 24,
+    marginBottom: 32,
   },
   input: {
-    fontSize: 24,
-    fontWeight: "300",
-    borderBottomWidth: 2,
-    borderBottomColor: colors.black,
-    paddingBottom: 12,
-    color: colors.gray[900],
+    fontSize: 16,
+    fontFamily: "Inter-Medium",
+    backgroundColor: colors.surfaceContainerLowest,
+    height: 56,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    color: colors.onSurface,
   },
   loadingText: {
     fontSize: 14,
-    color: colors.gray[400],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
   },
   empty: {
     paddingVertical: 64,
@@ -137,38 +160,46 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: colors.gray[400],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
   },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.gray[100],
+  gridContent: {
+    gap: 32,
   },
-  row: {
-    flexDirection: "row",
+  gridRow: {
+    gap: 24,
+  },
+  gridItem: {
+    flex: 1,
     alignItems: "center",
-    gap: 16,
-    paddingVertical: 16,
+    gap: 8,
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.gray[100],
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.surfaceContainerLow,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: {
-    fontSize: 14,
-    color: colors.gray[400],
+    fontSize: 16,
+    fontFamily: "Inter-Medium",
+    color: colors.onSurfaceVariant,
   },
   name: {
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: "Manrope-Bold",
+    color: colors.primary,
+    textAlign: "center",
   },
   nameEn: {
-    fontSize: 12,
-    color: colors.gray[400],
-    marginTop: 2,
+    fontSize: 10,
+    fontFamily: "Inter-Bold",
+    color: colors.onSurfaceVariant,
+    textTransform: "uppercase" as const,
+    letterSpacing: 1.5,
+    textAlign: "center",
   },
 });

@@ -66,7 +66,7 @@ export default function ArtistDetailScreen() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <View style={styles.profileCenter}>
+        <View style={{ alignItems: "center", paddingTop: 40 }}>
           <Skeleton width={96} height={96} borderRadius={48} />
           <Skeleton width={160} height={24} style={{ marginTop: 16 }} />
           <Skeleton width={96} height={16} style={{ marginTop: 8 }} />
@@ -88,28 +88,32 @@ export default function ArtistDetailScreen() {
 
   const headerComponent = (
     <View>
-      {/* 프로필 */}
-      <View style={styles.profileCenter}>
-        <View style={styles.avatar}>
-          {artist.imageUrl ? (
-            <Image
-              source={{ uri: artist.imageUrl }}
-              style={StyleSheet.absoluteFill}
-              contentFit="cover"
-            />
-          ) : (
-            <Text style={styles.avatarText}>{artist.name[0]}</Text>
-          )}
-        </View>
-        <Text style={styles.name}>{artist.name}</Text>
-        {artist.nameEn && (
-          <Text style={styles.nameEn}>{artist.nameEn}</Text>
-        )}
-        <Text style={styles.subscriberCount}>
-          구독자 {artist.subscriberCount}명
-        </Text>
-        <View style={styles.subscribeWrap}>
-          <SubscribeButton artistId={artist.id} />
+      {/* 프로필 — 에디토리얼 좌정렬 */}
+      <View style={styles.profileSection}>
+        <View style={styles.profileRow}>
+          <View style={styles.avatar}>
+            {artist.imageUrl ? (
+              <Image
+                source={{ uri: artist.imageUrl }}
+                style={StyleSheet.absoluteFill}
+                contentFit="cover"
+              />
+            ) : (
+              <Text style={styles.avatarText}>{artist.name[0]}</Text>
+            )}
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.name}>{artist.name}</Text>
+            {artist.nameEn && (
+              <Text style={styles.nameEn}>{artist.nameEn}</Text>
+            )}
+            <Text style={styles.subscriberCount}>
+              구독자 {artist.subscriberCount}명
+            </Text>
+            <View style={styles.subscribeWrap}>
+              <SubscribeButton artistId={artist.id} />
+            </View>
+          </View>
         </View>
       </View>
 
@@ -144,68 +148,84 @@ export default function ArtistDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     paddingTop: 32,
     paddingHorizontal: containerPadding,
   },
-  profileCenter: {
+  profileSection: {
+    backgroundColor: colors.surfaceContainerLow,
+    paddingVertical: 40,
+    paddingHorizontal: containerPadding,
+    marginHorizontal: -containerPadding,
+  },
+  profileRow: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 16,
+    gap: 20,
+  },
+  profileInfo: {
+    flex: 1,
   },
   avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: colors.gray[100],
+    width: 112,
+    height: 112,
+    borderRadius: 56,
+    backgroundColor: colors.surfaceContainer,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: {
     fontSize: 30,
-    color: colors.gray[300],
+    fontFamily: "Inter-Medium",
+    color: colors.onSurfaceVariant,
   },
   name: {
-    fontSize: 24,
-    fontWeight: "700",
-    marginTop: 16,
+    fontFamily: "Manrope-ExtraBold",
+    fontSize: 36,
+    letterSpacing: -1.5,
+    color: colors.primary,
   },
   nameEn: {
-    fontSize: 14,
-    color: colors.gray[400],
-    marginTop: 4,
+    fontSize: 10,
+    fontFamily: "Inter-Bold",
+    color: colors.onSurfaceVariant,
+    textTransform: "uppercase" as const,
+    letterSpacing: 1.5,
+    marginTop: 6,
   },
   subscriberCount: {
     fontSize: 12,
-    color: colors.gray[300],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
     marginTop: 8,
   },
   subscribeWrap: {
-    marginTop: 24,
+    marginTop: 16,
   },
   concertHeader: {
-    marginTop: 16,
+    marginTop: 32,
     marginBottom: 24,
   },
   concertTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: "Manrope-Bold",
+    color: colors.onSurface,
   },
   concertCount: {
-    color: colors.gray[300],
-    fontWeight: "400",
+    color: colors.onSurfaceVariant,
+    fontFamily: "Inter",
   },
   noConcerts: {
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    borderStyle: "dashed",
+    backgroundColor: colors.surfaceContainerLow,
     paddingVertical: 48,
     alignItems: "center",
-    borderRadius: 6,
+    borderRadius: 12,
   },
   noConcertsText: {
     fontSize: 14,
-    color: colors.gray[400],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
   },
   listContent: {
     paddingHorizontal: containerPadding,
@@ -213,17 +233,20 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
   },
   emptyText: {
     fontSize: 14,
-    color: colors.gray[400],
+    fontFamily: "Inter",
+    color: colors.onSurfaceVariant,
   },
   backLink: {
     fontSize: 14,
+    fontFamily: "Inter-Medium",
     textDecorationLine: "underline",
     marginTop: 16,
+    color: colors.onSurfaceVariant,
   },
 });

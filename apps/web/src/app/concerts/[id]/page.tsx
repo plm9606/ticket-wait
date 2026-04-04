@@ -40,6 +40,16 @@ function formatDate(dateStr: string | null) {
   });
 }
 
+function getDday(dateStr: string | null): string | null {
+  if (!dateStr) return null;
+  const diff = Math.ceil(
+    (new Date(dateStr).getTime() - Date.now()) / 86400000
+  );
+  if (diff < 0) return null;
+  if (diff === 0) return "D-DAY";
+  return `D-${diff}`;
+}
+
 function sourceLabel(source: string) {
   switch (source) {
     case "INTERPARK":
@@ -129,12 +139,16 @@ export default function ConcertDetailPage({
 
   if (loading) {
     return (
-      <section className="pt-8">
+      <section>
+        <div className="w-full h-[60vh] min-h-[400px] bg-gray-100 animate-pulse" />
         <Container>
-          <div className="animate-pulse space-y-6">
-            <div className="aspect-[3/4] max-w-xs mx-auto bg-gray-100 rounded-md" />
-            <div className="h-6 w-3/4 bg-gray-100 rounded mx-auto" />
-            <div className="h-4 w-1/2 bg-gray-100 rounded mx-auto" />
+          <div className="-mt-10 relative z-10 bg-white p-8 rounded-xl">
+            <div className="h-6 w-48 bg-gray-100 rounded mb-4" />
+            <div className="h-12 w-full bg-gray-100 rounded-xl" />
+          </div>
+          <div className="mt-10 space-y-4">
+            <div className="h-4 w-24 bg-gray-100 rounded" />
+            <div className="h-6 w-48 bg-gray-100 rounded" />
           </div>
         </Container>
       </section>
@@ -160,81 +174,152 @@ export default function ConcertDetailPage({
   }
 
   const subscribed = concert.artist ? isSubscribed(concert.artist.id) : false;
+  const dday = getDday(concert.ticketOpenDate);
 
   return (
-    <section className="pt-8 pb-24">
-      <Container>
-        {/* 공연 포스터 */}
-        <div className="max-w-xs mx-auto mb-8">
-          <div className="aspect-[3/4] bg-gray-50 rounded-md overflow-hidden">
-            {concert.imageUrl ? (
-              <img
-                src={concert.imageUrl}
-                alt={concert.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-200 text-sm">
-                No Image
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* 공연 정보 */}
-        <div className="text-center mb-10">
-          <h1 className="text-xl font-bold leading-snug">{concert.title}</h1>
-
-          <div className="mt-4 space-y-1.5">
-            {concert.venue && (
-              <p className="text-sm text-gray-500">{concert.venue}</p>
-            )}
-            <p className="text-sm text-gray-500">
-              {formatDate(concert.startDate)}
-              {concert.endDate && concert.endDate !== concert.startDate
-                ? ` ~ ${formatDate(concert.endDate)}`
-                : ""}
-            </p>
-            {concert.ticketOpenDate && (
-              <p className="text-sm text-gray-400">
-                티켓 오픈 {formatDate(concert.ticketOpenDate)}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center justify-center gap-3 mt-4">
-            <span className="text-xs text-gray-300">
-              {sourceLabel(concert.source)}
-            </span>
-            <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500">
+    <section className="pb-24">
+      {/* 풀블리드 히어로 */}
+      <div className="relative w-full h-[60vh] min-h-[400px] bg-black overflow-hidden">
+        {concert.imageUrl ? (
+          <img
+            src={concert.imageUrl}
+            alt={concert.title}
+            className="w-full h-full object-cover opacity-70 grayscale"
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-900" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+          <div className="max-w-[720px] mx-auto">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-white text-[11px] font-semibold tracking-widest uppercase">
               {genreLabel(concert.genre)}
             </span>
-            <span className="text-xs text-gray-300">
-              {statusLabel(concert.status)}
-            </span>
+            <h1 className="mt-3 text-4xl md:text-6xl font-black tracking-tighter leading-none text-white">
+              {concert.title}
+            </h1>
+            <div className="mt-4 flex flex-wrap gap-5 text-white/80 text-sm">
+              {concert.startDate && (
+                <span>{formatDate(concert.startDate)}</span>
+              )}
+              {concert.venue && <span>{concert.venue}</span>}
+            </div>
           </div>
+        </div>
+      </div>
 
-          {/* 예매 링크 */}
-          <a
-            href={concert.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-block px-8 py-2.5 bg-black text-white text-sm font-medium hover:opacity-80 transition-opacity"
-          >
-            {sourceLabel(concert.source)}에서 예매하기
-          </a>
+      {/* Quick Actions 카드 */}
+      <Container>
+        <div className="-mt-10 relative z-10 bg-white p-6 md:p-8 rounded-xl shadow-[0_-4px_24px_rgba(0,0,0,0.04)]">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                상태
+              </span>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="w-2 h-2 rounded-full bg-gray-900 animate-pulse" />
+                <span className="text-xl font-bold tracking-tight">
+                  {statusLabel(concert.status)}
+                </span>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              {concert.artist && (
+                user ? (
+                  <button
+                    onClick={handleToggle}
+                    disabled={toggling}
+                    className={`flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm transition-colors ${
+                      subscribed
+                        ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        : "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                    }`}
+                  >
+                    {toggling
+                      ? "..."
+                      : subscribed
+                        ? "구독 중"
+                        : "알림 받기"}
+                  </button>
+                ) : (
+                  <Link
+                    href={`${API_URL}/auth/kakao`}
+                    className="flex items-center justify-center gap-2 px-6 py-3.5 bg-gray-100 text-gray-900 rounded-xl font-bold text-sm hover:bg-gray-200 transition-colors"
+                  >
+                    알림 받기
+                  </Link>
+                )
+              )}
+              <a
+                href={concert.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-8 py-3.5 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors shadow-lg"
+              >
+                예매하기
+              </a>
+            </div>
+          </div>
         </div>
 
-        {/* 아티스트 정보 */}
+        {/* 티켓 오픈일 */}
+        {concert.ticketOpenDate && (
+          <div className="mt-10 py-8 border-t border-gray-200">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+              Ticket Open
+            </span>
+            <p className="text-2xl font-bold tracking-tight mt-1">
+              {formatDate(concert.ticketOpenDate)}
+            </p>
+            {dday && (
+              <p className="text-sm text-gray-400 mt-1">{dday}</p>
+            )}
+          </div>
+        )}
+
+        {/* 공연 정보 */}
+        <div className="grid grid-cols-2 gap-x-8 gap-y-6 py-8 border-t border-gray-100">
+          {concert.venue && (
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                Venue
+              </span>
+              <p className="text-sm text-gray-800 mt-1">{concert.venue}</p>
+            </div>
+          )}
+          <div>
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+              Source
+            </span>
+            <p className="text-sm text-gray-800 mt-1">
+              {sourceLabel(concert.source)}
+            </p>
+          </div>
+          <div className="col-span-2">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+              Date
+            </span>
+            <p className="text-sm text-gray-800 mt-1">
+              {formatDate(concert.startDate)}
+              {concert.endDate && concert.endDate !== concert.startDate
+                ? ` — ${formatDate(concert.endDate)}`
+                : ""}
+            </p>
+          </div>
+        </div>
+
+        {/* 아티스트 섹션 */}
         {concert.artist && (
-          <div className="border-t border-gray-100 pt-8">
-            <h2 className="text-lg font-bold mb-6">아티스트</h2>
-            <div className="flex items-center gap-4">
+          <div className="border-t border-gray-100 pt-10 pb-4">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+              Artist
+            </span>
+            <div className="flex items-center gap-4 mt-6">
               <Link
                 href={`/artist/${concert.artist.id}`}
                 className="shrink-0"
               >
-                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
                   {concert.artist.imageUrl ? (
                     <img
                       src={concert.artist.imageUrl}
@@ -242,7 +327,7 @@ export default function ConcertDetailPage({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-gray-300 text-xl">
+                    <span className="text-gray-300 text-lg">
                       {concert.artist.name[0]}
                     </span>
                   )}
@@ -251,16 +336,16 @@ export default function ConcertDetailPage({
               <div className="flex-1 min-w-0">
                 <Link
                   href={`/artist/${concert.artist.id}`}
-                  className="font-semibold hover:underline underline-offset-4"
+                  className="font-bold text-[15px] hover:underline underline-offset-4"
                 >
                   {concert.artist.name}
                 </Link>
                 {concert.artist.nameEn && (
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-[11px] text-gray-400 tracking-wide mt-0.5">
                     {concert.artist.nameEn}
                   </p>
                 )}
-                <p className="text-xs text-gray-300 mt-0.5">
+                <p className="text-[11px] text-gray-300 mt-0.5">
                   구독자 {concert.artist.subscriberCount}명
                 </p>
               </div>
@@ -269,10 +354,10 @@ export default function ConcertDetailPage({
                   <button
                     onClick={handleToggle}
                     disabled={toggling}
-                    className={`px-5 py-2 text-sm font-medium transition-all ${
+                    className={`px-5 py-2 text-sm font-bold rounded-xl transition-colors ${
                       subscribed
-                        ? "border border-gray-200 text-gray-500 hover:border-black hover:text-black"
-                        : "bg-black text-white hover:opacity-80"
+                        ? "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                        : "bg-black text-white hover:bg-gray-800"
                     }`}
                   >
                     {toggling
@@ -284,7 +369,7 @@ export default function ConcertDetailPage({
                 ) : (
                   <Link
                     href={`${API_URL}/auth/kakao`}
-                    className="px-5 py-2 bg-black text-white text-sm font-medium hover:opacity-80 transition-opacity"
+                    className="px-5 py-2 bg-black text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-colors"
                   >
                     구독하기
                   </Link>

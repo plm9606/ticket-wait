@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Container } from "@/components/layout/Container";
+import { EditorialHeadline } from "@/components/shared/EditorialHeadline";
 import { api } from "@/lib/api";
 
 interface Artist {
@@ -40,55 +41,75 @@ export default function SearchPage() {
   }, [query]);
 
   return (
-    <section className="pt-8 pb-16">
+    <section className="pb-16">
+      <EditorialHeadline title="Search" subtitle="아티스트를 찾아보세요" />
       <Container>
         {/* 검색 입력 */}
         <div className="mb-10">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="아티스트 이름을 검색하세요"
-            className="w-full text-2xl md:text-3xl font-light border-b-2 border-black pb-3 outline-none placeholder:text-gray-300 bg-transparent"
-            autoFocus
-          />
+          <div className="relative">
+            <svg
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="아티스트 이름을 검색하세요"
+              className="w-full bg-surface-container-lowest h-14 rounded-xl pl-12 pr-4 text-base font-medium outline-none placeholder:text-outline shadow-sm focus:ring-0 border-none"
+              autoFocus
+            />
+          </div>
         </div>
 
         {/* 검색 결과 */}
         {loading && (
-          <div className="text-sm text-gray-400">검색 중...</div>
+          <div className="text-sm text-on-surface-variant">검색 중...</div>
         )}
 
         {!loading && query && results.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-gray-400 text-sm">
+            <p className="text-on-surface-variant text-sm">
               검색 결과가 없습니다
             </p>
           </div>
         )}
 
-        <div className="divide-y divide-gray-100">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-x-6 gap-y-10">
           {results.map((artist) => (
             <a
               key={artist.id}
               href={`/artist/${artist.id}`}
-              className="flex items-center gap-4 py-4 hover:opacity-70 transition-opacity"
+              className="flex flex-col items-center gap-3 group"
             >
-              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm shrink-0">
+              <div className="w-20 h-20 rounded-full bg-surface-container-low overflow-hidden shrink-0 group-hover:scale-95 transition-transform duration-300">
                 {artist.imageUrl ? (
                   <img
                     src={artist.imageUrl}
                     alt={artist.name}
-                    className="w-full h-full rounded-full object-cover"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
-                  artist.name[0]
+                  <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-sm">
+                    {artist.name[0]}
+                  </div>
                 )}
               </div>
-              <div>
-                <div className="font-medium text-sm">{artist.name}</div>
+              <div className="text-center">
+                <div className="font-headline font-bold text-sm text-primary">
+                  {artist.name}
+                </div>
                 {artist.nameEn && (
-                  <div className="text-xs text-gray-400 mt-0.5">
+                  <div className="text-[10px] uppercase tracking-widest text-on-surface-variant mt-1">
                     {artist.nameEn}
                   </div>
                 )}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Container } from "@/components/layout/Container";
+import { EditorialHeadline } from "@/components/shared/EditorialHeadline";
 import { useRouter } from "next/navigation";
 import { requestNotificationPermission } from "@/lib/fcm";
 
@@ -31,9 +32,10 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <section className="pt-8">
+      <section>
+        <EditorialHeadline title="Settings" />
         <Container>
-          <div className="animate-pulse h-8 w-32 bg-gray-100 rounded" />
+          <div className="animate-pulse h-20 bg-surface-container-low rounded-xl" />
         </Container>
       </section>
     );
@@ -41,41 +43,45 @@ export default function SettingsPage() {
 
   if (!user) {
     return (
-      <section className="pt-8">
+      <section>
+        <EditorialHeadline title="Settings" />
         <Container>
-          <p className="text-gray-400 text-sm">로그인이 필요합니다</p>
+          <p className="text-on-surface-variant text-sm">로그인이 필요합니다</p>
         </Container>
       </section>
     );
   }
 
   return (
-    <section className="pt-8">
+    <section className="pb-24">
+      <EditorialHeadline title="Settings" subtitle="환경 설정" />
       <Container>
-        <h1 className="text-lg font-bold mb-8">설정</h1>
-
-        <div className="divide-y divide-gray-100">
+        <div className="space-y-4">
           {/* 계정 정보 */}
-          <div className="py-5">
-            <div className="text-xs text-gray-400 mb-2">계정</div>
-            <div className="text-sm">{user.nickname}</div>
+          <div className="bg-surface-container-low p-6 rounded-xl">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant mb-3">
+              계정
+            </div>
+            <div className="text-sm font-bold text-on-surface">{user.nickname}</div>
             {user.email && (
-              <div className="text-xs text-gray-400 mt-1">{user.email}</div>
+              <div className="text-xs text-on-surface-variant mt-1">{user.email}</div>
             )}
           </div>
 
           {/* 알림 설정 */}
-          <div className="py-5">
-            <div className="text-xs text-gray-400 mb-2">알림</div>
+          <div className="bg-surface-container-low p-6 rounded-xl">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant mb-3">
+              알림
+            </div>
             {pushEnabled ? (
-              <div className="text-sm text-gray-500">
+              <div className="bg-surface-container-lowest p-4 rounded-lg text-sm text-on-surface-variant">
                 푸시 알림이 활성화되었습니다
               </div>
             ) : (
               <button
                 onClick={handleEnablePush}
                 disabled={pushLoading}
-                className="text-sm text-black font-medium hover:opacity-70 transition-opacity"
+                className="bg-surface-container-lowest p-4 rounded-lg text-sm font-bold text-primary hover:bg-surface-container transition-colors w-full text-left"
               >
                 {pushLoading ? "설정 중..." : "푸시 알림 허용하기"}
               </button>
@@ -83,10 +89,10 @@ export default function SettingsPage() {
           </div>
 
           {/* 로그아웃 */}
-          <div className="py-5">
+          <div className="pt-4">
             <button
               onClick={handleLogout}
-              className="text-sm text-gray-500 hover:text-black transition-colors"
+              className="text-sm text-on-surface-variant hover:text-error transition-colors"
             >
               로그아웃
             </button>

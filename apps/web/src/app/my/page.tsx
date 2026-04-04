@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { Container } from "@/components/layout/Container";
+import { EditorialHeadline } from "@/components/shared/EditorialHeadline";
 import { API_URL } from "@/lib/constants";
 
 export default function MyPage() {
@@ -17,11 +18,12 @@ export default function MyPage() {
 
   if (authLoading) {
     return (
-      <section className="pt-8">
+      <section>
+        <EditorialHeadline title="My" />
         <Container>
           <div className="animate-pulse space-y-4">
-            <div className="h-8 w-48 bg-gray-100 rounded" />
-            <div className="h-4 w-32 bg-gray-100 rounded" />
+            <div className="h-16 bg-surface-container-low rounded-2xl" />
+            <div className="h-4 w-32 bg-surface-container-low rounded" />
           </div>
         </Container>
       </section>
@@ -30,15 +32,16 @@ export default function MyPage() {
 
   if (!user) {
     return (
-      <section className="pt-16">
+      <section>
+        <EditorialHeadline title="My" subtitle="나의 공간" />
         <Container>
           <div className="text-center py-16">
-            <p className="text-gray-500 text-sm mb-6">
+            <p className="text-on-surface-variant text-sm mb-6">
               로그인하고 좋아하는 아티스트를 구독하세요
             </p>
             <Link
               href={`${API_URL}/auth/kakao`}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#FEE500] text-[#191919] text-sm font-medium rounded-md"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#FEE500] text-[#191919] text-sm font-bold rounded-xl"
             >
               카카오로 시작하기
             </Link>
@@ -49,11 +52,12 @@ export default function MyPage() {
   }
 
   return (
-    <section className="pt-8 pb-24">
+    <section className="pb-24">
+      <EditorialHeadline title="My" subtitle="나의 공간" />
       <Container>
         {/* 프로필 */}
-        <div className="flex items-center gap-4 mb-10">
-          <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+        <div className="bg-surface-container-low rounded-2xl p-6 flex items-center gap-4 mb-10">
+          <div className="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0 ring-1 ring-outline-variant/20">
             {user.profileImage ? (
               <img
                 src={user.profileImage}
@@ -61,14 +65,14 @@ export default function MyPage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-gray-400 text-lg">
+              <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-lg">
                 {user.nickname[0]}
-              </span>
+              </div>
             )}
           </div>
           <div>
-            <div className="font-semibold">{user.nickname}</div>
-            <div className="text-xs text-gray-400 mt-0.5">
+            <div className="font-headline font-bold text-primary">{user.nickname}</div>
+            <div className="text-xs text-on-surface-variant mt-0.5">
               {user.email || ""}
             </div>
           </div>
@@ -76,50 +80,50 @@ export default function MyPage() {
 
         {/* 구독 아티스트 */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold">
+          <h2 className="font-headline font-bold text-xl">
             내 구독{" "}
-            <span className="text-gray-300 font-normal">
+            <span className="text-on-surface-variant font-normal">
               {subscriptions.length}
             </span>
           </h2>
           <Link
             href="/search"
-            className="text-xs text-gray-400 hover:text-black transition-colors"
+            className="text-xs font-bold text-on-surface-variant hover:text-primary transition-colors"
           >
             + 추가
           </Link>
         </div>
 
         {subsLoading ? (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-x-6 gap-y-10">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="aspect-square bg-gray-100 rounded-md" />
-                <div className="h-3 w-16 bg-gray-100 rounded mt-2" />
+              <div key={i} className="animate-pulse flex flex-col items-center">
+                <div className="w-20 h-20 bg-surface-container-low rounded-full" />
+                <div className="h-3 w-16 bg-surface-container-low rounded mt-3" />
               </div>
             ))}
           </div>
         ) : subscriptions.length === 0 ? (
-          <div className="text-center py-16 border border-dashed border-gray-200 rounded-md">
-            <p className="text-gray-400 text-sm mb-4">
+          <div className="text-center py-16 bg-surface-container-low rounded-xl">
+            <p className="text-on-surface-variant text-sm mb-4">
               아직 구독한 아티스트가 없어요
             </p>
             <Link
               href="/search"
-              className="text-sm font-medium text-black underline underline-offset-4"
+              className="text-sm font-bold text-primary underline underline-offset-4"
             >
               아티스트 검색하기
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-x-6 gap-y-10">
             {subscriptions.map((sub) => (
               <Link
                 key={sub.id}
                 href={`/artist/${sub.artistId}`}
-                className="group"
+                className="flex flex-col items-center group"
               >
-                <div className="aspect-square bg-gray-50 rounded-md flex items-center justify-center overflow-hidden group-hover:opacity-80 transition-opacity">
+                <div className="w-20 h-20 rounded-full bg-surface-container-low overflow-hidden group-hover:scale-95 transition-transform duration-300">
                   {sub.imageUrl ? (
                     <img
                       src={sub.imageUrl}
@@ -127,20 +131,22 @@ export default function MyPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-gray-300 text-2xl">
+                    <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-xl">
                       {sub.name[0]}
-                    </span>
+                    </div>
                   )}
                 </div>
-                <div className="mt-2">
-                  <div className="text-xs font-medium truncate">{sub.name}</div>
+                <div className="mt-3 text-center">
+                  <div className="font-headline font-bold text-sm text-primary truncate max-w-[80px]">
+                    {sub.name}
+                  </div>
                   {sub.nameEn && (
-                    <div className="text-[10px] text-gray-400 truncate">
+                    <div className="text-[10px] uppercase tracking-widest text-on-surface-variant mt-1 truncate max-w-[80px]">
                       {sub.nameEn}
                     </div>
                   )}
                   {sub.concertCount > 0 && (
-                    <div className="text-[10px] text-gray-300 mt-0.5">
+                    <div className="text-[10px] text-on-surface-variant mt-0.5">
                       공연 {sub.concertCount}건
                     </div>
                   )}

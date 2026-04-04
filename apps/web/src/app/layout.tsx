@@ -1,9 +1,22 @@
 import type { Metadata, Viewport } from "next";
+import { Manrope, Inter } from "next/font/google";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "@/styles/globals.css";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { AuthProvider } from "@/components/layout/AuthProvider";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "공연알리미 - 좋아하는 아티스트의 공연을 놓치지 마세요",
@@ -24,8 +37,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko">
-      <body>
+    <html lang="ko" className={`${manrope.variable} ${inter.variable}`}>
+      <body className="bg-surface text-on-surface font-body">
         <AuthProvider>
           <Header />
           <main className="min-h-screen">{children}</main>
