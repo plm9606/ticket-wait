@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist: { id: string; name: string; nameEn: string | null } | null;
@@ -39,7 +39,7 @@ interface UpcomingForYouProps {
 }
 
 export function UpcomingForYou({ genre }: UpcomingForYouProps) {
-  const [concerts, setConcerts] = useState<Concert[]>([]);
+  const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,10 +47,10 @@ export function UpcomingForYou({ genre }: UpcomingForYouProps) {
       setLoading(true);
       try {
         const genreParam = genre ? `&genre=${genre}` : "";
-        const data = await api<{ items: Concert[] }>(
-          `/concerts?limit=10${genreParam}`
+        const data = await api<{ items: Performance[] }>(
+          `/performances?limit=10${genreParam}`
         );
-        setConcerts(data.items);
+        setPerformances(data.items);
       } catch {
         // ignore
       } finally {
@@ -86,37 +86,37 @@ export function UpcomingForYou({ genre }: UpcomingForYouProps) {
                 <div className="aspect-[4/5] rounded-2xl bg-surface-container-low animate-pulse" />
               </div>
             ))
-          : concerts.length === 0
+          : performances.length === 0
             ? (
               <div className="w-full text-center py-12">
                 <p className="text-on-surface-variant text-sm">공연이 없습니다</p>
               </div>
             )
-            : concerts.map((concert) => (
+            : performances.map((performance) => (
                 <Link
-                  key={concert.id}
-                  href={`/concerts/${concert.id}`}
+                  key={performance.id}
+                  href={`/concerts/${performance.id}`}
                   className="flex-shrink-0 w-[280px] group"
                 >
                   <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-surface-container-low mb-4">
-                    {concert.imageUrl ? (
+                    {performance.imageUrl ? (
                       <img
-                        src={concert.imageUrl}
-                        alt={concert.title}
+                        src={performance.imageUrl}
+                        alt={performance.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-primary-container to-primary flex items-center justify-center p-6">
                         <span className="text-white/80 font-headline font-bold text-lg text-center leading-tight">
-                          {concert.title}
+                          {performance.title}
                         </span>
                       </div>
                     )}
 
-                    {statusLabel(concert.status) && (
+                    {statusLabel(performance.status) && (
                       <div className="absolute top-4 left-4">
                         <span className="bg-primary/90 text-white text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-md uppercase tracking-tight">
-                          {statusLabel(concert.status)}
+                          {statusLabel(performance.status)}
                         </span>
                       </div>
                     )}
@@ -125,11 +125,11 @@ export function UpcomingForYou({ genre }: UpcomingForYouProps) {
 
                     <div className="absolute bottom-4 left-4 right-4">
                       <p className="text-white/80 text-xs font-semibold mb-1 uppercase tracking-wider">
-                        {formatDate(concert.startDate)}
-                        {concert.venue && ` · ${concert.venue}`}
+                        {formatDate(performance.startDate)}
+                        {performance.venue && ` · ${performance.venue}`}
                       </p>
                       <h3 className="text-white font-headline font-bold text-xl leading-tight line-clamp-2">
-                        {concert.title}
+                        {performance.title}
                       </h3>
                     </div>
                   </div>

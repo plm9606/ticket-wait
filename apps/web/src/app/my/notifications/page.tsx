@@ -10,7 +10,7 @@ import { api } from "@/lib/api";
 interface NotificationItem {
   id: string;
   type: string;
-  concert: {
+  performance: {
     id: string;
     title: string;
     source: string;
@@ -128,7 +128,7 @@ export default function NotificationsPage() {
           {notifications.map((n) => (
             <a
               key={n.id}
-              href={n.concert.sourceUrl}
+              href={n.performance.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => !n.read && markAsRead(n.id)}
@@ -136,10 +136,10 @@ export default function NotificationsPage() {
                 n.read ? "opacity-60" : ""
               }`}
             >
-              {n.concert.imageUrl && (
+              {n.performance.imageUrl && (
                 <div className="w-14 h-14 shrink-0 bg-surface-container rounded-xl overflow-hidden">
                   <img
-                    src={n.concert.imageUrl}
+                    src={n.performance.imageUrl}
                     alt=""
                     className="w-full h-full object-cover"
                   />
@@ -155,11 +155,11 @@ export default function NotificationsPage() {
                   </span>
                 </div>
                 <div className="text-sm font-bold tracking-tight text-on-surface leading-snug line-clamp-2">
-                  {n.concert.title}
+                  {n.performance.title}
                 </div>
-                {n.concert.artist && (
+                {n.performance.artist && (
                   <div className="text-xs text-on-surface-variant mt-0.5">
-                    {n.concert.artist.name}
+                    {n.performance.artist.name}
                   </div>
                 )}
               </div>

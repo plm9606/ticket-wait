@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist: { id: string; name: string; nameEn: string | null } | null;
@@ -33,7 +33,7 @@ interface PopularNearYouProps {
 }
 
 export function PopularNearYou({ genre }: PopularNearYouProps) {
-  const [concerts, setConcerts] = useState<Concert[]>([]);
+  const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,10 +41,10 @@ export function PopularNearYou({ genre }: PopularNearYouProps) {
       setLoading(true);
       try {
         const genreParam = genre ? `&genre=${genre}` : "";
-        const data = await api<{ items: Concert[] }>(
-          `/concerts?limit=4${genreParam}`
+        const data = await api<{ items: Performance[] }>(
+          `/performances?limit=4${genreParam}`
         );
-        setConcerts(data.items);
+        setPerformances(data.items);
       } catch {
         // ignore
       } finally {
@@ -90,30 +90,30 @@ export function PopularNearYou({ genre }: PopularNearYouProps) {
                 </div>
               </div>
             ))
-          : concerts.map((concert) => (
+          : performances.map((performance) => (
               <Link
-                key={concert.id}
-                href={`/concerts/${concert.id}`}
+                key={performance.id}
+                href={`/concerts/${performance.id}`}
                 className="group block bg-surface-container-lowest rounded-3xl overflow-hidden shadow-sm"
               >
                 <div className="aspect-[16/9] overflow-hidden relative">
-                  {concert.imageUrl ? (
+                  {performance.imageUrl ? (
                     <img
-                      src={concert.imageUrl}
-                      alt={concert.title}
+                      src={performance.imageUrl}
+                      alt={performance.title}
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-primary-container to-primary" />
                   )}
 
-                  {concert.startDate && (
+                  {performance.startDate && (
                     <div className="absolute top-6 left-6 flex flex-col items-center justify-center w-14 h-16 bg-white/90 backdrop-blur rounded-xl">
                       <span className="text-[10px] font-black uppercase text-on-surface-variant leading-none mb-1">
-                        {formatMonth(concert.startDate)}
+                        {formatMonth(performance.startDate)}
                       </span>
                       <span className="text-2xl font-black text-primary leading-none">
-                        {formatDay(concert.startDate)}
+                        {formatDay(performance.startDate)}
                       </span>
                     </div>
                   )}
@@ -121,9 +121,9 @@ export function PopularNearYou({ genre }: PopularNearYouProps) {
 
                 <div className="p-8">
                   <h3 className="font-headline font-bold text-2xl tracking-tight mb-2">
-                    {concert.title}
+                    {performance.title}
                   </h3>
-                  {concert.venue && (
+                  {performance.venue && (
                     <div className="flex items-center gap-2 text-on-surface-variant font-medium">
                       <svg
                         width="14"
@@ -133,14 +133,14 @@ export function PopularNearYou({ genre }: PopularNearYouProps) {
                       >
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                       </svg>
-                      <span className="text-sm">{concert.venue}</span>
+                      <span className="text-sm">{performance.venue}</span>
                     </div>
                   )}
 
-                  {concert.artist && (
+                  {performance.artist && (
                     <div className="pt-6 mt-4 border-t border-outline-variant/10 flex items-center gap-4">
                       <span className="text-xs font-semibold text-on-surface-variant">
-                        {concert.artist.name}
+                        {performance.artist.name}
                       </span>
                     </div>
                   )}

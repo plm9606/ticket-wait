@@ -8,7 +8,7 @@ import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { API_URL } from "@/lib/constants";
 import { api } from "@/lib/api";
 
-interface ConcertDetail {
+interface PerformanceDetail {
   id: string;
   title: string;
   venue: string | null;
@@ -102,17 +102,17 @@ export default function ConcertDetailPage({
   const { id } = use(params);
   const { user } = useAuth();
   const { isSubscribed, subscribe, unsubscribe, fetch: fetchSubs } = useSubscriptions();
-  const [concert, setConcert] = useState<ConcertDetail | null>(null);
+  const [performance, setPerformance] = useState<PerformanceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await api<ConcertDetail>(`/concerts/${id}`);
-        setConcert(data);
+        const data = await api<PerformanceDetail>(`/performances/${id}`);
+        setPerformance(data);
       } catch {
-        setConcert(null);
+        setPerformance(null);
       } finally {
         setLoading(false);
       }
@@ -122,13 +122,13 @@ export default function ConcertDetailPage({
   }, [id, user, fetchSubs]);
 
   const handleToggle = async () => {
-    if (!concert?.artist || toggling) return;
+    if (!performance?.artist || toggling) return;
     setToggling(true);
     try {
-      if (isSubscribed(concert.artist.id)) {
-        await unsubscribe(concert.artist.id);
+      if (isSubscribed(performance.artist.id)) {
+        await unsubscribe(performance.artist.id);
       } else {
-        await subscribe(concert.artist.id);
+        await subscribe(performance.artist.id);
       }
     } catch {
       // ignore
@@ -155,7 +155,7 @@ export default function ConcertDetailPage({
     );
   }
 
-  if (!concert) {
+  if (!performance) {
     return (
       <section className="pt-16">
         <Container>
@@ -173,17 +173,17 @@ export default function ConcertDetailPage({
     );
   }
 
-  const subscribed = concert.artist ? isSubscribed(concert.artist.id) : false;
-  const dday = getDday(concert.ticketOpenDate);
+  const subscribed = performance.artist ? isSubscribed(performance.artist.id) : false;
+  const dday = getDday(performance.ticketOpenDate);
 
   return (
     <section className="pb-24">
       {/* 풀블리드 히어로 */}
       <div className="relative w-full h-[60vh] min-h-[400px] bg-black overflow-hidden">
-        {concert.imageUrl ? (
+        {performance.imageUrl ? (
           <img
-            src={concert.imageUrl}
-            alt={concert.title}
+            src={performance.imageUrl}
+            alt={performance.title}
             className="w-full h-full object-cover opacity-70 grayscale"
           />
         ) : (
@@ -193,16 +193,16 @@ export default function ConcertDetailPage({
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
           <div className="max-w-[720px] mx-auto">
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-white text-[11px] font-semibold tracking-widest uppercase">
-              {genreLabel(concert.genre)}
+              {genreLabel(performance.genre)}
             </span>
             <h1 className="mt-3 text-4xl md:text-6xl font-black tracking-tighter leading-none text-white">
-              {concert.title}
+              {performance.title}
             </h1>
             <div className="mt-4 flex flex-wrap gap-5 text-white/80 text-sm">
-              {concert.startDate && (
-                <span>{formatDate(concert.startDate)}</span>
+              {performance.startDate && (
+                <span>{formatDate(performance.startDate)}</span>
               )}
-              {concert.venue && <span>{concert.venue}</span>}
+              {performance.venue && <span>{performance.venue}</span>}
             </div>
           </div>
         </div>
@@ -219,12 +219,12 @@ export default function ConcertDetailPage({
               <div className="flex items-center gap-2 mt-1">
                 <div className="w-2 h-2 rounded-full bg-gray-900 animate-pulse" />
                 <span className="text-xl font-bold tracking-tight">
-                  {statusLabel(concert.status)}
+                  {statusLabel(performance.status)}
                 </span>
               </div>
             </div>
             <div className="flex gap-3">
-              {concert.artist && (
+              {performance.artist && (
                 user ? (
                   <button
                     onClick={handleToggle}
@@ -251,7 +251,7 @@ export default function ConcertDetailPage({
                 )
               )}
               <a
-                href={concert.sourceUrl}
+                href={performance.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 px-8 py-3.5 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors shadow-lg"
@@ -263,13 +263,13 @@ export default function ConcertDetailPage({
         </div>
 
         {/* 티켓 오픈일 */}
-        {concert.ticketOpenDate && (
+        {performance.ticketOpenDate && (
           <div className="mt-10 py-8 border-t border-gray-200">
             <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
               Ticket Open
             </span>
             <p className="text-2xl font-bold tracking-tight mt-1">
-              {formatDate(concert.ticketOpenDate)}
+              {formatDate(performance.ticketOpenDate)}
             </p>
             {dday && (
               <p className="text-sm text-gray-400 mt-1">{dday}</p>
@@ -279,12 +279,12 @@ export default function ConcertDetailPage({
 
         {/* 공연 정보 */}
         <div className="grid grid-cols-2 gap-x-8 gap-y-6 py-8 border-t border-gray-100">
-          {concert.venue && (
+          {performance.venue && (
             <div>
               <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
                 Venue
               </span>
-              <p className="text-sm text-gray-800 mt-1">{concert.venue}</p>
+              <p className="text-sm text-gray-800 mt-1">{performance.venue}</p>
             </div>
           )}
           <div>
@@ -292,7 +292,7 @@ export default function ConcertDetailPage({
               Source
             </span>
             <p className="text-sm text-gray-800 mt-1">
-              {sourceLabel(concert.source)}
+              {sourceLabel(performance.source)}
             </p>
           </div>
           <div className="col-span-2">
@@ -300,53 +300,53 @@ export default function ConcertDetailPage({
               Date
             </span>
             <p className="text-sm text-gray-800 mt-1">
-              {formatDate(concert.startDate)}
-              {concert.endDate && concert.endDate !== concert.startDate
-                ? ` — ${formatDate(concert.endDate)}`
+              {formatDate(performance.startDate)}
+              {performance.endDate && performance.endDate !== performance.startDate
+                ? ` — ${formatDate(performance.endDate)}`
                 : ""}
             </p>
           </div>
         </div>
 
         {/* 아티스트 섹션 */}
-        {concert.artist && (
+        {performance.artist && (
           <div className="border-t border-gray-100 pt-10 pb-4">
             <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
               Artist
             </span>
             <div className="flex items-center gap-4 mt-6">
               <Link
-                href={`/artist/${concert.artist.id}`}
+                href={`/artist/${performance.artist.id}`}
                 className="shrink-0"
               >
                 <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
-                  {concert.artist.imageUrl ? (
+                  {performance.artist.imageUrl ? (
                     <img
-                      src={concert.artist.imageUrl}
-                      alt={concert.artist.name}
+                      src={performance.artist.imageUrl}
+                      alt={performance.artist.name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <span className="text-gray-300 text-lg">
-                      {concert.artist.name[0]}
+                      {performance.artist.name[0]}
                     </span>
                   )}
                 </div>
               </Link>
               <div className="flex-1 min-w-0">
                 <Link
-                  href={`/artist/${concert.artist.id}`}
+                  href={`/artist/${performance.artist.id}`}
                   className="font-bold text-[15px] hover:underline underline-offset-4"
                 >
-                  {concert.artist.name}
+                  {performance.artist.name}
                 </Link>
-                {concert.artist.nameEn && (
+                {performance.artist.nameEn && (
                   <p className="text-[11px] text-gray-400 tracking-wide mt-0.5">
-                    {concert.artist.nameEn}
+                    {performance.artist.nameEn}
                   </p>
                 )}
                 <p className="text-[11px] text-gray-300 mt-0.5">
-                  구독자 {concert.artist.subscriberCount}명
+                  구독자 {performance.artist.subscriberCount}명
                 </p>
               </div>
               <div className="shrink-0">

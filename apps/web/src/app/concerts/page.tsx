@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { Container } from "@/components/layout/Container";
 import { EditorialHeadline } from "@/components/shared/EditorialHeadline";
 import { CategoryChips } from "@/components/home/CategoryChips";
-import { ConcertListCard } from "@/components/shared/ConcertListCard";
+import { PerformanceListCard } from "@/components/shared/PerformanceListCard";
 import { api } from "@/lib/api";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist: { id: string; name: string; nameEn: string | null } | null;
@@ -21,26 +21,26 @@ interface Concert {
   status: string;
 }
 
-interface ConcertListResponse {
-  items: Concert[];
+interface PerformanceListResponse {
+  items: Performance[];
   nextCursor: string | null;
 }
 
 export default function ConcertsPage() {
-  const [concerts, setConcerts] = useState<Concert[]>([]);
+  const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(true);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [genre, setGenre] = useState("");
 
-  const loadConcerts = useCallback(async (nextCursor?: string, genreFilter?: string) => {
+  const loadPerformances = useCallback(async (nextCursor?: string, genreFilter?: string) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ limit: "20" });
       if (nextCursor) params.set("cursor", nextCursor);
       if (genreFilter) params.set("genre", genreFilter);
-      const data = await api<ConcertListResponse>(`/concerts?${params}`);
-      setConcerts((prev) => nextCursor ? [...prev, ...data.items] : data.items);
+      const data = await api<PerformanceListResponse>(`/performances?${params}`);
+      setPerformances((prev) => nextCursor ? [...prev, ...data.items] : data.items);
       setCursor(data.nextCursor);
       setHasMore(!!data.nextCursor);
     } catch {
@@ -51,10 +51,10 @@ export default function ConcertsPage() {
   }, []);
 
   useEffect(() => {
-    setConcerts([]);
+    setPerformances([]);
     setCursor(null);
-    loadConcerts(undefined, genre);
-  }, [loadConcerts, genre]);
+    loadPerformances(undefined, genre);
+  }, [loadPerformances, genre]);
 
   return (
     <section className="pb-24">
@@ -63,15 +63,15 @@ export default function ConcertsPage() {
       <CategoryChips genre={genre} onSelect={setGenre} />
 
       <Container>
-        {concerts.length === 0 && !loading && (
+        {performances.length === 0 && !loading && (
           <div className="text-center py-16">
             <p className="text-on-surface-variant text-sm">등록된 공연이 없습니다</p>
           </div>
         )}
 
         <div className="space-y-3">
-          {concerts.map((concert) => (
-            <ConcertListCard key={concert.id} concert={concert} />
+          {performances.map((performance) => (
+            <PerformanceListCard key={performance.id} performance={performance} />
           ))}
         </div>
 
@@ -91,7 +91,7 @@ export default function ConcertsPage() {
 
         {hasMore && !loading && (
           <button
-            onClick={() => cursor && loadConcerts(cursor, genre)}
+            onClick={() => cursor && loadPerformances(cursor, genre)}
             className="w-full mt-6 py-3.5 text-sm font-medium text-on-surface-variant bg-surface-container-high rounded-xl hover:bg-surface-variant transition-colors"
           >
             더 보기

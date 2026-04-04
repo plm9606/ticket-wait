@@ -3,13 +3,13 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
-import { ConcertListCard } from "@/components/shared/ConcertListCard";
+import { PerformanceListCard } from "@/components/shared/PerformanceListCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { API_URL } from "@/lib/constants";
 import { api } from "@/lib/api";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   venue: string | null;
@@ -28,7 +28,7 @@ interface ArtistDetail {
   aliases: string[];
   imageUrl: string | null;
   subscriberCount: number;
-  concerts: Concert[];
+  performances: Performance[];
 }
 
 export default function ArtistDetailPage({
@@ -173,18 +173,18 @@ export default function ArtistDetailPage({
           <h2 className="font-headline font-bold text-xl mb-6">
             공연{" "}
             <span className="text-on-surface-variant font-normal">
-              {artist.concerts.length}
+              {artist.performances.length}
             </span>
           </h2>
 
-          {artist.concerts.length === 0 ? (
+          {artist.performances.length === 0 ? (
             <div className="text-center py-12 bg-surface-container-low rounded-xl">
               <p className="text-on-surface-variant text-sm">등록된 공연이 없습니다</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {artist.concerts.map((concert) => (
-                <ConcertListCard key={concert.id} concert={concert} />
+              {artist.performances.map((performance) => (
+                <PerformanceListCard key={performance.id} performance={performance} />
               ))}
             </div>
           )}

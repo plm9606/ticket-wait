@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist?: { id: string; name: string; nameEn: string | null } | null;
@@ -34,17 +34,17 @@ function formatDate(dateStr: string | null) {
   return d.toLocaleDateString("ko-KR", { month: "long", day: "numeric" });
 }
 
-export function ConcertListCard({ concert }: { concert: Concert }) {
+export function PerformanceListCard({ performance }: { performance: Performance }) {
   return (
     <Link
-      href={`/concerts/${concert.id}`}
+      href={`/concerts/${performance.id}`}
       className="bg-surface-container-lowest p-3 rounded-xl group hover:bg-white transition-colors flex gap-4"
     >
-      {concert.imageUrl ? (
+      {performance.imageUrl ? (
         <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-container-low">
           <img
-            src={concert.imageUrl}
-            alt={concert.title}
+            src={performance.imageUrl}
+            alt={performance.title}
             className="w-full h-full object-cover"
           />
         </div>
@@ -53,32 +53,32 @@ export function ConcertListCard({ concert }: { concert: Concert }) {
       )}
       <div className="flex-1 min-w-0">
         <p className="font-bold text-sm tracking-tight text-on-surface line-clamp-2">
-          {concert.title}
+          {performance.title}
         </p>
-        {concert.artist && (
+        {performance.artist && (
           <p className="text-xs text-on-surface-variant mt-1">
-            {concert.artist.name}
+            {performance.artist.name}
           </p>
         )}
         <div className="flex items-center gap-2 mt-1">
-          {concert.venue && (
+          {performance.venue && (
             <span className="text-xs text-on-surface-variant truncate">
-              {concert.venue}
+              {performance.venue}
             </span>
           )}
-          {concert.startDate && (
+          {performance.startDate && (
             <span className="text-xs text-on-surface-variant">
-              {formatDate(concert.startDate)}
+              {formatDate(performance.startDate)}
             </span>
           )}
         </div>
         <div className="flex items-center gap-2 mt-1.5">
           <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-            {SOURCE_LABELS[concert.source] ?? concert.source}
+            {SOURCE_LABELS[performance.source] ?? performance.source}
           </span>
-          {concert.genre && concert.genre !== "CONCERT" && (
+          {performance.genre && performance.genre !== "CONCERT" && (
             <span className="bg-secondary-container text-on-secondary-container rounded-full px-2 py-0.5 text-[10px] font-bold">
-              {GENRE_LABELS[concert.genre] ?? concert.genre}
+              {GENRE_LABELS[performance.genre] ?? performance.genre}
             </span>
           )}
         </div>

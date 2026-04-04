@@ -9,7 +9,7 @@ interface SubscribedArtist {
   name: string;
   nameEn: string | null;
   imageUrl: string | null;
-  concertCount: number;
+  performanceCount: number;
   subscribedAt: string;
 }
 
