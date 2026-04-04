@@ -4,10 +4,10 @@ import { env } from "../config/env.js";
 const KAKAO_AUTH_URL = "https://kauth.kakao.com";
 const KAKAO_API_URL = "https://kapi.kakao.com";
 
-export function getAuthorizationUrl(): string {
+export function getAuthorizationUrl(redirectUri?: string): string {
   const params = new URLSearchParams({
     client_id: env.KAKAO_REST_API_KEY,
-    redirect_uri: env.KAKAO_REDIRECT_URI,
+    redirect_uri: redirectUri || env.KAKAO_REDIRECT_URI,
     response_type: "code",
   });
   return `${KAKAO_AUTH_URL}/oauth/authorize?${params}`;
@@ -21,7 +21,8 @@ interface KakaoTokenResponse {
 }
 
 export async function exchangeCode(
-  code: string
+  code: string,
+  redirectUri?: string
 ): Promise<KakaoTokenResponse> {
   const { data } = await axios.post<KakaoTokenResponse>(
     `${KAKAO_AUTH_URL}/oauth/token`,
@@ -29,7 +30,7 @@ export async function exchangeCode(
       grant_type: "authorization_code",
       client_id: env.KAKAO_REST_API_KEY,
       client_secret: env.KAKAO_CLIENT_SECRET,
-      redirect_uri: env.KAKAO_REDIRECT_URI,
+      redirect_uri: redirectUri || env.KAKAO_REDIRECT_URI,
       code,
     }),
     { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
