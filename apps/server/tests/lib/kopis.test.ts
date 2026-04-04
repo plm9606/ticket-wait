@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import axios from "axios";
 
 vi.mock("axios");
-vi.mock("../config/env.js", () => ({
+vi.mock("../../src/config/env.js", () => ({
   env: { KOPIS_SERVICE_KEY: "test-service-key" },
 }));
 
@@ -153,7 +153,7 @@ const FACILITY_DETAIL_XML = `<?xml version="1.0" encoding="UTF-8"?>
 
 // import는 mock 이후에
 const { listPerformances, getPerformance, listFacilities, getFacility } =
-  await import("./kopis.js");
+  await import("../../src/lib/kopis.js");
 
 describe("kopis", () => {
   beforeEach(() => {
@@ -371,13 +371,13 @@ describe("kopis", () => {
 
   describe("인증", () => {
     it("KOPIS_SERVICE_KEY가 없으면 에러를 던진다", async () => {
-      vi.doMock("../config/env.js", () => ({
+      vi.doMock("../../src/config/env.js", () => ({
         env: { KOPIS_SERVICE_KEY: "" },
       }));
 
       // 모듈 캐시를 무효화하여 빈 키로 재로드
       const { listPerformances: freshListPerformances } = await import(
-        /* @vite-ignore */ "./kopis.js?nocache=" + Date.now()
+        /* @vite-ignore */ "../../src/lib/kopis.js?nocache=" + Date.now()
       );
 
       await expect(
