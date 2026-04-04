@@ -52,7 +52,7 @@ export async function mockApi<T>(
 
   const performanceDetailMatch = pathname.match(/^\/performances\/([^/]+)$/);
   if (performanceDetailMatch && method === "GET") {
-    return getPerformanceById(performanceDetailMatch[1]) as T;
+    return getPerformanceById(Number(performanceDetailMatch[1])) as T;
   }
 
   // --- Artists ---
@@ -63,7 +63,7 @@ export async function mockApi<T>(
 
   const artistDetailMatch = pathname.match(/^\/artists\/([^/]+)$/);
   if (artistDetailMatch && method === "GET") {
-    return getArtistById(artistDetailMatch[1]) as T;
+    return getArtistById(Number(artistDetailMatch[1])) as T;
   }
 
   // --- Subscriptions ---
@@ -73,19 +73,19 @@ export async function mockApi<T>(
 
   if (pathname === "/subscriptions" && method === "POST") {
     const body = options?.body ? JSON.parse(options.body as string) : {};
-    return addSubscription(body.artistId) as T;
+    return addSubscription(Number(body.artistId)) as T;
   }
 
   const unsubscribeMatch = pathname.match(/^\/subscriptions\/([^/]+)$/);
   if (unsubscribeMatch && method === "DELETE") {
-    return removeSubscription(unsubscribeMatch[1]) as T;
+    return removeSubscription(Number(unsubscribeMatch[1])) as T;
   }
 
   const checkSubMatch = pathname.match(
     /^\/subscriptions\/check\/([^/]+)$/
   );
   if (checkSubMatch && method === "GET") {
-    return checkSubscription(checkSubMatch[1]) as T;
+    return checkSubscription(Number(checkSubMatch[1])) as T;
   }
 
   // --- Notifications ---
@@ -101,7 +101,7 @@ export async function mockApi<T>(
 
   const readNotifMatch = pathname.match(/^\/notifications\/([^/]+)\/read$/);
   if (readNotifMatch && method === "PATCH") {
-    return markNotificationRead(readNotifMatch[1]) as T;
+    return markNotificationRead(Number(readNotifMatch[1])) as T;
   }
 
   if (pathname === "/notifications/register-token" && method === "POST") {

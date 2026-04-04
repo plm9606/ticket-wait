@@ -111,9 +111,9 @@ export function buildDateWindows(): Array<{ stdate: string; eddate: string }> {
 
 // ─── Venue Upsert ────────────────────────────────────────────────────────────
 
-const venueCache = new Map<string, string>(); // kopisId → venueId
+const venueCache = new Map<string, number>(); // kopisId → venueId
 
-async function upsertVenue(mt10id: string, fallbackName: string): Promise<string> {
+async function upsertVenue(mt10id: string, fallbackName: string): Promise<number> {
   const cached = venueCache.get(mt10id);
   if (cached) return cached;
 
@@ -155,7 +155,7 @@ export function parseCastNames(prfcast: string | null | undefined): string[] {
 
 async function matchArtistForPerformance(
   detail: PerformanceDetail
-): Promise<string | null> {
+): Promise<number | null> {
   // 1. prfcast 파싱된 이름으로 시도
   const castNames = parseCastNames(detail.prfcast);
   for (const name of castNames) {
@@ -170,17 +170,17 @@ async function matchArtistForPerformance(
 // ─── Performance Upsert ──────────────────────────────────────────────────────
 
 interface UpsertResult {
-  newIds: string[];
+  newIds: number[];
   updatedCount: number;
 }
 
 async function upsertPerformances(
   detail: PerformanceDetail,
   genre: PerformanceGenre,
-  artistId: string | null,
-  venueId: string | null
+  artistId: number | null,
+  venueId: number | null
 ): Promise<UpsertResult> {
-  const newIds: string[] = [];
+  const newIds: number[] = [];
   let updatedCount = 0;
 
   // relates에서 인식 가능한 예매처 추출
@@ -365,7 +365,7 @@ export async function syncPerformances(): Promise<void> {
     let totalFound = 0;
     let totalNew = 0;
     let totalUpdated = 0;
-    const allNewIds: string[] = [];
+    const allNewIds: number[] = [];
 
     const windows = buildDateWindows();
 
@@ -396,7 +396,7 @@ export async function syncPerformances(): Promise<void> {
             const artistId = await matchArtistForPerformance(detail);
 
             // Venue
-            let venueId: string | null = null;
+            let venueId: number | null = null;
             if (detail.mt10id) {
               venueId = await upsertVenue(detail.mt10id, detail.fcltynm);
             }

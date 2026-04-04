@@ -28,7 +28,7 @@ export default async function performanceRoutes(fastify: FastifyInstance) {
       },
       orderBy: { createdAt: "desc" },
       take: take + 1,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      ...(cursor ? { cursor: { id: Number(cursor) }, skip: 1 } : {}),
     });
 
     const hasMore = performances.length > take;
@@ -58,7 +58,7 @@ export default async function performanceRoutes(fastify: FastifyInstance) {
     "/performances/:id",
     async (request, reply) => {
       const performance = await prisma.performance.findUnique({
-        where: { id: request.params.id },
+        where: { id: Number(request.params.id) },
         include: {
           artist: {
             select: {
@@ -108,7 +108,7 @@ export default async function performanceRoutes(fastify: FastifyInstance) {
   fastify.get<{ Params: { id: string }; Querystring: { limit?: string } }>(
     "/artists/:id/performances",
     async (request, reply) => {
-      const { id } = request.params;
+      const id = Number(request.params.id);
       const take = Math.min(Number(request.query.limit) || 20, 50);
 
       const artist = await prisma.artist.findUnique({ where: { id } });
@@ -154,7 +154,7 @@ export default async function performanceRoutes(fastify: FastifyInstance) {
         },
         orderBy: { createdAt: "desc" },
         take: take + 1,
-        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        ...(cursor ? { cursor: { id: Number(cursor) }, skip: 1 } : {}),
       });
 
       const hasMore = performances.length > take;

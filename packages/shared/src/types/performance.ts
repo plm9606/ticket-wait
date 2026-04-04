@@ -17,7 +17,7 @@ export type PerformanceGenre =
   | "OTHER";
 
 export interface Venue {
-  id: string;
+  id: number;
   name: string;
   kopisId: string;
   address: string | null;
@@ -33,10 +33,10 @@ export interface Venue {
 }
 
 export interface Performance {
-  id: string;
+  id: number;
   title: string;
-  artistId: string | null;
-  venueId: string | null;
+  artistId: number | null;
+  venueId: number | null;
   startDate: Date | null;
   endDate: Date | null;
   ticketOpenDate: Date | null;

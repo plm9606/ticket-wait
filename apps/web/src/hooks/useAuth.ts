@@ -4,7 +4,7 @@ import { create } from "zustand";
 import { api } from "@/lib/api";
 
 interface User {
-  id: string;
+  id: number;
   nickname: string;
   email: string | null;
   profileImage: string | null;

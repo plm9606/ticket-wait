@@ -10,7 +10,7 @@ import { API_URL } from "@/lib/constants";
 import { api } from "@/lib/api";
 
 interface Performance {
-  id: string;
+  id: number;
   title: string;
   venue: string | null;
   startDate: string | null;
@@ -22,7 +22,7 @@ interface Performance {
 }
 
 interface ArtistDetail {
-  id: string;
+  id: number;
   name: string;
   nameEn: string | null;
   aliases: string[];

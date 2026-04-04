@@ -18,7 +18,7 @@ import { colors } from "@/theme/colors";
 import { containerPadding } from "@/theme/spacing";
 
 interface Performance {
-  id: string;
+  id: number;
   title: string;
   venue: string | null;
   startDate: string | null;
@@ -31,7 +31,7 @@ interface Performance {
 }
 
 interface ArtistDetail {
-  id: string;
+  id: number;
   name: string;
   nameEn: string | null;
   aliases: string[];

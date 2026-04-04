@@ -8,15 +8,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 
 interface NotificationItem {
-  id: string;
+  id: number;
   type: string;
   performance: {
-    id: string;
+    id: number;
     title: string;
     source: string;
     sourceUrl: string;
     imageUrl: string | null;
-    artist: { id: string; name: string; nameEn: string | null } | null;
+    artist: { id: number; name: string; nameEn: string | null } | null;
   };
   read: boolean;
   createdAt: string;
@@ -74,7 +74,7 @@ export default function NotificationsPage() {
     if (user) load();
   }, [user, load]);
 
-  const markAsRead = async (id: string) => {
+  const markAsRead = async (id: number) => {
     await api(`/notifications/${id}/read`, { method: "PATCH" });
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))

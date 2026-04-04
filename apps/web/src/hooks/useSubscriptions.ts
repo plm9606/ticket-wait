@@ -4,8 +4,8 @@ import { create } from "zustand";
 import { api } from "@/lib/api";
 
 interface SubscribedArtist {
-  id: string;
-  artistId: string;
+  id: number;
+  artistId: number;
   name: string;
   nameEn: string | null;
   imageUrl: string | null;
@@ -16,17 +16,17 @@ interface SubscribedArtist {
 interface SubscriptionState {
   subscriptions: SubscribedArtist[];
   loading: boolean;
-  subscribedIds: Set<string>;
+  subscribedIds: Set<number>;
   fetch: () => Promise<void>;
-  subscribe: (artistId: string) => Promise<void>;
-  unsubscribe: (artistId: string) => Promise<void>;
-  isSubscribed: (artistId: string) => boolean;
+  subscribe: (artistId: number) => Promise<void>;
+  unsubscribe: (artistId: number) => Promise<void>;
+  isSubscribed: (artistId: number) => boolean;
 }
 
 export const useSubscriptions = create<SubscriptionState>((set, get) => ({
   subscriptions: [],
   loading: false,
-  subscribedIds: new Set(),
+  subscribedIds: new Set<number>(),
 
   fetch: async () => {
     set({ loading: true });
@@ -42,7 +42,7 @@ export const useSubscriptions = create<SubscriptionState>((set, get) => ({
     }
   },
 
-  subscribe: async (artistId: string) => {
+  subscribe: async (artistId: number) => {
     await api("/subscriptions", {
       method: "POST",
       body: JSON.stringify({ artistId }),
@@ -51,12 +51,12 @@ export const useSubscriptions = create<SubscriptionState>((set, get) => ({
     await get().fetch();
   },
 
-  unsubscribe: async (artistId: string) => {
+  unsubscribe: async (artistId: number) => {
     await api(`/subscriptions/${artistId}`, { method: "DELETE" });
     await get().fetch();
   },
 
-  isSubscribed: (artistId: string) => {
+  isSubscribed: (artistId: number) => {
     return get().subscribedIds.has(artistId);
   },
 }));

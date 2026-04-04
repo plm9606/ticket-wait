@@ -10,13 +10,13 @@ import { mockUser } from "./data/user";
 
 let isLoggedIn = true;
 
-const subscribedArtistIds = new Set<string>([
-  "artist-1",
-  "artist-2",
-  "artist-4",
+const subscribedArtistIds = new Set<number>([
+  1,
+  2,
+  4,
 ]);
 
-const readNotificationIds = new Set<string>(
+const readNotificationIds = new Set<number>(
   mockNotifications.filter((n) => n.read).map((n) => n.id)
 );
 
@@ -60,7 +60,7 @@ export function getPerformances(
   };
 }
 
-export function getPerformanceById(id: string) {
+export function getPerformanceById(id: number) {
   const performance = mockPerformances.find((c) => c.id === id);
   if (!performance) throw new Error("Performance not found");
 
@@ -127,7 +127,7 @@ export function searchArtists(query: string) {
     .map(formatArtistSearchItem);
 }
 
-export function getArtistById(id: string) {
+export function getArtistById(id: number) {
   const artist = mockArtists.find((a) => a.id === id);
   if (!artist) throw new Error("Artist not found");
 
@@ -175,7 +175,7 @@ export function getSubscriptions() {
       ).length;
 
       return {
-        id: `sub-${artistId}`,
+        id: artistId * 100,
         artistId: artist.id,
         name: artist.name,
         nameEn: artist.nameEn,
@@ -187,21 +187,21 @@ export function getSubscriptions() {
     .filter(Boolean);
 }
 
-export function addSubscription(artistId: string) {
+export function addSubscription(artistId: number) {
   subscribedArtistIds.add(artistId);
   return {
-    id: `sub-${artistId}`,
+    id: artistId * 100,
     artistId,
     subscribedAt: new Date().toISOString(),
   };
 }
 
-export function removeSubscription(artistId: string) {
+export function removeSubscription(artistId: number) {
   subscribedArtistIds.delete(artistId);
   return { success: true };
 }
 
-export function checkSubscription(artistId: string) {
+export function checkSubscription(artistId: number) {
   return { subscribed: subscribedArtistIds.has(artistId) };
 }
 
@@ -242,7 +242,7 @@ export function getNotifications(limit: number, cursor: string | null) {
   };
 }
 
-export function markNotificationRead(id: string) {
+export function markNotificationRead(id: number) {
   readNotificationIds.add(id);
   return { success: true };
 }

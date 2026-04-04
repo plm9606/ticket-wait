@@ -124,7 +124,7 @@ const artists = [
 ];
 
 // 샘플 공연 데이터
-function generateConcerts(artistMap: Map<string, string>) {
+function generateConcerts(artistMap: Map<string, number>) {
   const venues = [
     "KSPO DOME", "올림픽공원 올림픽홀", "잠실종합운동장 주경기장",
     "고척스카이돔", "세종문화회관 대극장", "블루스퀘어 마스터카드홀",
@@ -226,25 +226,31 @@ function generateConcerts(artistMap: Map<string, string>) {
 async function main() {
   console.log("Seeding artists...");
 
-  const artistMap = new Map<string, string>();
+  const artistMap = new Map<string, number>();
 
   for (const artist of artists) {
-    const created = await prisma.artist.upsert({
-      where: {
-        id: `seed-${artist.nameEn?.toLowerCase().replace(/[^a-z0-9]/g, "-") ?? artist.name}`,
-      },
-      update: {
-        name: artist.name,
-        nameEn: artist.nameEn,
-        aliases: artist.aliases,
-      },
-      create: {
-        id: `seed-${artist.nameEn?.toLowerCase().replace(/[^a-z0-9]/g, "-") ?? artist.name}`,
-        name: artist.name,
-        nameEn: artist.nameEn,
-        aliases: artist.aliases,
-      },
+    const existing = await prisma.artist.findFirst({
+      where: { name: artist.name },
     });
+
+    let created;
+    if (existing) {
+      created = await prisma.artist.update({
+        where: { id: existing.id },
+        data: {
+          nameEn: artist.nameEn,
+          aliases: artist.aliases,
+        },
+      });
+    } else {
+      created = await prisma.artist.create({
+        data: {
+          name: artist.name,
+          nameEn: artist.nameEn,
+          aliases: artist.aliases,
+        },
+      });
+    }
     artistMap.set(artist.name, created.id);
   }
 

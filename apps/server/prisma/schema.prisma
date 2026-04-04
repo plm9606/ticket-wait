@@ -9,7 +9,7 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
+  id            Int            @id @default(autoincrement())
   kakaoId       String         @unique
   nickname      String
   email         String?
@@ -23,7 +23,7 @@ model User {
 }
 
 model Artist {
-  id            String   @id @default(cuid())
+  id            Int      @id @default(autoincrement())
   name          String
   nameEn        String?
   aliases       String[] @default([])
@@ -37,7 +37,7 @@ model Artist {
 }
 
 model Venue {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   name      String
   kopisId   String   @unique
   address   String?
@@ -55,11 +55,11 @@ model Venue {
 }
 
 model Performance {
-  id             String           @id @default(cuid())
+  id             Int              @id @default(autoincrement())
   title          String
-  artistId       String?
+  artistId       Int?
   artist         Artist?          @relation(fields: [artistId], references: [id])
-  venueId        String?
+  venueId        Int?
   venue          Venue?           @relation(fields: [venueId], references: [id])
   startDate      DateTime?
   endDate        DateTime?
@@ -82,10 +82,10 @@ model Performance {
 }
 
 model Subscription {
-  id        String   @id @default(cuid())
-  userId    String
+  id        Int      @id @default(autoincrement())
+  userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  artistId  String
+  artistId  Int
   artist    Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
@@ -93,8 +93,8 @@ model Subscription {
 }
 
 model FcmToken {
-  id        String   @id @default(cuid())
-  userId    String
+  id        Int      @id @default(autoincrement())
+  userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String   @unique
   device    String?
@@ -103,10 +103,10 @@ model FcmToken {
 }
 
 model Notification {
-  id            String           @id @default(cuid())
-  userId        String
+  id            Int              @id @default(autoincrement())
+  userId        Int
   user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  performanceId String
+  performanceId Int
   performance   Performance      @relation(fields: [performanceId], references: [id])
   type          NotificationType
   sentAt        DateTime         @default(now())
@@ -114,7 +114,7 @@ model Notification {
 }
 
 model SyncLog {
-  id           String      @id @default(cuid())
+  id           Int         @id @default(autoincrement())
   source       String
   startedAt    DateTime    @default(now())
   completedAt  DateTime?

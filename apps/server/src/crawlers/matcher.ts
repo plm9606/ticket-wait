@@ -3,7 +3,7 @@ import type { PerformanceGenre } from "@prisma/client";
 import { normalizeForMatch, removeConcertSuffixes } from "@concert-alert/shared";
 
 interface ArtistMatch {
-  id: string;
+  id: number;
   name: string;
   nameEn: string | null;
   aliases: string[];
@@ -41,7 +41,7 @@ export function clearArtistCache() {
  */
 export async function matchArtist(
   title: string
-): Promise<string | null> {
+): Promise<number | null> {
   const artists = await loadArtists();
   const normalizedTitle = normalizeForMatch(title);
   const cleanedTitle = normalizeForMatch(removeConcertSuffixes(title));
