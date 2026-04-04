@@ -1,0 +1,817 @@
+openapi: 3.0.0
+info:
+  title: KOPIS OPEN API
+  description: 공연예술통합전산망 OpenAPI 개발가이드 Version 4.0
+  version: "4.0"
+  license:
+    name: KOPIS Open Data
+servers:
+  - url: http://www.kopis.or.kr/openApi/restful
+    description: 운영환경 서버
+
+security:
+  - serviceKey: []
+
+paths:
+  /pblprfr:
+    get:
+      operationId: listPerformances
+      summary: 공연목록 조회 서비스
+      description: 조건에 맞는 공연 목록을 조회합니다.
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/stdate'
+        - $ref: '#/components/parameters/eddate'
+        - $ref: '#/components/parameters/cpage'
+        - $ref: '#/components/parameters/rows'
+        - $ref: '#/components/parameters/shcate'
+        - $ref: '#/components/parameters/shprfnm'
+        - $ref: '#/components/parameters/shprfnmfct'
+        - $ref: '#/components/parameters/prfplccd'
+        - $ref: '#/components/parameters/signgucode'
+        - $ref: '#/components/parameters/signgucodesub'
+        - $ref: '#/components/parameters/kidstate'
+        - $ref: '#/components/parameters/prfstate'
+        - $ref: '#/components/parameters/openrun'
+        - $ref: '#/components/parameters/afterdate'
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/PerformanceListResponse'
+
+  /pblprfr/{mt20id}:
+    get:
+      operationId: getPerformance
+      summary: 공연 상세 조회 서비스
+      description: 특정 공연의 상세 정보를 조회합니다.
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - name: mt20id
+          in: path
+          required: true
+          description: 공연 ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/PerformanceDetailResponse'
+
+  /prfplc:
+    get:
+      operationId: listFacilities
+      summary: 공연시설 목록 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/cpage'
+        - $ref: '#/components/parameters/rows'
+        - $ref: '#/components/parameters/shprfnmfct'
+        - $ref: '#/components/parameters/fcltychartr'
+        - $ref: '#/components/parameters/signgucode_facility'
+        - $ref: '#/components/parameters/signgucodesub_facility'
+        - $ref: '#/components/parameters/afterdate'
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/FacilityListResponse'
+
+  /prfplc/{mt10id}:
+    get:
+      operationId: getFacility
+      summary: 공연시설 상세 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - name: mt10id
+          in: path
+          required: true
+          description: 공연시설 ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/FacilityDetailResponse'
+
+  /mnfct:
+    get:
+      operationId: listProducers
+      summary: 기획/제작사 목록 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/cpage'
+        - $ref: '#/components/parameters/rows'
+        - name: entrpsnm
+          in: query
+          description: 기획/제작사 명 (URLEncoding)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/shcate'
+        - $ref: '#/components/parameters/afterdate'
+      responses:
+        '200':
+          description: 성공
+
+  /prfawad:
+    get:
+      operationId: listAwards
+      summary: 수상작 목록 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/stdate'
+        - $ref: '#/components/parameters/eddate'
+        - $ref: '#/components/parameters/cpage'
+        - $ref: '#/components/parameters/rows'
+        - $ref: '#/components/parameters/shcate'
+        - $ref: '#/components/parameters/shprfnm'
+        - $ref: '#/components/parameters/shprfnmfct'
+        - $ref: '#/components/parameters/prfplccd'
+        - $ref: '#/components/parameters/signgucode'
+        - $ref: '#/components/parameters/signgucodesub'
+        - $ref: '#/components/parameters/kidstate'
+        - $ref: '#/components/parameters/prfstate'
+        - $ref: '#/components/parameters/afterdate'
+      responses:
+        '200':
+          description: 성공
+
+  /prffest:
+    get:
+      operationId: listFestivals
+      summary: 축제 목록 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/stdate'
+        - $ref: '#/components/parameters/eddate'
+        - $ref: '#/components/parameters/cpage'
+        - $ref: '#/components/parameters/rows'
+        - $ref: '#/components/parameters/shcate'
+        - $ref: '#/components/parameters/shprfnm'
+        - $ref: '#/components/parameters/shprfnmfct'
+        - $ref: '#/components/parameters/prfplccd'
+        - $ref: '#/components/parameters/signgucode'
+        - $ref: '#/components/parameters/signgucodesub'
+        - $ref: '#/components/parameters/kidstate'
+        - $ref: '#/components/parameters/prfstate'
+        - $ref: '#/components/parameters/afterdate'
+      responses:
+        '200':
+          description: 성공
+
+  /prfper:
+    get:
+      operationId: listPlaywrights
+      summary: 극작가 목록 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/stdate'
+        - $ref: '#/components/parameters/eddate'
+        - $ref: '#/components/parameters/cpage'
+        - $ref: '#/components/parameters/rows'
+        - $ref: '#/components/parameters/shcate'
+        - $ref: '#/components/parameters/shprfnm'
+        - $ref: '#/components/parameters/shprfnmfct'
+        - $ref: '#/components/parameters/prfplccd'
+        - $ref: '#/components/parameters/signgucode'
+        - $ref: '#/components/parameters/signgucodesub'
+        - $ref: '#/components/parameters/kidstate'
+        - $ref: '#/components/parameters/prfstate'
+        - $ref: '#/components/parameters/afterdate'
+      responses:
+        '200':
+          description: 성공
+
+  /boxoffice:
+    get:
+      operationId: getBoxOffice
+      summary: 예매상황판 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/stdate'
+        - $ref: '#/components/parameters/eddate'
+        - name: date
+          in: query
+          required: true
+          description: 날짜 (YYYYMMDD)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/catecode'
+        - $ref: '#/components/parameters/area'
+        - $ref: '#/components/parameters/srchseatscale'
+      responses:
+        '200':
+          description: 성공
+
+  /boxStats:
+    get:
+      operationId: getBoxStats
+      summary: 예매통계 기간별 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/ststype'
+        - $ref: '#/components/parameters/stdate'
+        - $ref: '#/components/parameters/eddate'
+      responses:
+        '200':
+          description: 성공
+
+  /boxStatsCate:
+    get:
+      operationId: getBoxStatsByGenre
+      summary: 예매통계 장르별 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/stdate'
+        - $ref: '#/components/parameters/eddate'
+        - name: catecode
+          in: query
+          description: 장르 구분 코드
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 성공
+
+  /boxStatsTime:
+    get:
+      operationId: getBoxStatsByTime
+      summary: 예매통계 시간대별 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/stdate'
+        - $ref: '#/components/parameters/eddate'
+      responses:
+        '200':
+          description: 성공
+
+  /boxStatsPrice:
+    get:
+      operationId: getBoxStatsByPrice
+      summary: 예매통계 가격대별 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/stdate'
+        - $ref: '#/components/parameters/eddate'
+      responses:
+        '200':
+          description: 성공
+
+  /prfstsTotal:
+    get:
+      operationId: getPerformanceStatsByPeriod
+      summary: 공연통계 기간별 통계 목록 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/ststype_total'
+        - $ref: '#/components/parameters/stdate_stats'
+        - $ref: '#/components/parameters/eddate_stats'
+      responses:
+        '200':
+          description: 성공
+
+  /prfstsArea:
+    get:
+      operationId: getPerformanceStatsByArea
+      summary: 지역별 통계 목록 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/stdate_stats'
+        - $ref: '#/components/parameters/eddate_stats'
+      responses:
+        '200':
+          description: 성공
+
+  /prfstsCate:
+    get:
+      operationId: getPerformanceStatsByGenre
+      summary: 장르별 통계 목록 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/stdate_stats'
+        - $ref: '#/components/parameters/eddate_stats'
+      responses:
+        '200':
+          description: 성공
+
+  /prfstsPrfBy:
+    get:
+      operationId: getPerformanceStatsByPerformance
+      summary: 공연별 통계 목록 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/cpage'
+        - $ref: '#/components/parameters/rows'
+        - $ref: '#/components/parameters/stdate_stats'
+        - $ref: '#/components/parameters/eddate_stats'
+        - $ref: '#/components/parameters/shcate'
+        - $ref: '#/components/parameters/shprfnm'
+      responses:
+        '200':
+          description: 성공
+
+  /prfstsPrfByFct:
+    get:
+      operationId: getPerformanceStatsByFacility
+      summary: 공연시설별 통계 목록 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/cpage'
+        - $ref: '#/components/parameters/rows'
+        - $ref: '#/components/parameters/stdate_stats'
+        - $ref: '#/components/parameters/eddate_stats'
+        - name: sharea
+          in: query
+          description: 지역(시도)코드
+          schema:
+            type: string
+        - $ref: '#/components/parameters/shprfnmfct'
+      responses:
+        '200':
+          description: 성공
+
+  /prfstsPrice:
+    get:
+      operationId: getPerformanceStatsByPriceRange
+      summary: 가격대별 통계 목록 조회 서비스
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/stdate_stats'
+        - $ref: '#/components/parameters/eddate_stats'
+        - $ref: '#/components/parameters/shcate_required'
+      responses:
+        '200':
+          description: 성공
+
+components:
+  parameters:
+    service:
+      name: service
+      in: query
+      required: true
+      description: 인증 발급받은 서비스키
+      schema:
+        type: string
+        maxLength: 60
+    stdate:
+      name: stdate
+      in: query
+      required: true
+      description: 시작일 (YYYYMMDD)
+      schema:
+        type: string
+        maxLength: 8
+    eddate:
+      name: eddate
+      in: query
+      required: true
+      description: 종료일 (YYYYMMDD, 최대 31일)
+      schema:
+        type: string
+        maxLength: 8
+    stdate_stats:
+      name: stdate
+      in: query
+      required: true
+      description: 시작검색기간 (YYYYMMDD)
+      schema:
+        type: string
+        maxLength: 8
+    eddate_stats:
+      name: eddate
+      in: query
+      required: true
+      description: 종료검색기간 (YYYYMMDD, 최대 31일)
+      schema:
+        type: string
+        maxLength: 8
+    cpage:
+      name: cpage
+      in: query
+      required: true
+      description: 현재페이지
+      schema:
+        type: integer
+    rows:
+      name: rows
+      in: query
+      required: true
+      description: 페이지당 목록 수 (최대 100건)
+      schema:
+        type: integer
+    shcate:
+      name: shcate
+      in: query
+      description: "장르코드 (AAAA 연극, BBBC 무용, BBBE 대중무용, CCCA 클래식, CCCC 국악, CCCD 대중음악, EEEA 복합, EEEB 서커스/마술, GGGA 뮤지컬)"
+      schema:
+        type: string
+        enum: [AAAA, BBBC, BBBE, CCCA, CCCC, CCCD, EEEA, EEEB, GGGA]
+    shcate_required:
+      name: shcate
+      in: query
+      required: true
+      description: 장르코드 (필수)
+      schema:
+        type: string
+        enum: [AAAA, BBBC, BBBE, CCCA, CCCC, CCCD, EEEA, EEEB, GGGA]
+    shprfnm:
+      name: shprfnm
+      in: query
+      description: 공연명 (URLEncoding)
+      schema:
+        type: string
+        maxLength: 100
+    shprfnmfct:
+      name: shprfnmfct
+      in: query
+      description: 공연시설명 (URLEncoding)
+      schema:
+        type: string
+        maxLength: 100
+    prfplccd:
+      name: prfplccd
+      in: query
+      description: 공연장코드
+      schema:
+        type: string
+        maxLength: 15
+    signgucodesub:
+      name: signgucodesub
+      in: query
+      description: "지역(구군)코드 (4자리 예: 1111 서울특별시종로구)"
+      schema:
+        type: string
+        maxLength: 4
+    signgucode_facility:
+      name: signgucode
+      in: query
+      description: "지역(시도)코드 (4자리 명시, 실제는 2자리 행정표준코드)"
+      schema:
+        type: string
+    signgucodesub_facility:
+      name: signgucodesub
+      in: query
+      description: 지역(구군)코드 (4자리)
+      schema:
+        type: string
+    kidstate:
+      name: kidstate
+      in: query
+      description: "아동공연여부 (Y, 지정안하면 디폴트는 'N')"
+      schema:
+        type: string
+        enum: [Y, N]
+    prfstate:
+      name: prfstate
+      in: query
+      description: "공연상태코드 (01 공연예정, 02 공연중, 03 공연완료)"
+      schema:
+        type: string
+        enum: ['01', '02', '03']
+    openrun:
+      name: openrun
+      in: query
+      description: 오픈런여부 (Y)
+      schema:
+        type: string
+        enum: [Y]
+    afterdate:
+      name: afterdate
+      in: query
+      description: 해당일자 이후 등록/수정된 항목만 출력 (YYYYMMDD)
+      schema:
+        type: string
+        maxLength: 8
+    fcltychartr:
+      name: fcltychartr
+      in: query
+      description: "공연시설특성코드 (1 중앙정부, 2 문예회관, 3 기타(공공), 4 대학로, 5 민간(대학로 외), 6 기타(해외등), 7 기타(비공연장))"
+      schema:
+        type: string
+        enum: ['1', '2', '3', '4', '5', '6', '7']
+    catecode:
+      name: catecode
+      in: query
+      description: 예매상황판용 장르 구분 코드
+      schema:
+        type: string
+        enum: [AAAA, GGGA, CCCA, CCCC, CCCD, BBBC, BBBR, EEEB, EEEA, KID, OPEN]
+    catecode_multi:
+      name: catecode
+      in: query
+      description: "장르 구분 코드 (예: AAAA BBBB CCCA) 다중 입력 가능"
+      schema:
+        type: string
+        maxLength: 30
+    area:
+      name: area
+      in: query
+      description: "예매상황판용 지역(시도) 코드 (43/44 충청, 47/48 경상, 45/46 전라, UNI 대학로 포함)"
+      schema:
+        type: string
+        enum: ['11', '28', '30', '27', '29', '26', '31', '36', '41', '43/44', '47/48', '45/46', '51', '50', 'UNI']
+    signgucode:
+      name: signgucode
+      in: query
+      description: 지역(시도)코드 (행정표준코드 앞 2자리)
+      schema:
+        type: string
+        maxLength: 2
+        enum: ['11', '26', '27', '28', '29', '30', '31', '36', '41', '51', '43', '44', '45', '46', '47', '48', '50']
+    srchseatscale:
+      name: srchseatscale
+      in: query
+      description: "좌석수 코드 (0, 100, 300, 500, 1000, 5000, 10000)"
+      schema:
+        type: string
+        enum: ['0', '100', '300', '500', '1000', '5000', '10000']
+    ststype:
+      name: ststype
+      in: query
+      required: true
+      description: "요청형태 날짜코드 (month, week, day)"
+      schema:
+        type: string
+        enum: [month, week, day]
+    ststype_total:
+      name: ststype
+      in: query
+      required: true
+      description: "통계용 날짜코드 (day 일별, dayWeek 요일별)"
+      schema:
+        type: string
+        enum: [day, dayWeek]
+
+  securitySchemes:
+    serviceKey:
+      type: apiKey
+      in: query
+      name: service
+      description: 인증 발급받은 서비스키
+
+  schemas:
+    PerformanceListResponse:
+      type: object
+      xml:
+        name: dbs
+      properties:
+        db:
+          type: array
+          xml:
+            wrapped: false
+          items:
+            $ref: '#/components/schemas/PerformanceSummary'
+
+    PerformanceSummary:
+      type: object
+      xml:
+        name: db
+      properties:
+        mt20id:
+          type: string
+          description: 공연 ID
+        prfnm:
+          type: string
+          description: 공연명
+        prfpdfrom:
+          type: string
+          description: "공연 시작일 (YYYY.MM.DD)"
+        prfpdto:
+          type: string
+          description: "공연 종료일 (YYYY.MM.DD)"
+        fcltynm:
+          type: string
+          description: 공연시설명
+        poster:
+          type: string
+          description: 포스터 이미지 URL
+        area:
+          type: string
+          description: 지역
+        genrenm:
+          type: string
+          description: 장르명
+        openrun:
+          type: string
+          description: 오픈런 여부 (Y/N)
+        prfstate:
+          type: string
+          description: "공연상태 (공연예정, 공연중, 공연완료)"
+
+    PerformanceDetailResponse:
+      type: object
+      xml:
+        name: dbs
+      properties:
+        db:
+          type: array
+          xml:
+            wrapped: false
+          items:
+            $ref: '#/components/schemas/PerformanceDetail'
+
+    PerformanceDetail:
+      type: object
+      xml:
+        name: db
+      properties:
+        mt20id:
+          type: string
+          description: 공연 ID
+        prfnm:
+          type: string
+          description: 공연명
+        prfpdfrom:
+          type: string
+          description: 공연 시작일
+        prfpdto:
+          type: string
+          description: 공연 종료일
+        fcltynm:
+          type: string
+          description: 공연시설명
+        mt10id:
+          type: string
+          description: 공연시설 ID
+        prfcast:
+          type: string
+          description: 출연진
+        prfcrew:
+          type: string
+          description: 제작진
+        prfruntime:
+          type: string
+          description: 공연 런타임
+        prfage:
+          type: string
+          description: 관람연령
+        entrpsnmH:
+          type: string
+          description: 주최
+        entrpsnmS:
+          type: string
+          description: 주관
+        entrpsnmA:
+          type: string
+          description: 기획사
+        entrpsnmP:
+          type: string
+          description: 제작사
+        pcseguidance:
+          type: string
+          description: 티켓가격 안내
+        poster:
+          type: string
+          description: 포스터 이미지 URL
+        area:
+          type: string
+          description: 지역
+        genrenm:
+          type: string
+          description: 장르명
+        openrun:
+          type: string
+          description: 오픈런 여부 (Y/N)
+        prfstate:
+          type: string
+          description: 공연상태
+        styurls:
+          type: object
+          description: 소개 이미지 목록
+          properties:
+            styurl:
+              oneOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+        dtguidance:
+          type: string
+          description: 공연 일시 안내
+        relates:
+          type: object
+          description: 관련 링크 목록
+          properties:
+            relate:
+              oneOf:
+                - $ref: '#/components/schemas/RelateLink'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/RelateLink'
+
+    RelateLink:
+      type: object
+      properties:
+        relatenm:
+          type: string
+          description: 링크명 (예매 사이트명)
+        relateurl:
+          type: string
+          description: 링크 URL
+
+    FacilityListResponse:
+      type: object
+      xml:
+        name: dbs
+      properties:
+        db:
+          type: array
+          xml:
+            wrapped: false
+          items:
+            $ref: '#/components/schemas/FacilitySummary'
+
+    FacilitySummary:
+      type: object
+      xml:
+        name: db
+      properties:
+        mt10id:
+          type: string
+          description: 공연시설 ID
+        fcltynm:
+          type: string
+          description: 공연시설명
+        opende:
+          type: string
+          description: 개관연도
+        seatscale:
+          type: string
+          description: 좌석수
+        telno:
+          type: string
+          description: 전화번호
+        relateurl:
+          type: string
+          description: 웹사이트 URL
+        sidonm:
+          type: string
+          description: 시도명
+        gugunnm:
+          type: string
+          description: 구군명
+        fcltychartr:
+          type: string
+          description: 공연시설특성
+
+    FacilityDetailResponse:
+      type: object
+      xml:
+        name: dbs
+      properties:
+        db:
+          type: array
+          xml:
+            wrapped: false
+          items:
+            $ref: '#/components/schemas/FacilityDetail'
+
+    FacilityDetail:
+      type: object
+      xml:
+        name: db
+      allOf:
+        - $ref: '#/components/schemas/FacilitySummary'
+      properties:
+        adres:
+          type: string
+          description: 주소
+        la:
+          type: string
+          description: 위도
+        lo:
+          type: string
+          description: 경도
+        mt13s:
+          type: object
+          description: 공연장 목록
+          properties:
+            mt13:
+              oneOf:
+                - $ref: '#/components/schemas/Hall'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/Hall'
+
+    Hall:
+      type: object
+      properties:
+        mt13id:
+          type: string
+          description: 공연장 ID
+        prfplcnm:
+          type: string
+          description: 공연장명
+        seatscale:
+          type: string
+          description: 좌석수
