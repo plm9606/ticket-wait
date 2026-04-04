@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import type { ConcertGenre } from "@prisma/client";
+import type { PerformanceGenre } from "@prisma/client";
 import { normalizeForMatch, removeConcertSuffixes } from "@concert-alert/shared";
 
 interface ArtistMatch {
@@ -40,11 +40,11 @@ export function clearArtistCache() {
  * 우선순위: 정확한 이름 → 영문 이름 → 별명 → 정규화 매칭
  */
 export async function matchArtist(
-  concertTitle: string
+  title: string
 ): Promise<string | null> {
   const artists = await loadArtists();
-  const normalizedTitle = normalizeForMatch(concertTitle);
-  const cleanedTitle = normalizeForMatch(removeConcertSuffixes(concertTitle));
+  const normalizedTitle = normalizeForMatch(title);
+  const cleanedTitle = normalizeForMatch(removeConcertSuffixes(title));
 
   // 1. 한글 이름 정확 매칭 (길이 순 내림차순 - 더 긴 이름 우선)
   const sortedByNameLength = [...artists].sort(
@@ -71,7 +71,7 @@ export async function matchArtist(
     // 영문 이름이 짧은 경우(4자 이하) 단어 경계 체크
     if (normalizedEn.length <= 4) {
       const regex = new RegExp(`(?:^|[\\s\\[\\(\\-])${escapeRegex(artist.nameEn)}(?:$|[\\s\\]\\)\\-'"])`, "i");
-      if (regex.test(concertTitle)) {
+      if (regex.test(title)) {
         return artist.id;
       }
     } else if (normalizedTitle.includes(normalizedEn)) {
@@ -87,7 +87,7 @@ export async function matchArtist(
 
       if (normalizedAlias.length <= 4) {
         const regex = new RegExp(`(?:^|[\\s\\[\\(\\-])${escapeRegex(alias)}(?:$|[\\s\\]\\)\\-'"])`, "i");
-        if (regex.test(concertTitle)) {
+        if (regex.test(title)) {
           return artist.id;
         }
       } else if (normalizedTitle.includes(normalizedAlias)) {
@@ -177,9 +177,7 @@ export function extractArtistName(title: string): string | null {
 /**
  * 공연 제목에서 장르를 분류
  */
-export function classifyGenre(title: string): ConcertGenre {
-  const t = title.toLowerCase();
-
+export function classifyGenre(title: string): PerformanceGenre {
   // 뮤지컬
   if (/뮤지컬|musical/i.test(title)) return "MUSICAL";
 
@@ -210,10 +208,10 @@ export function classifyGenre(title: string): ConcertGenre {
  * DB의 미매칭 공연들에 대해 아티스트 매칭 실행
  * 매칭 실패 시 제목에서 아티스트 이름을 추출하여 새 아티스트 생성
  */
-export async function matchUnmatchedConcerts(): Promise<number> {
+export async function matchUnmatchedPerformances(): Promise<number> {
   clearArtistCache();
 
-  const unmatched = await prisma.concert.findMany({
+  const unmatched = await prisma.performance.findMany({
     where: { artistId: null },
     select: { id: true, title: true },
   });
@@ -221,13 +219,13 @@ export async function matchUnmatchedConcerts(): Promise<number> {
   let matched = 0;
   let created = 0;
 
-  for (const concert of unmatched) {
+  for (const perf of unmatched) {
     // 1. 기존 아티스트 매칭 시도
-    let artistId = await matchArtist(concert.title);
+    let artistId = await matchArtist(perf.title);
 
     // 2. 매칭 실패 시 아티스트 이름 추출 → 새 아티스트 생성
     if (!artistId) {
-      const extracted = extractArtistName(concert.title);
+      const extracted = extractArtistName(perf.title);
       if (extracted) {
         // 같은 이름의 아티스트가 이미 있는지 확인 (정규화 비교)
         const normalizedExtracted = normalizeForMatch(extracted);
@@ -250,15 +248,15 @@ export async function matchUnmatchedConcerts(): Promise<number> {
           });
           artistId = newArtist.id;
           created++;
-          clearArtistCache(); // 새 아티스트 추가됐으므로 캐시 초기화
+          clearArtistCache();
           console.log(`[Matcher] Created new artist: ${extracted}`);
         }
       }
     }
 
     if (artistId) {
-      await prisma.concert.update({
-        where: { id: concert.id },
+      await prisma.performance.update({
+        where: { id: perf.id },
         data: { artistId },
       });
       matched++;
@@ -266,35 +264,7 @@ export async function matchUnmatchedConcerts(): Promise<number> {
   }
 
   console.log(
-    `[Matcher] ${matched}/${unmatched.length} concerts matched (${created} new artists created)`
+    `[Matcher] ${matched}/${unmatched.length} performances matched (${created} new artists created)`
   );
   return matched;
-}
-
-/**
- * 기존 공연 중 장르가 기본값(CONCERT)인 것들을 재분류
- */
-export async function classifyUnclassifiedConcerts(): Promise<number> {
-  const concerts = await prisma.concert.findMany({
-    where: { genre: "CONCERT" },
-    select: { id: true, title: true },
-  });
-
-  let reclassified = 0;
-
-  for (const concert of concerts) {
-    const genre = classifyGenre(concert.title);
-    if (genre !== "CONCERT") {
-      await prisma.concert.update({
-        where: { id: concert.id },
-        data: { genre },
-      });
-      reclassified++;
-    }
-  }
-
-  if (reclassified > 0) {
-    console.log(`[Matcher] ${reclassified} concerts reclassified by genre`);
-  }
-  return reclassified;
 }

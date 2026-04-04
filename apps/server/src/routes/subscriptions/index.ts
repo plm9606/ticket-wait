@@ -18,7 +18,7 @@ export default async function subscriptionRoutes(fastify: FastifyInstance) {
             name: true,
             nameEn: true,
             imageUrl: true,
-            _count: { select: { concerts: true } },
+            _count: { select: { performances: true } },
           },
         },
       },
@@ -31,7 +31,7 @@ export default async function subscriptionRoutes(fastify: FastifyInstance) {
       name: s.artist.name,
       nameEn: s.artist.nameEn,
       imageUrl: s.artist.imageUrl,
-      concertCount: s.artist._count.concerts,
+      performanceCount: s.artist._count.performances,
       subscribedAt: s.createdAt,
     }));
   });

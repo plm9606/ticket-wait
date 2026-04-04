@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { prisma } from "../../lib/prisma.js";
-import { notifyNewConcert } from "../../services/notification.service.js";
+import { notifyNewPerformance } from "../../services/notification.service.js";
 
 export default async function notificationRoutes(fastify: FastifyInstance) {
   // 모든 알림 라우트에 인증 필요
@@ -39,7 +39,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
       const notifications = await prisma.notification.findMany({
         where: { userId },
         include: {
-          concert: {
+          performance: {
             select: {
               id: true,
               title: true,
@@ -62,7 +62,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
         items: items.map((n) => ({
           id: n.id,
           type: n.type,
-          concert: n.concert,
+          performance: n.performance,
           read: !!n.readAt,
           createdAt: n.sentAt,
         })),
@@ -107,15 +107,15 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
   });
 
   // 테스트 알림 발송 (개발용)
-  fastify.post<{ Body: { concertId: string } }>(
+  fastify.post<{ Body: { performanceId: string } }>(
     "/notifications/test-send",
     async (request, reply) => {
-      const { concertId } = request.body;
-      if (!concertId) {
-        return reply.status(400).send({ error: "concertId is required" });
+      const { performanceId } = request.body;
+      if (!performanceId) {
+        return reply.status(400).send({ error: "performanceId is required" });
       }
 
-      const sent = await notifyNewConcert(concertId);
+      const sent = await notifyNewPerformance(performanceId);
       return { sent };
     }
   );
