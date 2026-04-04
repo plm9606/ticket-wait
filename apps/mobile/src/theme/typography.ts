@@ -1,4 +1,6 @@
 export const fontFamily = "Pretendard";
+export const fontFamilyHeadline = "Manrope";
+export const fontFamilyBody = "Inter";
 
 export const fontSize = {
   "2xs": 10,
@@ -20,6 +22,7 @@ export const fontWeight = {
   medium: "500" as const,
   semibold: "600" as const,
   bold: "700" as const,
+  extrabold: "800" as const,
 };
 
 export const letterSpacing = {

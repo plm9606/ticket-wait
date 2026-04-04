@@ -14,24 +14,84 @@
   --color-gray-800: #262626;
   --color-gray-900: #171717;
 
-  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+  /* Background */
+  --color-background: #f9f9fb;
+  --color-on-background: #1a1c1d;
+
+  /* Surface hierarchy */
+  --color-surface: #f9f9fb;
+  --color-surface-dim: #d9dadc;
+  --color-surface-bright: #f9f9fb;
+  --color-surface-variant: #e2e2e4;
+  --color-surface-tint: #5e5e5e;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f3f5;
+  --color-surface-container: #eeeef0;
+  --color-surface-container-high: #e8e8ea;
+  --color-surface-container-highest: #e2e2e4;
+
+  /* On-surface */
+  --color-on-surface: #1a1c1d;
+  --color-on-surface-variant: #474747;
+
+  /* Primary */
+  --color-primary: #000000;
+  --color-primary-container: #3b3b3b;
+  --color-on-primary: #e2e2e2;
+  --color-on-primary-container: #ffffff;
+  --color-primary-fixed: #5e5e5e;
+  --color-primary-fixed-dim: #474747;
+  --color-on-primary-fixed: #ffffff;
+  --color-on-primary-fixed-variant: #e2e2e2;
+
+  /* Secondary */
+  --color-secondary: #5f5e5e;
+  --color-secondary-container: #d6d4d3;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #1b1c1c;
+  --color-secondary-fixed: #c8c6c5;
+  --color-secondary-fixed-dim: #adabaa;
+  --color-on-secondary-fixed: #1b1c1c;
+  --color-on-secondary-fixed-variant: #3c3b3b;
+
+  /* Tertiary */
+  --color-tertiary: #3b3b3b;
+  --color-tertiary-container: #757474;
+  --color-on-tertiary: #e4e2e2;
+  --color-on-tertiary-container: #ffffff;
+  --color-tertiary-fixed: #5e5e5e;
+  --color-tertiary-fixed-dim: #464747;
+  --color-on-tertiary-fixed: #ffffff;
+  --color-on-tertiary-fixed-variant: #e4e2e2;
+
+  /* Outline */
+  --color-outline: #777777;
+  --color-outline-variant: #c6c6c6;
+
+  /* Error */
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #410002;
+
+  /* Inverse */
+  --color-inverse-surface: #2f3132;
+  --color-inverse-on-surface: #f0f0f2;
+  --color-inverse-primary: #c6c6c6;
+
+  /* Font families */
+  --font-headline: var(--font-manrope), 'Pretendard Variable', sans-serif;
+  --font-body: var(--font-inter), 'Pretendard Variable', sans-serif;
+  --font-label: var(--font-inter), 'Pretendard Variable', sans-serif;
+  --font-sans: var(--font-inter), 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-white);
-  color: var(--color-gray-900);
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* 29cm 스타일: 부드러운 전환 */
-a, button {
-  transition: opacity 0.2s ease;
-}
-
-a:hover, button:hover {
-  opacity: 0.7;
 }
 
 /* 스크롤바 미니멀 */
@@ -93,4 +153,13 @@ img {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
+}
+
+/* 스크롤바 숨기기 (수평 스크롤 섹션) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
