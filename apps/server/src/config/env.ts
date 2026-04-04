@@ -8,8 +8,18 @@ function optionalEnv(name: string, fallback: string): string {
   return process.env[name] || fallback;
 }
 
+function buildDatabaseUrl(): string {
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+  const user = requireEnv("DATABASE_USER");
+  const password = requireEnv("DATABASE_PASSWORD");
+  const host = optionalEnv("DATABASE_HOST", "localhost");
+  const port = optionalEnv("DATABASE_PORT", "5432");
+  const db = optionalEnv("DATABASE_NAME", "concert_alert");
+  return `postgresql://${user}:${password}@${host}:${port}/${db}`;
+}
+
 export const env = {
-  DATABASE_URL: requireEnv("DATABASE_URL"),
+  DATABASE_URL: buildDatabaseUrl(),
   KAKAO_REST_API_KEY: requireEnv("KAKAO_REST_API_KEY"),
   KAKAO_CLIENT_SECRET: requireEnv("KAKAO_CLIENT_SECRET"),
   KAKAO_REDIRECT_URI: requireEnv("KAKAO_REDIRECT_URI"),
@@ -17,6 +27,7 @@ export const env = {
   PORT: Number(optionalEnv("PORT", "4000")),
   FRONTEND_URL: optionalEnv("FRONTEND_URL", "http://localhost:3000"),
   KAKAO_REDIRECT_URI_MOBILE: optionalEnv("KAKAO_REDIRECT_URI_MOBILE", ""),
+  KOPIS_SERVICE_KEY: optionalEnv("KOPIS_SERVICE_KEY", ""),
   // Firebase (optional - push notifications)
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || "",
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || "",
