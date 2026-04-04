@@ -2,7 +2,6 @@ import { useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
-import { registerForPushNotifications } from "@/lib/notifications";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { colors } from "@/theme/colors";
 import { containerPadding } from "@/theme/spacing";
@@ -21,6 +20,7 @@ export default function SettingsScreen() {
   const handleEnablePush = async () => {
     setPushLoading(true);
     try {
+      const { registerForPushNotifications } = await import("@/lib/notifications");
       const success = await registerForPushNotifications();
       setPushEnabled(success);
     } catch {
