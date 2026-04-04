@@ -1,5 +1,5 @@
 import { mockArtists, type MockArtist } from "./data/artists";
-import { mockConcerts, type MockConcert } from "./data/concerts";
+import { mockPerformances, type MockPerformance } from "./data/concerts";
 import {
   mockNotifications,
   type MockNotification,
@@ -31,14 +31,14 @@ export function logout() {
   isLoggedIn = false;
 }
 
-// --- Concerts ---
+// --- Performances ---
 
-export function getConcerts(
+export function getPerformances(
   limit: number,
   cursor: string | null,
   genre: string | null
 ) {
-  let filtered = [...mockConcerts];
+  let filtered = [...mockPerformances];
 
   if (genre) {
     filtered = filtered.filter((c) => c.genre === genre);
@@ -55,31 +55,31 @@ export function getConcerts(
   const nextCursor = nextIndex < filtered.length ? String(nextIndex) : null;
 
   return {
-    items: items.map(formatConcertListItem),
+    items: items.map(formatPerformanceListItem),
     nextCursor,
   };
 }
 
-export function getConcertById(id: string) {
-  const concert = mockConcerts.find((c) => c.id === id);
-  if (!concert) throw new Error("Concert not found");
+export function getPerformanceById(id: string) {
+  const performance = mockPerformances.find((c) => c.id === id);
+  if (!performance) throw new Error("Performance not found");
 
-  const artist = concert.artistId
-    ? mockArtists.find((a) => a.id === concert.artistId)
+  const artist = performance.artistId
+    ? mockArtists.find((a) => a.id === performance.artistId)
     : null;
 
   return {
-    id: concert.id,
-    title: concert.title,
-    venue: concert.venue,
-    startDate: concert.startDate,
-    endDate: concert.endDate,
-    ticketOpenDate: concert.ticketOpenDate,
-    source: concert.source,
-    sourceUrl: concert.sourceUrl,
-    imageUrl: concert.imageUrl,
-    genre: concert.genre,
-    status: concert.status,
+    id: performance.id,
+    title: performance.title,
+    venue: performance.venue,
+    startDate: performance.startDate,
+    endDate: performance.endDate,
+    ticketOpenDate: performance.ticketOpenDate,
+    source: performance.source,
+    sourceUrl: performance.sourceUrl,
+    imageUrl: performance.imageUrl,
+    genre: performance.genre,
+    status: performance.status,
     artist: artist
       ? {
           id: artist.id,
@@ -93,7 +93,7 @@ export function getConcertById(id: string) {
   };
 }
 
-function formatConcertListItem(c: MockConcert) {
+function formatPerformanceListItem(c: MockPerformance) {
   return {
     id: c.id,
     title: c.title,
@@ -131,13 +131,13 @@ export function getArtistById(id: string) {
   const artist = mockArtists.find((a) => a.id === id);
   if (!artist) throw new Error("Artist not found");
 
-  const concerts = mockConcerts
+  const performances = mockPerformances
     .filter(
       (c) =>
         c.artistId === id &&
         (c.status === "UPCOMING" || c.status === "ON_SALE")
     )
-    .map(formatConcertListItem);
+    .map(formatPerformanceListItem);
 
   return {
     id: artist.id,
@@ -146,7 +146,7 @@ export function getArtistById(id: string) {
     aliases: artist.aliases,
     imageUrl: artist.imageUrl,
     subscriberCount: artist.subscriberCount,
-    concerts,
+    performances,
   };
 }
 
@@ -168,7 +168,7 @@ export function getSubscriptions() {
       const artist = mockArtists.find((a) => a.id === artistId);
       if (!artist) return null;
 
-      const concertCount = mockConcerts.filter(
+      const performanceCount = mockPerformances.filter(
         (c) =>
           c.artistId === artistId &&
           (c.status === "UPCOMING" || c.status === "ON_SALE")
@@ -180,7 +180,7 @@ export function getSubscriptions() {
         name: artist.name,
         nameEn: artist.nameEn,
         imageUrl: artist.imageUrl,
-        concertCount,
+        performanceCount,
         subscribedAt: "2026-01-15T09:00:00.000Z",
       };
     })
@@ -220,18 +220,18 @@ export function getNotifications(limit: number, cursor: string | null) {
 
   return {
     items: items.map((n) => {
-      const concert = mockConcerts.find((c) => c.id === n.concertId);
+      const performance = mockPerformances.find((c) => c.id === n.performanceId);
       return {
         id: n.id,
         type: n.type,
-        concert: concert
+        performance: performance
           ? {
-              id: concert.id,
-              title: concert.title,
-              source: concert.source,
-              sourceUrl: concert.sourceUrl,
-              imageUrl: concert.imageUrl,
-              artist: concert.artist,
+              id: performance.id,
+              title: performance.title,
+              source: performance.source,
+              sourceUrl: performance.sourceUrl,
+              imageUrl: performance.imageUrl,
+              artist: performance.artist,
             }
           : null,
         read: readNotificationIds.has(n.id),

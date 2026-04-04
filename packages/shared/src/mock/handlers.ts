@@ -1,8 +1,8 @@
 import {
   getUser,
   logout,
-  getConcerts,
-  getConcertById,
+  getPerformances,
+  getPerformanceById,
   searchArtists,
   getArtistById,
   getSubscriptions,
@@ -42,17 +42,17 @@ export async function mockApi<T>(
     return { ok: true } as T;
   }
 
-  // --- Concerts ---
-  if (pathname === "/concerts" && method === "GET") {
+  // --- Performances ---
+  if (pathname === "/performances" && method === "GET") {
     const limit = parseInt(params.get("limit") || "20", 10);
     const cursor = params.get("cursor") || null;
     const genre = params.get("genre") || null;
-    return getConcerts(limit, cursor, genre) as T;
+    return getPerformances(limit, cursor, genre) as T;
   }
 
-  const concertDetailMatch = pathname.match(/^\/concerts\/([^/]+)$/);
-  if (concertDetailMatch && method === "GET") {
-    return getConcertById(concertDetailMatch[1]) as T;
+  const performanceDetailMatch = pathname.match(/^\/performances\/([^/]+)$/);
+  if (performanceDetailMatch && method === "GET") {
+    return getPerformanceById(performanceDetailMatch[1]) as T;
   }
 
   // --- Artists ---

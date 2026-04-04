@@ -250,47 +250,45 @@ async function main() {
 
   console.log(`Seeded ${artists.length} artists.`);
 
-  console.log("Seeding concerts...");
+  console.log("Seeding performances...");
 
-  const concerts = generateConcerts(artistMap);
+  const performances = generateConcerts(artistMap);
 
-  for (const concert of concerts) {
-    const artistId = artistMap.get(concert.artistName) ?? null;
-    await prisma.concert.upsert({
+  for (const perf of performances) {
+    const artistId = artistMap.get(perf.artistName) ?? null;
+    await prisma.performance.upsert({
       where: {
         source_sourceId: {
-          source: concert.source,
-          sourceId: concert.sourceId,
+          source: perf.source,
+          sourceId: perf.sourceId,
         },
       },
       update: {
-        title: concert.title,
-        venue: concert.venue,
-        startDate: concert.startDate,
-        endDate: concert.endDate,
-        ticketOpenDate: concert.ticketOpenDate,
-        status: concert.status as any,
-        genre: concert.genre as any,
+        title: perf.title,
+        startDate: perf.startDate,
+        endDate: perf.endDate,
+        ticketOpenDate: perf.ticketOpenDate,
+        status: perf.status as any,
+        genre: perf.genre as any,
       },
       create: {
-        title: concert.title,
+        title: perf.title,
         artistId,
-        venue: concert.venue,
-        startDate: concert.startDate,
-        endDate: concert.endDate,
-        ticketOpenDate: concert.ticketOpenDate,
-        source: concert.source,
-        sourceId: concert.sourceId,
-        sourceUrl: concert.sourceUrl,
-        imageUrl: concert.img,
-        rawTitle: concert.rawTitle,
-        genre: concert.genre as any,
-        status: concert.status as any,
+        startDate: perf.startDate,
+        endDate: perf.endDate,
+        ticketOpenDate: perf.ticketOpenDate,
+        source: perf.source,
+        sourceId: perf.sourceId,
+        sourceUrl: perf.sourceUrl,
+        imageUrl: perf.img,
+        rawTitle: perf.rawTitle,
+        genre: perf.genre as any,
+        status: perf.status as any,
       },
     });
   }
 
-  console.log(`Seeded ${concerts.length} concerts.`);
+  console.log(`Seeded ${performances.length} performances.`);
 }
 
 main()
