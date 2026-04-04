@@ -31,13 +31,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-router",
     "expo-secure-store",
     "expo-font",
-    [
-      "expo-notifications",
-      {
-        icon: "./assets/icon.png",
-        color: "#000000",
-      },
-    ],
   ],
   extra: {
     apiUrl: process.env.API_URL || "http://localhost:4000",
