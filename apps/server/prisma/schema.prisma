@@ -22,13 +22,14 @@ model User {
 }
 
 model Artist {
-  id        String   @id @default(cuid())
-  name      String
-  nameEn    String?
-  aliases   String[] @default([])
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  nameEn        String?
+  aliases       String[] @default([])
+  imageUrl      String?
+  musicbrainzId String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   subscriptions Subscription[]
   concerts      Concert[]
