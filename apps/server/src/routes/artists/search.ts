@@ -44,6 +44,34 @@ export default async function artistRoutes(fastify: FastifyInstance) {
     }
   );
 
+  // 인기 아티스트 목록
+  fastify.get<{ Querystring: { limit?: string } }>(
+    "/artists",
+    async (request) => {
+      const take = Math.min(Number(request.query.limit) || 30, 50);
+
+      const artists = await prisma.artist.findMany({
+        select: {
+          id: true,
+          name: true,
+          nameEn: true,
+          imageUrl: true,
+          _count: { select: { subscriptions: true } },
+        },
+        orderBy: { subscriptions: { _count: "desc" } },
+        take,
+      });
+
+      return artists.map((a) => ({
+        id: a.id,
+        name: a.name,
+        nameEn: a.nameEn,
+        imageUrl: a.imageUrl,
+        subscriberCount: a._count.subscriptions,
+      }));
+    }
+  );
+
   // 아티스트 상세
   fastify.get<{ Params: { id: string } }>(
     "/artists/:id",

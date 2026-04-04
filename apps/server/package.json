@@ -7,7 +7,11 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "seed:musicbrainz": "tsx src/scripts/seed-from-musicbrainz.ts",
+    "enrich:artists": "tsx src/scripts/enrich-artists.ts"
   },
   "dependencies": {
     "@concert-alert/shared": "workspace:*",
@@ -18,6 +22,7 @@
     "axios": "^1.7.0",
     "cheerio": "^1.0.0",
     "dotenv": "^17.3.1",
+    "fast-xml-parser": "^5.5.10",
     "fastify": "^5.2.0",
     "fastify-plugin": "^5.1.0",
     "firebase-admin": "^13.7.0",
@@ -28,7 +33,8 @@
     "@types/node-cron": "^3.0.0",
     "prisma": "^6.4.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.2"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
