@@ -1,9 +1,11 @@
-import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { api } from "./api";
 
+let Notifications: typeof import("expo-notifications") | null = null;
+
 try {
-  Notifications.setNotificationHandler({
+  Notifications = require("expo-notifications");
+  Notifications?.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
       shouldPlaySound: true,
@@ -15,6 +17,8 @@ try {
 }
 
 export async function registerForPushNotifications(): Promise<boolean> {
+  if (!Notifications) return false;
+
   const { status: existingStatus } =
     await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
