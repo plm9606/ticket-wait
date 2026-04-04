@@ -22,7 +22,7 @@ const KOPIS_GENRE_MAP: Record<string, PerformanceGenre> = {
 
 const SYNC_GENRE_CODES: GenreCode[] = ["CCCD", "GGGA", "CCCA", "AAAA"];
 
-function mapGenre(shcate: GenreCode, title: string): PerformanceGenre {
+export function mapGenre(shcate: GenreCode, title: string): PerformanceGenre {
   const base = KOPIS_GENRE_MAP[shcate] ?? "OTHER";
   // 대중음악(CCCD)만 제목 기반 세분화
   if (shcate === "CCCD") return classifyGenre(title);
@@ -31,7 +31,7 @@ function mapGenre(shcate: GenreCode, title: string): PerformanceGenre {
 
 // ─── TicketSource Mapping ────────────────────────────────────────────────────
 
-function mapRelateToSource(relatenm: string): TicketSource | null {
+export function mapRelateToSource(relatenm: string): TicketSource | null {
   const name = relatenm.toLowerCase();
   if (name.includes("인터파크") || name.includes("interpark")) return "INTERPARK";
   if (name.includes("yes24")) return "YES24";
@@ -39,7 +39,7 @@ function mapRelateToSource(relatenm: string): TicketSource | null {
   return null;
 }
 
-function extractSourceId(url: string, source: TicketSource): string {
+export function extractSourceId(url: string, source: TicketSource): string {
   try {
     const u = new URL(url);
     switch (source) {
@@ -65,14 +65,14 @@ function extractSourceId(url: string, source: TicketSource): string {
 
 // ─── Date Helpers ────────────────────────────────────────────────────────────
 
-function formatDate(d: Date): string {
+export function formatDate(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}${m}${day}`;
 }
 
-function parseKopisDate(dateStr: string): Date | null {
+export function parseKopisDate(dateStr: string): Date | null {
   // "YYYY.MM.DD" → Date
   const parts = dateStr.split(".");
   if (parts.length !== 3) return null;
@@ -82,7 +82,7 @@ function parseKopisDate(dateStr: string): Date | null {
 /**
  * 오늘~90일 후를 31일씩 윈도우로 분할
  */
-function buildDateWindows(): Array<{ stdate: string; eddate: string }> {
+export function buildDateWindows(): Array<{ stdate: string; eddate: string }> {
   const windows: Array<{ stdate: string; eddate: string }> = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -145,7 +145,7 @@ async function upsertVenue(mt10id: string, fallbackName: string): Promise<string
 
 // ─── Artist Matching ─────────────────────────────────────────────────────────
 
-function parseCastNames(prfcast: string | null | undefined): string[] {
+export function parseCastNames(prfcast: string | null | undefined): string[] {
   if (!prfcast || prfcast.trim() === "") return [];
   return prfcast
     .split(/[,，、]/)
