@@ -3,32 +3,22 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { api } from "@/lib/api";
-
-interface SubscribedArtist {
-  id: string;
-  artistId: string;
-  name: string;
-}
 
 export default function KakaoCallbackPage() {
   const router = useRouter();
   const { fetchUser } = useAuth();
 
   useEffect(() => {
-    fetchUser().then(async () => {
-      try {
-        const subs = await api<SubscribedArtist[]>("/subscriptions");
-        router.replace(subs.length === 0 ? "/onboarding" : "/");
-      } catch {
-        router.replace("/");
-      }
+    // 서버에서 JWT 쿠키를 설정한 후 여기로 리다이렉트됨
+    // 유저 정보를 가져오고 /my로 이동
+    fetchUser().then(() => {
+      router.replace("/my");
     });
   }, [fetchUser, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <p className="text-sm text-on-surface-variant">로그인 처리 중...</p>
+      <p className="text-sm text-gray-400">로그인 처리 중...</p>
     </div>
   );
 }

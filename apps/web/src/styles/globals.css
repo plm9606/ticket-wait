@@ -14,40 +14,18 @@
   --color-gray-800: #262626;
   --color-gray-900: #171717;
 
-  --color-surface: #f9f9fb;
-  --color-surface-low: #f3f3f5;
-  --color-surface-lowest: #ffffff;
-  --color-surface-container: #eeeef0;
-  --color-surface-dim: #d9dadc;
-  --color-outline: #c6c6c6;
-  --color-outline-strong: #777777;
-  --color-on-surface: #1a1c1d;
-  --color-on-surface-variant: #474747;
-
   --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #000, #3b3b3b);
-  color: white;
-  border-radius: 0.5rem;
-}
-
-.glass {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
 body {
-  font-family: var(--font-inter), var(--font-sans);
-  background-color: var(--color-surface);
-  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+  background-color: var(--color-white);
+  color: var(--color-gray-900);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 부드러운 전환 */
+/* 29cm 스타일: 부드러운 전환 */
 a, button {
   transition: opacity 0.2s ease;
 }
