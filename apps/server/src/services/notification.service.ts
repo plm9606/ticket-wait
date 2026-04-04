@@ -4,17 +4,17 @@ import { sendPushBatch } from "../lib/fcm.js";
 /**
  * 새로 매칭된 공연에 대해 구독자에게 알림 발송
  */
-export async function notifyNewConcert(concertId: string): Promise<number> {
-  const concert = await prisma.concert.findUnique({
-    where: { id: concertId },
+export async function notifyNewPerformance(performanceId: string): Promise<number> {
+  const performance = await prisma.performance.findUnique({
+    where: { id: performanceId },
     include: { artist: true },
   });
 
-  if (!concert || !concert.artistId || !concert.artist) return 0;
+  if (!performance || !performance.artistId || !performance.artist) return 0;
 
   // 해당 아티스트 구독자 조회
   const subscriptions = await prisma.subscription.findMany({
-    where: { artistId: concert.artistId },
+    where: { artistId: performance.artistId },
     include: {
       user: {
         include: {
@@ -33,7 +33,7 @@ export async function notifyNewConcert(concertId: string): Promise<number> {
     await prisma.notification.create({
       data: {
         userId: sub.userId,
-        concertId: concert.id,
+        performanceId: performance.id,
         type: "NEW_CONCERT",
       },
     });
@@ -42,14 +42,14 @@ export async function notifyNewConcert(concertId: string): Promise<number> {
     const tokens = sub.user.fcmTokens.map((t) => t.token);
     if (tokens.length > 0) {
       const result = await sendPushBatch(tokens, {
-        title: `${concert.artist.name} 새 공연!`,
-        body: concert.title,
-        imageUrl: concert.imageUrl || undefined,
+        title: `${performance.artist.name} 새 공연!`,
+        body: performance.title,
+        imageUrl: performance.imageUrl || undefined,
         data: {
           type: "NEW_CONCERT",
-          concertId: concert.id,
-          artistId: concert.artistId,
-          url: `/artist/${concert.artistId}`,
+          performanceId: performance.id,
+          artistId: performance.artistId,
+          url: `/artist/${performance.artistId}`,
         },
       });
       sentCount += result.success;
@@ -60,19 +60,19 @@ export async function notifyNewConcert(concertId: string): Promise<number> {
 }
 
 /**
- * 크롤러에서 새로 발견된 공연들에 대해 알림 발송
+ * 새로 발견된 공연들에 대해 알림 발송
  * (매칭된 공연 중 아직 알림이 안 간 것들)
  */
-export async function notifyNewConcerts(concertIds: string[]): Promise<number> {
+export async function notifyNewPerformances(performanceIds: string[]): Promise<number> {
   let total = 0;
-  for (const id of concertIds) {
+  for (const id of performanceIds) {
     // 이미 알림이 간 공연인지 확인
     const existing = await prisma.notification.findFirst({
-      where: { concertId: id, type: "NEW_CONCERT" },
+      where: { performanceId: id, type: "NEW_CONCERT" },
     });
     if (existing) continue;
 
-    const sent = await notifyNewConcert(id);
+    const sent = await notifyNewPerformance(id);
     total += sent;
   }
   return total;
@@ -87,7 +87,7 @@ export async function sendTicketOpenReminders(): Promise<number> {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const concerts = await prisma.concert.findMany({
+  const performances = await prisma.performance.findMany({
     where: {
       ticketOpenDate: { gte: today, lt: tomorrow },
       artistId: { not: null },
@@ -96,11 +96,11 @@ export async function sendTicketOpenReminders(): Promise<number> {
   });
 
   let sentCount = 0;
-  for (const concert of concerts) {
-    if (!concert.artistId || !concert.artist) continue;
+  for (const perf of performances) {
+    if (!perf.artistId || !perf.artist) continue;
 
     const subscriptions = await prisma.subscription.findMany({
-      where: { artistId: concert.artistId },
+      where: { artistId: perf.artistId },
       include: {
         user: { include: { fcmTokens: true } },
       },
@@ -111,7 +111,7 @@ export async function sendTicketOpenReminders(): Promise<number> {
       const existing = await prisma.notification.findFirst({
         where: {
           userId: sub.userId,
-          concertId: concert.id,
+          performanceId: perf.id,
           type: "TICKET_OPEN_SOON",
         },
       });
@@ -120,7 +120,7 @@ export async function sendTicketOpenReminders(): Promise<number> {
       await prisma.notification.create({
         data: {
           userId: sub.userId,
-          concertId: concert.id,
+          performanceId: perf.id,
           type: "TICKET_OPEN_SOON",
         },
       });
@@ -129,12 +129,12 @@ export async function sendTicketOpenReminders(): Promise<number> {
       if (tokens.length > 0) {
         const result = await sendPushBatch(tokens, {
           title: `오늘 티켓 오픈!`,
-          body: `${concert.artist.name} - ${concert.title}`,
-          imageUrl: concert.imageUrl || undefined,
+          body: `${perf.artist.name} - ${perf.title}`,
+          imageUrl: perf.imageUrl || undefined,
           data: {
             type: "TICKET_OPEN_SOON",
-            concertId: concert.id,
-            url: concert.sourceUrl,
+            performanceId: perf.id,
+            url: perf.sourceUrl,
           },
         });
         sentCount += result.success;

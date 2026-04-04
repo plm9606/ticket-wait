@@ -1,4 +1,4 @@
-export interface MockConcert {
+export interface MockPerformance {
   id: string;
   title: string;
   artistId: string | null;
@@ -16,10 +16,10 @@ export interface MockConcert {
   createdAt: string;
 }
 
-export const mockConcerts: MockConcert[] = [
+export const mockPerformances: MockPerformance[] = [
   // === 아이유 (artist-1) ===
   {
-    id: "concert-1",
+    id: "performance-1",
     title: "2026 아이유 콘서트 'The Winning'",
     artistId: "artist-1",
     artist: { id: "artist-1", name: "아이유", nameEn: "IU" },
@@ -36,7 +36,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-03-20T09:00:00.000Z",
   },
   {
-    id: "concert-2",
+    id: "performance-2",
     title: "아이유 팬미팅 'UAENA DAY'",
     artistId: "artist-1",
     artist: { id: "artist-1", name: "아이유", nameEn: "IU" },
@@ -55,7 +55,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 뉴진스 (artist-2) ===
   {
-    id: "concert-3",
+    id: "performance-3",
     title: "NewJeans 1st World Tour 'Get Up' in Seoul",
     artistId: "artist-2",
     artist: { id: "artist-2", name: "뉴진스", nameEn: "NewJeans" },
@@ -72,7 +72,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-03-25T09:00:00.000Z",
   },
   {
-    id: "concert-4",
+    id: "performance-4",
     title: "뉴진스 팬미팅 'Bunnies Camp'",
     artistId: "artist-2",
     artist: { id: "artist-2", name: "뉴진스", nameEn: "NewJeans" },
@@ -91,7 +91,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 임영웅 (artist-3) ===
   {
-    id: "concert-5",
+    id: "performance-5",
     title: "임영웅 전국투어 콘서트 'IM HERO'",
     artistId: "artist-3",
     artist: { id: "artist-3", name: "임영웅", nameEn: "Lim Young Woong" },
@@ -108,7 +108,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-03-18T09:00:00.000Z",
   },
   {
-    id: "concert-6",
+    id: "performance-6",
     title: "임영웅 단독 콘서트 '별빛 아래서'",
     artistId: "artist-3",
     artist: { id: "artist-3", name: "임영웅", nameEn: "Lim Young Woong" },
@@ -127,7 +127,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 세븐틴 (artist-4) ===
   {
-    id: "concert-7",
+    id: "performance-7",
     title: "SEVENTEEN WORLD TOUR [FOLLOW] AGAIN",
     artistId: "artist-4",
     artist: { id: "artist-4", name: "세븐틴", nameEn: "SEVENTEEN" },
@@ -144,7 +144,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-04-02T09:00:00.000Z",
   },
   {
-    id: "concert-8",
+    id: "performance-8",
     title: "세븐틴 팬미팅 'CARAT LAND 2026'",
     artistId: "artist-4",
     artist: { id: "artist-4", name: "세븐틴", nameEn: "SEVENTEEN" },
@@ -163,7 +163,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 르세라핌 (artist-5) ===
   {
-    id: "concert-9",
+    id: "performance-9",
     title: "LE SSERAFIM TOUR 'EASY' in Seoul",
     artistId: "artist-5",
     artist: { id: "artist-5", name: "르세라핌", nameEn: "LE SSERAFIM" },
@@ -180,7 +180,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-03-22T09:00:00.000Z",
   },
   {
-    id: "concert-10",
+    id: "performance-10",
     title: "LE SSERAFIM 1st Fan Meeting",
     artistId: "artist-5",
     artist: { id: "artist-5", name: "르세라핌", nameEn: "LE SSERAFIM" },
@@ -199,7 +199,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 에스파 (artist-6) ===
   {
-    id: "concert-11",
+    id: "performance-11",
     title: "aespa LIVE TOUR 'SYNK : PARALLEL LINE'",
     artistId: "artist-6",
     artist: { id: "artist-6", name: "에스파", nameEn: "aespa" },
@@ -216,7 +216,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-03-10T09:00:00.000Z",
   },
   {
-    id: "concert-12",
+    id: "performance-12",
     title: "에스파 단독 콘서트 'MY WORLD'",
     artistId: "artist-6",
     artist: { id: "artist-6", name: "에스파", nameEn: "aespa" },
@@ -235,7 +235,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 박효신 (artist-7) ===
   {
-    id: "concert-13",
+    id: "performance-13",
     title: "박효신 콘서트 'LOVERS'",
     artistId: "artist-7",
     artist: { id: "artist-7", name: "박효신", nameEn: "Park Hyo Shin" },
@@ -252,7 +252,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-03-28T09:00:00.000Z",
   },
   {
-    id: "concert-14",
+    id: "performance-14",
     title: "박효신 소극장 콘서트 'BREATH'",
     artistId: "artist-7",
     artist: { id: "artist-7", name: "박효신", nameEn: "Park Hyo Shin" },
@@ -271,7 +271,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 비비 (artist-8) ===
   {
-    id: "concert-15",
+    id: "performance-15",
     title: "BIBI 단독 콘서트 'LOWLIFE PRINCESS'",
     artistId: "artist-8",
     artist: { id: "artist-8", name: "비비", nameEn: "BIBI" },
@@ -288,7 +288,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-03-29T09:00:00.000Z",
   },
   {
-    id: "concert-16",
+    id: "performance-16",
     title: "비비 소극장 라이브 'NUDE'",
     artistId: "artist-8",
     artist: { id: "artist-8", name: "비비", nameEn: "BIBI" },
@@ -307,7 +307,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === (여자)아이들 (artist-9) ===
   {
-    id: "concert-17",
+    id: "performance-17",
     title: "(G)I-DLE WORLD TOUR 'iDOL'",
     artistId: "artist-9",
     artist: { id: "artist-9", name: "(여자)아이들", nameEn: "(G)I-DLE" },
@@ -324,7 +324,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-04-02T09:00:00.000Z",
   },
   {
-    id: "concert-18",
+    id: "performance-18",
     title: "(여자)아이들 팬미팅 'NEVERLAND'",
     artistId: "artist-9",
     artist: { id: "artist-9", name: "(여자)아이들", nameEn: "(G)I-DLE" },
@@ -343,7 +343,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 데이식스 (artist-10) ===
   {
-    id: "concert-19",
+    id: "performance-19",
     title: "DAY6 콘서트 'FOREVER YOUNG'",
     artistId: "artist-10",
     artist: { id: "artist-10", name: "데이식스", nameEn: "DAY6" },
@@ -360,7 +360,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-04-01T09:00:00.000Z",
   },
   {
-    id: "concert-20",
+    id: "performance-20",
     title: "DAY6 소극장 콘서트 'Gravity'",
     artistId: "artist-10",
     artist: { id: "artist-10", name: "데이식스", nameEn: "DAY6" },
@@ -379,7 +379,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 페스티벌 (artist: null) ===
   {
-    id: "concert-21",
+    id: "performance-21",
     title: "2026 서울재즈페스티벌",
     artistId: null,
     artist: null,
@@ -396,7 +396,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-03-15T09:00:00.000Z",
   },
   {
-    id: "concert-22",
+    id: "performance-22",
     title: "2026 워터밤 서울",
     artistId: null,
     artist: null,
@@ -413,7 +413,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-04-01T09:00:00.000Z",
   },
   {
-    id: "concert-23",
+    id: "performance-23",
     title: "펜타포트 락 페스티벌 2026",
     artistId: null,
     artist: null,
@@ -432,7 +432,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 뮤지컬 ===
   {
-    id: "concert-24",
+    id: "performance-24",
     title: "뮤지컬 '웃는 남자'",
     artistId: null,
     artist: null,
@@ -449,7 +449,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-03-01T09:00:00.000Z",
   },
   {
-    id: "concert-25",
+    id: "performance-25",
     title: "뮤지컬 '오페라의 유령' 내한공연",
     artistId: null,
     artist: null,
@@ -468,7 +468,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 클래식 ===
   {
-    id: "concert-26",
+    id: "performance-26",
     title: "서울시향 베토벤 교향곡 전곡 연주회",
     artistId: null,
     artist: null,
@@ -485,7 +485,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-03-25T09:00:00.000Z",
   },
   {
-    id: "concert-27",
+    id: "performance-27",
     title: "피아니스트 조성진 리사이틀",
     artistId: null,
     artist: null,
@@ -504,7 +504,7 @@ export const mockConcerts: MockConcert[] = [
 
   // === 추가 공연 (다양한 아티스트/장르) ===
   {
-    id: "concert-28",
+    id: "performance-28",
     title: "아이유 × 박효신 자선 콘서트 'Together'",
     artistId: "artist-1",
     artist: { id: "artist-1", name: "아이유", nameEn: "IU" },
@@ -521,7 +521,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-04-03T09:00:00.000Z",
   },
   {
-    id: "concert-29",
+    id: "performance-29",
     title: "에스파 팬미팅 'MY WORLD IS...'",
     artistId: "artist-6",
     artist: { id: "artist-6", name: "에스파", nameEn: "aespa" },
@@ -538,7 +538,7 @@ export const mockConcerts: MockConcert[] = [
     createdAt: "2026-02-25T09:00:00.000Z",
   },
   {
-    id: "concert-30",
+    id: "performance-30",
     title: "데이식스 × (여자)아이들 합동 콘서트",
     artistId: "artist-10",
     artist: { id: "artist-10", name: "데이식스", nameEn: "DAY6" },

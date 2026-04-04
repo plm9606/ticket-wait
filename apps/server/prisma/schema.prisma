@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model User {
@@ -32,18 +33,34 @@ model Artist {
   updatedAt     DateTime @updatedAt
 
   subscriptions Subscription[]
-  concerts      Concert[]
-
-  @@index([name])
-  @@index([nameEn])
+  performances  Performance[]
 }
 
-model Concert {
-  id             String        @id @default(cuid())
+model Venue {
+  id        String   @id @default(cuid())
+  name      String
+  kopisId   String   @unique
+  address   String?
+  lat       Float?
+  lng       Float?
+  seatScale Int?
+  phone     String?
+  website   String?
+  sido      String?
+  gugun     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  performances Performance[]
+}
+
+model Performance {
+  id             String           @id @default(cuid())
   title          String
   artistId       String?
-  artist         Artist?       @relation(fields: [artistId], references: [id])
-  venue          String?
+  artist         Artist?          @relation(fields: [artistId], references: [id])
+  venueId        String?
+  venue          Venue?           @relation(fields: [venueId], references: [id])
   startDate      DateTime?
   endDate        DateTime?
   ticketOpenDate DateTime?
@@ -52,18 +69,16 @@ model Concert {
   sourceUrl      String
   imageUrl       String?
   rawTitle       String
-  genre          ConcertGenre  @default(CONCERT)
-  status         ConcertStatus @default(UPCOMING)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  kopisId        String?
+  genre          PerformanceGenre
+  status         PerformanceStatus
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
   notifications Notification[]
 
   @@unique([source, sourceId])
-  @@index([artistId])
-  @@index([startDate])
-  @@index([ticketOpenDate])
-  @@index([genre])
+  @@index([kopisId])
 }
 
 model Subscription {
@@ -75,7 +90,6 @@ model Subscription {
   createdAt DateTime @default(now())
 
   @@unique([userId, artistId])
-  @@index([artistId])
 }
 
 model FcmToken {
@@ -89,27 +103,26 @@ model FcmToken {
 }
 
 model Notification {
-  id        String           @id @default(cuid())
-  userId    String
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  concertId String
-  concert   Concert          @relation(fields: [concertId], references: [id])
-  type      NotificationType
-  sentAt    DateTime         @default(now())
-  readAt    DateTime?
-
-  @@index([userId, sentAt])
+  id            String           @id @default(cuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  performanceId String
+  performance   Performance      @relation(fields: [performanceId], references: [id])
+  type          NotificationType
+  sentAt        DateTime         @default(now())
+  readAt        DateTime?
 }
 
-model CrawlLog {
-  id          String       @id @default(cuid())
-  source      TicketSource
-  startedAt   DateTime     @default(now())
-  completedAt DateTime?
-  itemsFound  Int          @default(0)
-  newItems    Int          @default(0)
-  errors      String?
-  status      CrawlStatus  @default(RUNNING)
+model SyncLog {
+  id           String      @id @default(cuid())
+  source       String
+  startedAt    DateTime    @default(now())
+  completedAt  DateTime?
+  itemsFound   Int         @default(0)
+  newItems     Int         @default(0)
+  updatedItems Int         @default(0)
+  errors       String?
+  status       SyncStatus  @default(RUNNING)
 }
 
 enum TicketSource {
@@ -118,18 +131,18 @@ enum TicketSource {
   INTERPARK
 }
 
-enum ConcertGenre {
-  CONCERT    // 일반 콘서트
-  FESTIVAL   // 페스티벌
-  FANMEETING // 팬미팅
-  MUSICAL    // 뮤지컬
-  CLASSIC    // 클래식/오케스트라
-  HIPHOP     // 힙합/R&B
-  TROT       // 트로트
-  OTHER      // 기타
+enum PerformanceGenre {
+  CONCERT
+  FESTIVAL
+  FANMEETING
+  MUSICAL
+  CLASSIC
+  HIPHOP
+  TROT
+  OTHER
 }
 
-enum ConcertStatus {
+enum PerformanceStatus {
   UPCOMING
   ON_SALE
   SOLD_OUT
@@ -142,7 +155,7 @@ enum NotificationType {
   TICKET_OPEN_SOON
 }
 
-enum CrawlStatus {
+enum SyncStatus {
   RUNNING
   SUCCESS
   FAILED

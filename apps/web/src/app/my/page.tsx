@@ -145,9 +145,9 @@ export default function MyPage() {
                       {sub.nameEn}
                     </div>
                   )}
-                  {sub.concertCount > 0 && (
+                  {sub.performanceCount > 0 && (
                     <div className="text-[10px] text-on-surface-variant mt-0.5">
-                      공연 {sub.concertCount}건
+                      공연 {sub.performanceCount}건
                     </div>
                   )}
                 </div>

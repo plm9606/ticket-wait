@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist: { id: string; name: string; nameEn: string | null } | null;
@@ -31,14 +31,14 @@ function formatDate(dateStr: string | null) {
 }
 
 export function RecentConcerts() {
-  const [concerts, setConcerts] = useState<Concert[]>([]);
+  const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await api<{ items: Concert[] }>("/concerts?limit=8");
-        setConcerts(data.items);
+        const data = await api<{ items: Performance[] }>("/performances?limit=8");
+        setPerformances(data.items);
       } catch {
         // ignore
       } finally {
@@ -62,7 +62,7 @@ export function RecentConcerts() {
     );
   }
 
-  if (concerts.length === 0) {
+  if (performances.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-400 text-sm">아직 등록된 공연이 없습니다</p>
@@ -72,17 +72,17 @@ export function RecentConcerts() {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {concerts.map((concert) => (
+      {performances.map((performance) => (
         <Link
-          key={concert.id}
-          href={`/concerts/${concert.id}`}
+          key={performance.id}
+          href={`/concerts/${performance.id}`}
           className="group"
         >
           <div className="aspect-[3/4] bg-gray-50 rounded-md overflow-hidden">
-            {concert.imageUrl ? (
+            {performance.imageUrl ? (
               <img
-                src={concert.imageUrl}
-                alt={concert.title}
+                src={performance.imageUrl}
+                alt={performance.title}
                 className="w-full h-full object-cover group-hover:opacity-80 transition-opacity"
               />
             ) : (
@@ -93,20 +93,20 @@ export function RecentConcerts() {
           </div>
           <div className="mt-2">
             <div className="text-xs font-medium leading-snug line-clamp-2">
-              {concert.title}
+              {performance.title}
             </div>
-            {concert.artist && (
+            {performance.artist && (
               <div className="text-[10px] text-gray-500 mt-0.5">
-                {concert.artist.name}
+                {performance.artist.name}
               </div>
             )}
             <div className="flex items-center gap-1 mt-0.5">
               <span className="text-[10px] text-gray-300">
-                {sourceLabel(concert.source)}
+                {sourceLabel(performance.source)}
               </span>
-              {concert.startDate && (
+              {performance.startDate && (
                 <span className="text-[10px] text-gray-300">
-                  · {formatDate(concert.startDate)}
+                  · {formatDate(performance.startDate)}
                 </span>
               )}
             </div>

@@ -80,7 +80,7 @@ export default async function artistRoutes(fastify: FastifyInstance) {
         where: { id: request.params.id },
         include: {
           _count: { select: { subscriptions: true } },
-          concerts: {
+          performances: {
             where: { status: { in: ["UPCOMING", "ON_SALE"] } },
             orderBy: { startDate: "asc" },
             take: 20,
@@ -99,7 +99,7 @@ export default async function artistRoutes(fastify: FastifyInstance) {
         aliases: artist.aliases,
         imageUrl: artist.imageUrl,
         subscriberCount: artist._count.subscriptions,
-        concerts: artist.concerts,
+        performances: artist.performances,
       };
     }
   );

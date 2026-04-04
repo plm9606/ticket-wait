@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { colors } from "@/theme/colors";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist: { id: string; name: string; nameEn: string | null } | null;
@@ -33,19 +33,19 @@ function statusLabel(status: string): string | null {
 
 const CARD_WIDTH = 280;
 
-export function UpcomingConcertCard({ concert }: { concert: Concert }) {
+export function UpcomingConcertCard({ performance }: { performance: Performance }) {
   const router = useRouter();
-  const badge = statusLabel(concert.status);
+  const badge = statusLabel(performance.status);
 
   return (
     <Pressable
-      onPress={() => router.push(`/concerts/${concert.id}`)}
+      onPress={() => router.push(`/concerts/${performance.id}`)}
       style={styles.card}
     >
       <View style={styles.imageContainer}>
-        {concert.imageUrl ? (
+        {performance.imageUrl ? (
           <Image
-            source={{ uri: concert.imageUrl }}
+            source={{ uri: performance.imageUrl }}
             style={StyleSheet.absoluteFill}
             contentFit="cover"
           />
@@ -57,7 +57,7 @@ export function UpcomingConcertCard({ concert }: { concert: Concert }) {
             style={[StyleSheet.absoluteFill, styles.fallback]}
           >
             <Text style={styles.fallbackText} numberOfLines={3}>
-              {concert.title}
+              {performance.title}
             </Text>
           </LinearGradient>
         )}
@@ -75,11 +75,11 @@ export function UpcomingConcertCard({ concert }: { concert: Concert }) {
 
         <View style={styles.textOverlay}>
           <Text style={styles.metaText}>
-            {formatDate(concert.startDate)}
-            {concert.venue ? ` · ${concert.venue}` : ""}
+            {formatDate(performance.startDate)}
+            {performance.venue ? ` · ${performance.venue}` : ""}
           </Text>
           <Text style={styles.title} numberOfLines={2}>
-            {concert.title}
+            {performance.title}
           </Text>
         </View>
       </View>

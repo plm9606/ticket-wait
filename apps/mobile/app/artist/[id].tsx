@@ -17,7 +17,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { colors } from "@/theme/colors";
 import { containerPadding } from "@/theme/spacing";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   venue: string | null;
@@ -37,7 +37,7 @@ interface ArtistDetail {
   aliases: string[];
   imageUrl: string | null;
   subscriberCount: number;
-  concerts: Concert[];
+  performances: Performance[];
 }
 
 export default function ArtistDetailScreen() {
@@ -121,11 +121,11 @@ export default function ArtistDetailScreen() {
       <View style={styles.concertHeader}>
         <Text style={styles.concertTitle}>
           공연{" "}
-          <Text style={styles.concertCount}>{artist.concerts.length}</Text>
+          <Text style={styles.concertCount}>{artist.performances.length}</Text>
         </Text>
       </View>
 
-      {artist.concerts.length === 0 && (
+      {artist.performances.length === 0 && (
         <View style={styles.noConcerts}>
           <Text style={styles.noConcertsText}>등록된 공연이 없습니다</Text>
         </View>
@@ -135,11 +135,11 @@ export default function ArtistDetailScreen() {
 
   return (
     <FlatList
-      data={artist.concerts}
+      data={artist.performances}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={headerComponent}
       contentContainerStyle={styles.listContent}
-      renderItem={({ item }) => <ConcertCard concert={item} />}
+      renderItem={({ item }) => <ConcertCard performance={item} />}
       ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
     />
   );

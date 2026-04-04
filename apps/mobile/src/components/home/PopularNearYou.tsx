@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { colors } from "@/theme/colors";
 import { PopularConcertCard } from "./PopularConcertCard";
 
-interface Concert {
+interface Performance {
   id: string;
   title: string;
   artist: { id: string; name: string; nameEn: string | null } | null;
@@ -21,7 +21,7 @@ interface PopularNearYouProps {
 }
 
 export function PopularNearYou({ genre }: PopularNearYouProps) {
-  const [concerts, setConcerts] = useState<Concert[]>([]);
+  const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,10 +29,10 @@ export function PopularNearYou({ genre }: PopularNearYouProps) {
       setLoading(true);
       try {
         const genreParam = genre ? `&genre=${genre}` : "";
-        const data = await api<{ items: Concert[] }>(
-          `/concerts?limit=4${genreParam}`
+        const data = await api<{ items: Performance[] }>(
+          `/performances?limit=4${genreParam}`
         );
-        setConcerts(data.items);
+        setPerformances(data.items);
       } catch {
         // ignore
       } finally {
@@ -66,8 +66,8 @@ export function PopularNearYou({ genre }: PopularNearYouProps) {
                 </View>
               </View>
             ))
-          : concerts.map((concert) => (
-              <PopularConcertCard key={concert.id} concert={concert} />
+          : performances.map((performance) => (
+              <PopularConcertCard key={performance.id} performance={performance} />
             ))}
       </View>
     </View>
