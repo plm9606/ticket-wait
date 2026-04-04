@@ -53,6 +53,47 @@ export default async function kakaoAuthRoutes(fastify: FastifyInstance) {
     }
   );
 
+  // 모바일 카카오 로그인 리다이렉트
+  fastify.get("/auth/kakao/mobile", async (_request, reply) => {
+    if (!env.KAKAO_REDIRECT_URI_MOBILE) {
+      return reply.status(500).send({ error: "Mobile OAuth not configured" });
+    }
+    reply.redirect(getAuthorizationUrl(env.KAKAO_REDIRECT_URI_MOBILE));
+  });
+
+  // 모바일 카카오 OAuth 콜백 — JWT를 딥링크로 반환
+  fastify.get<{ Querystring: { code: string } }>(
+    "/auth/kakao/callback/mobile",
+    async (request, reply) => {
+      const { code } = request.query;
+
+      if (!code) {
+        return reply.status(400).send({ error: "Missing authorization code" });
+      }
+
+      const tokenData = await exchangeCode(code, env.KAKAO_REDIRECT_URI_MOBILE);
+      const profile = await getUserProfile(tokenData.access_token);
+
+      const user = await prisma.user.upsert({
+        where: { kakaoId: profile.kakaoId },
+        update: {
+          nickname: profile.nickname,
+          email: profile.email,
+          profileImage: profile.profileImage,
+        },
+        create: {
+          kakaoId: profile.kakaoId,
+          nickname: profile.nickname,
+          email: profile.email,
+          profileImage: profile.profileImage,
+        },
+      });
+
+      const token = fastify.jwt.sign({ userId: user.id });
+      reply.redirect(`concertalert://auth/callback?token=${token}`);
+    }
+  );
+
   // 로그아웃
   fastify.post("/auth/logout", async (_request, reply) => {
     reply.clearCookie("token", { path: "/" }).send({ ok: true });
