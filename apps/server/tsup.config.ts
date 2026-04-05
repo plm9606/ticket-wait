@@ -7,4 +7,5 @@ export default defineConfig({
   splitting: false,
   clean: true,
   outDir: "dist",
+  noExternal: ["@concert-alert/shared"],
 });
