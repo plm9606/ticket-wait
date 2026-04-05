@@ -3,8 +3,9 @@ import { normalizeForMatch } from "@concert-alert/shared";
 import {
   fetchAllKoreanArtists,
   mapArtist,
-  type MBArtist,
 } from "../lib/musicbrainz.js";
+import { AppleMusicAdapter } from "../adapters/apple-music.adapter.js";
+import { WikidataAdapter } from "../adapters/wikidata.adapter.js";
 
 const prisma = new PrismaClient();
 
@@ -54,17 +55,14 @@ function findExistingArtist(
   mapped: ReturnType<typeof mapArtist>,
   index: Map<string, number>
 ): number | null {
-  // 한글 이름으로 매칭
   const byName = index.get(normalizeForMatch(mapped.name));
   if (byName) return byName;
 
-  // 영문 이름으로 매칭
   if (mapped.nameEn) {
     const byEn = index.get(normalizeForMatch(mapped.nameEn));
     if (byEn) return byEn;
   }
 
-  // aliases로 매칭
   for (const alias of mapped.aliases) {
     const byAlias = index.get(normalizeForMatch(alias));
     if (byAlias) return byAlias;
@@ -73,27 +71,84 @@ function findExistingArtist(
   return null;
 }
 
+// --- Apple Music 매칭 ---
+
+async function resolveAppleMusic(
+  appleMusic: AppleMusicAdapter,
+  name: string,
+  nameEn: string | null,
+  aliases: string[]
+): Promise<{ appleMusicId: number; imageUrl: string | null } | null> {
+  let artist;
+  try {
+    artist = await appleMusic.searchArtist(name, nameEn, aliases);
+    if (!artist) {
+      console.log(`  [Apple Music] ⚠ ${name} — 매칭 실패`);
+      return null;
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error(`  [Apple Music] ✗ ${name} — 검색 에러: ${msg}`);
+    return null;
+  }
+
+  let imageUrl: string | null = null;
+  try {
+    imageUrl = await appleMusic.scrapeImageUrl(artist.artistPageUrl);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error(`  [Apple Music] ✗ ${name} — 이미지 스크래핑 실패: ${msg}`);
+  }
+
+  return { appleMusicId: artist.appleMusicId, imageUrl };
+}
+
+// --- Wikidata fallback ---
+
+async function resolveWikidataImage(
+  wikidata: WikidataAdapter,
+  name: string,
+  mbid: string
+): Promise<string | null> {
+  try {
+    const url = await wikidata.getImageUrlByMbid(mbid);
+    if (!url) {
+      console.log(`  [Wikidata] ⚠ ${name} — 이미지 없음`);
+      return null;
+    }
+    return url;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error(`  [Wikidata] ✗ ${name} — 에러: ${msg}`);
+    return null;
+  }
+}
+
 // --- 메인 ---
 
 async function main() {
   const { type, limit, dryRun } = parseArgs();
+
+  const appleMusic = new AppleMusicAdapter();
+  const wikidata = new WikidataAdapter();
+
   console.log(
     `🎵 MusicBrainz 시드 시작 (type=${type ?? "all"}, limit=${limit}, dryRun=${dryRun})`
   );
 
   const { index, mbIdSet } = await buildExistingArtistIndex();
-  console.log(`📦 기존 DB 아티스트: ${index.size / 2}개 (인덱스 키 ${index.size}개)`);
+  console.log(`📦 기존 DB 아티스트: ${index.size}개`);
 
   let totalFetched = 0;
   let created = 0;
   let updated = 0;
   let skipped = 0;
+  let errors = 0;
 
   for await (const batch of fetchAllKoreanArtists(type, limit)) {
     for (const mbArtist of batch) {
       totalFetched++;
 
-      // type이 null인 항목 스킵
       if (!mbArtist.type) {
         skipped++;
         continue;
@@ -101,7 +156,6 @@ async function main() {
 
       const mapped = mapArtist(mbArtist);
 
-      // 이미 musicbrainzId로 연결된 아티스트 스킵
       if (mbIdSet.has(mapped.musicbrainzId)) {
         skipped++;
         continue;
@@ -109,48 +163,72 @@ async function main() {
 
       if (dryRun) {
         console.log(
-          `  [DRY] ${mapped.name} (${mapped.nameEn ?? "-"}) / aliases: [${mapped.aliases.slice(0, 3).join(", ")}] / type: ${mapped.type}`
+          `  [DRY] ${mapped.name} (${mapped.nameEn ?? "-"}) / mbId=${mapped.musicbrainzId} [Apple Music 검색: "${mapped.nameEn ?? mapped.name}"]`
         );
         continue;
       }
 
-      // 기존 아티스트와 이름 매칭 → musicbrainzId 연결
-      const existingId = findExistingArtist(mapped, index);
-      if (existingId) {
-        await prisma.artist.update({
-          where: { id: existingId },
-          data: {
-            musicbrainzId: mapped.musicbrainzId,
-            // nameEn이 없으면 채워주기
-            ...(mapped.nameEn ? { nameEn: mapped.nameEn } : {}),
-            // aliases 병합
-            aliases: {
-              push: mapped.aliases.filter(
-                (a) => !index.has(normalizeForMatch(a))
-              ),
+      try {
+        const amResult = await resolveAppleMusic(
+          appleMusic,
+          mapped.name,
+          mapped.nameEn,
+          mapped.aliases
+        );
+
+        // Apple Music에 이미지 없으면 Wikidata fallback
+        let imageUrl = amResult?.imageUrl ?? null;
+        if (!imageUrl) {
+          imageUrl = await resolveWikidataImage(wikidata, mapped.name, mapped.musicbrainzId);
+        }
+
+        const existingId = findExistingArtist(mapped, index);
+
+        if (existingId) {
+          await prisma.artist.update({
+            where: { id: existingId },
+            data: {
+              musicbrainzId: mapped.musicbrainzId,
+              ...(mapped.nameEn ? { nameEn: mapped.nameEn } : {}),
+              ...(amResult?.appleMusicId ? { appleMusicId: amResult.appleMusicId } : {}),
+              ...(imageUrl ? { imageUrl } : {}),
+              aliases: {
+                push: mapped.aliases.filter(
+                  (a) => !index.has(normalizeForMatch(a))
+                ),
+              },
             },
-          },
-        });
-        updated++;
-      } else {
-        // 새 아티스트 생성
-        const newArtist = await prisma.artist.create({
-          data: {
-            name: mapped.name,
-            nameEn: mapped.nameEn,
-            aliases: mapped.aliases,
-            musicbrainzId: mapped.musicbrainzId,
-          },
-        });
-        created++;
+          });
+          updated++;
+          console.log(
+            `  ✓ 업데이트: ${mapped.name}${imageUrl ? " (이미지 저장)" : ""}`
+          );
+        } else {
+          const newArtist = await prisma.artist.create({
+            data: {
+              name: mapped.name,
+              nameEn: mapped.nameEn,
+              aliases: mapped.aliases,
+              musicbrainzId: mapped.musicbrainzId,
+              appleMusicId: amResult?.appleMusicId ?? null,
+              imageUrl,
+            },
+          });
+          created++;
 
-        // 인덱스 업데이트
-        index.set(normalizeForMatch(mapped.name), newArtist.id);
-        if (mapped.nameEn)
-          index.set(normalizeForMatch(mapped.nameEn), newArtist.id);
+          index.set(normalizeForMatch(mapped.name), newArtist.id);
+          if (mapped.nameEn) index.set(normalizeForMatch(mapped.nameEn), newArtist.id);
+          console.log(
+            `  + 생성: ${mapped.name}${imageUrl ? " (이미지 저장)" : ""}`
+          );
+        }
+
+        mbIdSet.add(mapped.musicbrainzId);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error(`  ✗ ${mapped.name} — 에러: ${msg}`);
+        errors++;
       }
-
-      mbIdSet.add(mapped.musicbrainzId);
 
       if (totalFetched >= limit) break;
     }
@@ -158,20 +236,21 @@ async function main() {
     if (totalFetched >= limit) break;
 
     console.log(
-      `  진행: ${totalFetched}건 처리 (생성=${created}, 업데이트=${updated}, 스킵=${skipped})`
+      `  진행: ${totalFetched}건 (생성=${created}, 업데이트=${updated}, 스킵=${skipped}, 에러=${errors})`
     );
   }
 
   console.log("\n✅ 완료!");
-  console.log(`  총 가져온 수: ${totalFetched}`);
-  console.log(`  새로 생성: ${created}`);
-  console.log(`  기존 업데이트: ${updated}`);
-  console.log(`  스킵: ${skipped}`);
+  console.log(`  총 처리: ${totalFetched}`);
+  console.log(`  생성:    ${created}`);
+  console.log(`  업데이트: ${updated}`);
+  console.log(`  스킵:    ${skipped}`);
+  console.log(`  에러:    ${errors}`);
 }
 
 main()
   .catch((e) => {
-    console.error("❌ 에러:", e);
+    console.error("❌ 치명적 에러:", e);
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());

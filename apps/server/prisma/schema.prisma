@@ -29,6 +29,7 @@ model Artist {
   aliases       String[] @default([])
   imageUrl      String?
   musicbrainzId String?  @unique
+  appleMusicId  Int?     @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
