@@ -22,13 +22,13 @@ export interface IPerformanceRepository {
   ): Promise<CursorPage<PerformanceListItem>>;
   upsert(data: UpsertPerformanceInput): Promise<{ performance: Performance; isNew: boolean }>;
   findUnmatched(): Promise<Array<{ id: number; title: string }>>;
-  updateArtist(id: number, artistId: number): Promise<void>;
+  setArtists(id: number, artistIds: number[]): Promise<void>;
   findWithTicketOpenToday(): Promise<
     Array<{
       id: number;
       title: string;
-      artistId: number;
-      artist: { name: string } | null;
+      artistIds: number[];
+      artists: Array<{ id: number; name: string }>;
       imageUrl: string | null;
       sourceUrl: string;
     }>

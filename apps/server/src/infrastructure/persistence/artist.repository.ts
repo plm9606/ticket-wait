@@ -64,9 +64,10 @@ export class PrismaArtistRepository implements IArtistRepository {
       where: { id },
       include: {
         _count: { select: { subscriptions: true } },
-        performances: {
-          where: { status: { in: ["UPCOMING", "ON_SALE"] } },
-          orderBy: { startDate: "asc" },
+        performanceArtists: {
+          where: { performance: { status: { in: ["UPCOMING", "ON_SALE"] } } },
+          include: { performance: true },
+          orderBy: { performance: { startDate: "asc" } },
           take: 20,
         },
       },
@@ -84,17 +85,17 @@ export class PrismaArtistRepository implements IArtistRepository {
       appleMusicId: row.appleMusicId,
       createdAt: row.createdAt,
       subscriberCount: row._count.subscriptions,
-      performances: row.performances.map((p) => ({
-        id: p.id,
-        title: p.title,
-        startDate: p.startDate,
-        endDate: p.endDate,
-        status: p.status,
-        genre: p.genre,
-        imageUrl: p.imageUrl,
-        source: p.source,
-        sourceUrl: p.sourceUrl,
-        ticketOpenDate: p.ticketOpenDate,
+      performances: row.performanceArtists.map((pa) => ({
+        id: pa.performance.id,
+        title: pa.performance.title,
+        startDate: pa.performance.startDate,
+        endDate: pa.performance.endDate,
+        status: pa.performance.status,
+        genre: pa.performance.genre,
+        imageUrl: pa.performance.imageUrl,
+        source: pa.performance.source,
+        sourceUrl: pa.performance.sourceUrl,
+        ticketOpenDate: pa.performance.ticketOpenDate,
       })),
     };
   }

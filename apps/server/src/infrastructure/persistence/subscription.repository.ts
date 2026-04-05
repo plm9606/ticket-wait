@@ -15,7 +15,7 @@ export class PrismaSubscriptionRepository implements ISubscriptionRepository {
             name: true,
             nameEn: true,
             imageUrl: true,
-            _count: { select: { performances: true } },
+            _count: { select: { performanceArtists: true } },
           },
         },
       },
@@ -28,7 +28,7 @@ export class PrismaSubscriptionRepository implements ISubscriptionRepository {
       name: s.artist.name,
       nameEn: s.artist.nameEn,
       imageUrl: s.artist.imageUrl,
-      performanceCount: s.artist._count.performances,
+      performanceCount: s.artist._count.performanceArtists,
       subscribedAt: s.createdAt,
     }));
   }

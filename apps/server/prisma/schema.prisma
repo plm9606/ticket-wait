@@ -33,8 +33,8 @@ model Artist {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  subscriptions Subscription[]
-  performances  Performance[]
+  subscriptions       Subscription[]
+  performanceArtists  PerformanceArtist[]
 }
 
 model Venue {
@@ -58,8 +58,6 @@ model Venue {
 model Performance {
   id             Int              @id @default(autoincrement())
   title          String
-  artistId       Int?
-  artist         Artist?          @relation(fields: [artistId], references: [id])
   venueId        Int?
   venue          Venue?           @relation(fields: [venueId], references: [id])
   startDate      DateTime?
@@ -76,10 +74,21 @@ model Performance {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
-  notifications Notification[]
+  notifications      Notification[]
+  performanceArtists PerformanceArtist[]
 
   @@unique([source, sourceId])
   @@index([kopisId])
+}
+
+model PerformanceArtist {
+  performanceId Int
+  artistId      Int
+  performance   Performance @relation(fields: [performanceId], references: [id])
+  artist        Artist      @relation(fields: [artistId], references: [id])
+
+  @@id([performanceId, artistId])
+  @@index([artistId])
 }
 
 model Subscription {
@@ -112,6 +121,17 @@ model Notification {
   type          NotificationType
   sentAt        DateTime         @default(now())
   readAt        DateTime?
+}
+
+model SyncDlq {
+  id               Int       @id @default(autoincrement())
+  kopisId          String    @unique
+  reason           String
+  rawData          Json
+  resolvedAt       DateTime?
+  resolvedArtistId Int?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
 model SyncLog {

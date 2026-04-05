@@ -20,7 +20,7 @@ export interface NotificationItem {
     source: string;
     sourceUrl: string;
     imageUrl: string | null;
-    artist: { id: number; name: string; nameEn: string | null } | null;
+    artists: Array<{ id: number; name: string; nameEn: string | null }>;
   } | null;
 }
 
