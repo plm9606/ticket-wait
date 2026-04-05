@@ -53,14 +53,6 @@ export class CreateArtistService implements ICreateArtistUseCase {
 
     const musicbrainzId = best ? mapped.musicbrainzId : null;
 
-    if (musicbrainzId) {
-      const existing = await this.artistRepository.findByMusicbrainzId(musicbrainzId);
-      if (existing) {
-        console.log(`[CreateArtistService] musicbrainzId 중복, 기존 아티스트 반환 (name=${existing.name}, id=${existing.id})`);
-        return existing;
-      }
-    }
-
     let imageData: { appleMusicId: number | null; imageUrl: string | null } = {
       appleMusicId: null,
       imageUrl: null,
