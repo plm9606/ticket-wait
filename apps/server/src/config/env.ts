@@ -20,9 +20,9 @@ function buildDatabaseUrl(): string {
 
 export const env = {
   DATABASE_URL: buildDatabaseUrl(),
-  KAKAO_REST_API_KEY: requireEnv("KAKAO_REST_API_KEY"),
-  KAKAO_CLIENT_SECRET: requireEnv("KAKAO_CLIENT_SECRET"),
-  KAKAO_REDIRECT_URI: requireEnv("KAKAO_REDIRECT_URI"),
+  KAKAO_REST_API_KEY: optionalEnv("KAKAO_REST_API_KEY", ""),
+  KAKAO_CLIENT_SECRET: optionalEnv("KAKAO_CLIENT_SECRET", ""),
+  KAKAO_REDIRECT_URI: optionalEnv("KAKAO_REDIRECT_URI", ""),
   JWT_SECRET: requireEnv("JWT_SECRET"),
   PORT: Number(optionalEnv("PORT", "4000")),
   FRONTEND_URL: optionalEnv("FRONTEND_URL", "http://localhost:3000"),
