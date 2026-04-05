@@ -6,8 +6,8 @@ import { colors } from "@/theme/colors";
 interface Performance {
   id: number;
   title: string;
-  artist?: { id: number; name: string; nameEn: string | null } | null;
-  venue: string | null;
+  artists?: Array<{ id: number; name: string; nameEn: string | null }> | null;
+  venue: { id: number; name: string } | null;
   startDate: string | null;
   source: string;
   imageUrl: string | null;
@@ -61,12 +61,12 @@ export function ConcertCard({ performance }: { performance: Performance }) {
         <Text style={styles.title} numberOfLines={2}>
           {performance.title}
         </Text>
-        {performance.artist && (
-          <Text style={styles.artist}>{performance.artist.name}</Text>
+        {performance.artists?.[0] && (
+          <Text style={styles.artist}>{performance.artists[0].name}</Text>
         )}
         <View style={styles.metaRow}>
           {performance.venue && (
-            <Text style={styles.metaText}>{performance.venue}</Text>
+            <Text style={styles.metaText}>{performance.venue.name}</Text>
           )}
           {performance.startDate && (
             <Text style={styles.metaText}>{formatDate(performance.startDate)}</Text>
