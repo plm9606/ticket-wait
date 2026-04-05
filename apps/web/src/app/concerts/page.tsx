@@ -10,8 +10,8 @@ import { api } from "@/lib/api";
 interface Performance {
   id: number;
   title: string;
-  artist: { id: number; name: string; nameEn: string | null } | null;
-  venue: string | null;
+  artists: Array<{ id: number; name: string; nameEn: string | null }>;
+  venue: { id: number; name: string } | null;
   startDate: string | null;
   endDate: string | null;
   source: string;

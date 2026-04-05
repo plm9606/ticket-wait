@@ -12,7 +12,7 @@ import { api } from "@/lib/api";
 interface Performance {
   id: number;
   title: string;
-  venue: string | null;
+  venue: { id: number; name: string } | null;
   startDate: string | null;
   endDate: string | null;
   source: string;

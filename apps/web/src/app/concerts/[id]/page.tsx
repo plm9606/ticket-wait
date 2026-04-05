@@ -11,7 +11,15 @@ import { api } from "@/lib/api";
 interface PerformanceDetail {
   id: number;
   title: string;
-  venue: string | null;
+  venue: {
+    id: number;
+    name: string;
+    address: string | null;
+    lat: number | null;
+    lng: number | null;
+    sido: string | null;
+    gugun: string | null;
+  } | null;
   startDate: string | null;
   endDate: string | null;
   ticketOpenDate: string | null;
@@ -20,14 +28,14 @@ interface PerformanceDetail {
   imageUrl: string | null;
   genre: string;
   status: string;
-  artist: {
+  artists: Array<{
     id: number;
     name: string;
     nameEn: string | null;
     imageUrl: string | null;
     aliases: string[];
     subscriberCount: number;
-  } | null;
+  }>;
 }
 
 function formatDate(dateStr: string | null) {
@@ -122,13 +130,14 @@ export default function ConcertDetailPage({
   }, [id, user, fetchSubs]);
 
   const handleToggle = async () => {
-    if (!performance?.artist || toggling) return;
+    const artist = performance?.artists[0];
+    if (!artist || toggling) return;
     setToggling(true);
     try {
-      if (isSubscribed(performance.artist.id)) {
-        await unsubscribe(performance.artist.id);
+      if (isSubscribed(artist.id)) {
+        await unsubscribe(artist.id);
       } else {
-        await subscribe(performance.artist.id);
+        await subscribe(artist.id);
       }
     } catch {
       // ignore
@@ -173,7 +182,7 @@ export default function ConcertDetailPage({
     );
   }
 
-  const subscribed = performance.artist ? isSubscribed(performance.artist.id) : false;
+  const subscribed = performance.artists[0] ? isSubscribed(performance.artists[0].id) : false;
   const dday = getDday(performance.ticketOpenDate);
 
   return (
@@ -202,7 +211,7 @@ export default function ConcertDetailPage({
               {performance.startDate && (
                 <span>{formatDate(performance.startDate)}</span>
               )}
-              {performance.venue && <span>{performance.venue}</span>}
+              {performance.venue && <span>{performance.venue.name}</span>}
             </div>
           </div>
         </div>
@@ -224,7 +233,7 @@ export default function ConcertDetailPage({
               </div>
             </div>
             <div className="flex gap-3">
-              {performance.artist && (
+              {performance.artists[0] && (
                 user ? (
                   <button
                     onClick={handleToggle}
@@ -284,7 +293,7 @@ export default function ConcertDetailPage({
               <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
                 Venue
               </span>
-              <p className="text-sm text-gray-800 mt-1">{performance.venue}</p>
+              <p className="text-sm text-gray-800 mt-1">{performance.venue.name}</p>
             </div>
           )}
           <div>
@@ -309,44 +318,44 @@ export default function ConcertDetailPage({
         </div>
 
         {/* 아티스트 섹션 */}
-        {performance.artist && (
+        {performance.artists[0] && (
           <div className="border-t border-gray-100 pt-10 pb-4">
             <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
               Artist
             </span>
             <div className="flex items-center gap-4 mt-6">
               <Link
-                href={`/artist/${performance.artist.id}`}
+                href={`/artist/${performance.artists[0].id}`}
                 className="shrink-0"
               >
                 <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
-                  {performance.artist.imageUrl ? (
+                  {performance.artists[0].imageUrl ? (
                     <img
-                      src={performance.artist.imageUrl}
-                      alt={performance.artist.name}
+                      src={performance.artists[0].imageUrl}
+                      alt={performance.artists[0].name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <span className="text-gray-300 text-lg">
-                      {performance.artist.name[0]}
+                      {performance.artists[0].name[0]}
                     </span>
                   )}
                 </div>
               </Link>
               <div className="flex-1 min-w-0">
                 <Link
-                  href={`/artist/${performance.artist.id}`}
+                  href={`/artist/${performance.artists[0].id}`}
                   className="font-bold text-[15px] hover:underline underline-offset-4"
                 >
-                  {performance.artist.name}
+                  {performance.artists[0].name}
                 </Link>
-                {performance.artist.nameEn && (
+                {performance.artists[0].nameEn && (
                   <p className="text-[11px] text-gray-400 tracking-wide mt-0.5">
-                    {performance.artist.nameEn}
+                    {performance.artists[0].nameEn}
                   </p>
                 )}
                 <p className="text-[11px] text-gray-300 mt-0.5">
-                  구독자 {performance.artist.subscriberCount}명
+                  구독자 {performance.artists[0].subscriberCount}명
                 </p>
               </div>
               <div className="shrink-0">
