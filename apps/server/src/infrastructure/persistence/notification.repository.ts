@@ -32,7 +32,7 @@ export class PrismaNotificationRepository implements INotificationRepository {
     const items = hasMore ? rows.slice(0, limit) : rows;
 
     return {
-      items: items.map((n) => ({
+      items: items.map((n: (typeof items)[number]) => ({
         id: n.id,
         type: n.type,
         read: !!n.readAt,
@@ -44,7 +44,7 @@ export class PrismaNotificationRepository implements INotificationRepository {
               source: n.performance.source,
               sourceUrl: n.performance.sourceUrl,
               imageUrl: n.performance.imageUrl,
-              artists: n.performance.performanceArtists.map((pa) => pa.artist),
+              artists: n.performance.performanceArtists.map((pa: (typeof n.performance.performanceArtists)[number]) => pa.artist),
             }
           : null,
       })),

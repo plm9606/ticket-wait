@@ -50,7 +50,7 @@ export class PrismaUserRepository implements IUserRepository {
       },
     });
 
-    return rows.map((s) => ({
+    return rows.map((s: (typeof rows)[number]) => ({
       ...toUser(s.user),
       fcmTokens: s.user.fcmTokens,
     }));

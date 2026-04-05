@@ -22,7 +22,7 @@ export class PrismaSubscriptionRepository implements ISubscriptionRepository {
       orderBy: { createdAt: "desc" },
     });
 
-    return rows.map((s) => ({
+    return rows.map((s: (typeof rows)[number]) => ({
       id: s.id,
       artistId: s.artist.id,
       name: s.artist.name,
@@ -39,7 +39,7 @@ export class PrismaSubscriptionRepository implements ISubscriptionRepository {
       select: { artistId: true },
     });
 
-    return rows.map((s) => s.artistId);
+    return rows.map((s: (typeof rows)[number]) => s.artistId);
   }
 
   async find(userId: number, artistId: number): Promise<Subscription | null> {
