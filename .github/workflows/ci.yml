@@ -31,6 +31,7 @@ jobs:
       KAKAO_REST_API_KEY: dummy
       KAKAO_CLIENT_SECRET: dummy
       KAKAO_REDIRECT_URI: http://localhost:4000/auth/kakao/callback
+      KAKAO_REDIRECT_URI_MOBILE: kakaoapp://oauth
 
     steps:
       - uses: actions/checkout@v4
