@@ -85,7 +85,7 @@ export class PrismaArtistRepository implements IArtistRepository {
       appleMusicId: row.appleMusicId,
       createdAt: row.createdAt,
       subscriberCount: row._count.subscriptions,
-      performances: row.performanceArtists.map((pa) => ({
+      performances: row.performanceArtists.map((pa: (typeof row.performanceArtists)[number]) => ({
         id: pa.performance.id,
         title: pa.performance.title,
         startDate: pa.performance.startDate,
@@ -115,6 +115,24 @@ export class PrismaArtistRepository implements IArtistRepository {
           { aliases: { has: name } },
         ],
       },
+      select: {
+        id: true,
+        name: true,
+        nameEn: true,
+        aliases: true,
+        imageUrl: true,
+        musicbrainzId: true,
+        appleMusicId: true,
+        createdAt: true,
+      },
+    });
+
+    return row ? toArtist(row) : null;
+  }
+
+  async findByMusicbrainzId(musicbrainzId: string): Promise<Artist | null> {
+    const row = await this.prisma.artist.findFirst({
+      where: { musicbrainzId },
       select: {
         id: true,
         name: true,

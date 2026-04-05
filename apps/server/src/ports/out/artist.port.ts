@@ -14,6 +14,7 @@ export interface IArtistRepository {
   findAllForMatching(): Promise<ArtistMatchData[]>;
   findAllWithoutImage(): Promise<Artist[]>;
   findByName(name: string): Promise<Artist | null>;
+  findByMusicbrainzId(musicbrainzId: string): Promise<Artist | null>;
   create(data: CreateArtistInput): Promise<Artist>;
   update(id: number, data: UpdateArtistInput): Promise<void>;
 }

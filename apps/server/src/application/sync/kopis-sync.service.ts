@@ -1,7 +1,7 @@
 import type { IArtistRepository } from "../../ports/out/artist.port.js";
 import type { IPerformanceRepository } from "../../ports/out/performance.port.js";
 import type { IVenueRepository } from "../../ports/out/venue.port.js";
-import type { ISyncLogRepository } from "../../ports/out/sync-log.port.js";
+import type { ISyncLogRepository, SyncCheckpoint } from "../../ports/out/sync-log.port.js";
 import type { ISyncDlqRepository } from "../../ports/out/sync-dlq.port.js";
 import type { INotificationUseCase } from "../../ports/in/notification.use-case.js";
 import type { ICreateArtistUseCase } from "../../ports/in/create-artist.use-case.js";
@@ -144,6 +144,13 @@ export class KopisSyncService {
   }
 
   async syncPerformances(): Promise<void> {
+    // 이전 실패 로그에서 체크포인트 복원
+    const failedLog = await this.syncLogs.findLastFailed("KOPIS");
+    const resumeFrom: SyncCheckpoint | null = failedLog?.checkpoint ?? null;
+    if (resumeFrom) {
+      console.log(`[PerformanceSync] 이전 실패 감지 (logId=${failedLog!.id}), 장르 ${resumeFrom.genreIndex} / 윈도우 ${resumeFrom.windowIndex}부터 재개`);
+    }
+
     const log = await this.syncLogs.create("KOPIS");
     console.log(`[PerformanceSync] 시작 (logId=${log.id})`);
 
@@ -160,10 +167,13 @@ export class KopisSyncService {
       console.log(`[PerformanceSync] 장르 ${genreCount}개 × 날짜 윈도우 ${windows.length}개`);
 
       for (let gi = 0; gi < SYNC_GENRE_CODES.length; gi++) {
+        if (resumeFrom && gi < resumeFrom.genreIndex) continue;
+
         const shcate = SYNC_GENRE_CODES[gi];
         console.log(`[PerformanceSync] 장르 [${gi + 1}/${genreCount}] ${shcate} 시작`);
 
         for (let wi = 0; wi < windows.length; wi++) {
+          if (resumeFrom && gi === resumeFrom.genreIndex && wi < resumeFrom.windowIndex) continue;
           const { stdate, eddate } = windows[wi];
           let page = 1;
           let windowFound = 0;
@@ -219,6 +229,7 @@ export class KopisSyncService {
           }
 
           console.log(`[PerformanceSync]   윈도우 [${wi + 1}/${windows.length}] ${stdate}~${eddate} 완료: ${windowFound}건`);
+          await this.syncLogs.saveCheckpoint(log.id, { genreIndex: gi, windowIndex: wi + 1 });
         }
 
         console.log(`[PerformanceSync] 장르 ${shcate} 완료 (누적: ${totalFound}건 조회, ${totalNew}건 신규, ${totalUpdated}건 업데이트)`);
