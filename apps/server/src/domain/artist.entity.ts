@@ -41,4 +41,15 @@ export interface CreateArtistInput {
   name: string;
   nameEn?: string | null;
   aliases?: string[];
+  musicbrainzId?: string | null;
+  appleMusicId?: number | null;
+  imageUrl?: string | null;
+}
+
+export interface UpdateArtistInput {
+  nameEn?: string | null;
+  imageUrl?: string | null;
+  appleMusicId?: number | null;
+  aliases?: string[];
+  musicbrainzId?: string | null;
 }

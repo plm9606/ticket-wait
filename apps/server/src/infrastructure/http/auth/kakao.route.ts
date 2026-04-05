@@ -1,18 +1,14 @@
 import type { FastifyInstance } from "fastify";
-import {
-  getAuthorizationUrl,
-  exchangeCode,
-  getUserProfile,
-} from "../../external/kakao.adapter.js";
+import type { IKakaoAuthPort } from "../../../ports/out/kakao-auth.port.js";
 import type { IUserRepository } from "../../../ports/out/user.port.js";
 import { env } from "../../../config/env.js";
 
 export async function kakaoAuthRoutes(
   fastify: FastifyInstance,
-  { userRepository }: { userRepository: IUserRepository }
+  { userRepository, kakaoAuth }: { userRepository: IUserRepository; kakaoAuth: IKakaoAuthPort }
 ) {
   fastify.get("/auth/kakao", async (_request, reply) => {
-    reply.redirect(getAuthorizationUrl());
+    reply.redirect(kakaoAuth.getAuthorizationUrl());
   });
 
   fastify.get<{ Querystring: { code: string } }>(
@@ -24,8 +20,8 @@ export async function kakaoAuthRoutes(
         return reply.status(400).send({ error: "Missing authorization code" });
       }
 
-      const tokenData = await exchangeCode(code);
-      const profile = await getUserProfile(tokenData.access_token);
+      const tokenData = await kakaoAuth.exchangeCode(code);
+      const profile = await kakaoAuth.getUserProfile(tokenData.access_token);
       const user = await userRepository.upsert(profile);
 
       const token = fastify.jwt.sign({ userId: user.id });
@@ -46,7 +42,7 @@ export async function kakaoAuthRoutes(
     if (!env.KAKAO_REDIRECT_URI_MOBILE) {
       return reply.status(500).send({ error: "Mobile OAuth not configured" });
     }
-    reply.redirect(getAuthorizationUrl(env.KAKAO_REDIRECT_URI_MOBILE));
+    reply.redirect(kakaoAuth.getAuthorizationUrl(env.KAKAO_REDIRECT_URI_MOBILE));
   });
 
   fastify.get<{ Querystring: { code: string } }>(
@@ -58,8 +54,8 @@ export async function kakaoAuthRoutes(
         return reply.status(400).send({ error: "Missing authorization code" });
       }
 
-      const tokenData = await exchangeCode(code, env.KAKAO_REDIRECT_URI_MOBILE);
-      const profile = await getUserProfile(tokenData.access_token);
+      const tokenData = await kakaoAuth.exchangeCode(code, env.KAKAO_REDIRECT_URI_MOBILE);
+      const profile = await kakaoAuth.getUserProfile(tokenData.access_token);
       const user = await userRepository.upsert(profile);
 
       const token = fastify.jwt.sign({ userId: user.id });

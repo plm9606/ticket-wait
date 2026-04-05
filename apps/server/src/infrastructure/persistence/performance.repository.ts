@@ -9,6 +9,16 @@ import type {
   UpsertPerformanceInput,
 } from "../../domain/performance.entity.js";
 
+const artistSelect = { id: true, name: true, nameEn: true } as const;
+const artistDetailSelect = {
+  id: true,
+  name: true,
+  nameEn: true,
+  imageUrl: true,
+  aliases: true,
+  _count: { select: { subscriptions: true } },
+} as const;
+
 export class PrismaPerformanceRepository implements IPerformanceRepository {
   constructor(private prisma: PrismaClient) {}
 
@@ -25,7 +35,7 @@ export class PrismaPerformanceRepository implements IPerformanceRepository {
     const rows = await this.prisma.performance.findMany({
       where,
       include: {
-        artist: { select: { id: true, name: true, nameEn: true } },
+        performanceArtists: { include: { artist: { select: artistSelect } } },
         venue: { select: { id: true, name: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -40,15 +50,8 @@ export class PrismaPerformanceRepository implements IPerformanceRepository {
     const row = await this.prisma.performance.findUnique({
       where: { id },
       include: {
-        artist: {
-          select: {
-            id: true,
-            name: true,
-            nameEn: true,
-            imageUrl: true,
-            aliases: true,
-            _count: { select: { subscriptions: true } },
-          },
+        performanceArtists: {
+          include: { artist: { select: artistDetailSelect } },
         },
         venue: true,
       },
@@ -58,16 +61,14 @@ export class PrismaPerformanceRepository implements IPerformanceRepository {
 
     return {
       ...toPerformance(row),
-      artist: row.artist
-        ? {
-            id: row.artist.id,
-            name: row.artist.name,
-            nameEn: row.artist.nameEn,
-            imageUrl: row.artist.imageUrl,
-            aliases: row.artist.aliases,
-            subscriberCount: row.artist._count.subscriptions,
-          }
-        : null,
+      artists: row.performanceArtists.map((pa) => ({
+        id: pa.artist.id,
+        name: pa.artist.name,
+        nameEn: pa.artist.nameEn,
+        imageUrl: pa.artist.imageUrl,
+        aliases: pa.artist.aliases,
+        subscriberCount: pa.artist._count.subscriptions,
+      })),
       venue: row.venue
         ? {
             id: row.venue.id,
@@ -84,7 +85,7 @@ export class PrismaPerformanceRepository implements IPerformanceRepository {
 
   async findByArtist(artistId: number, limit: number): Promise<Performance[]> {
     const rows = await this.prisma.performance.findMany({
-      where: { artistId },
+      where: { performanceArtists: { some: { artistId } } },
       orderBy: { startDate: "desc" },
       take: limit,
     });
@@ -98,9 +99,9 @@ export class PrismaPerformanceRepository implements IPerformanceRepository {
     cursor?: number
   ): Promise<CursorPage<PerformanceListItem>> {
     const rows = await this.prisma.performance.findMany({
-      where: { artistId: { in: artistIds } },
+      where: { performanceArtists: { some: { artistId: { in: artistIds } } } },
       include: {
-        artist: { select: { id: true, name: true, nameEn: true } },
+        performanceArtists: { include: { artist: { select: artistSelect } } },
         venue: { select: { id: true, name: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -126,11 +127,13 @@ export class PrismaPerformanceRepository implements IPerformanceRepository {
           venueId: data.venueId,
           imageUrl: data.imageUrl,
           sourceUrl: data.sourceUrl,
-          artistId: data.artistId,
           genre: data.genre,
           status: data.status,
         },
       });
+      if (data.artistIds.length > 0) {
+        await this.syncArtists(existing.id, data.artistIds);
+      }
       return { performance: toPerformance(updated), isNew: false };
     }
 
@@ -142,7 +145,6 @@ export class PrismaPerformanceRepository implements IPerformanceRepository {
         source: data.source,
         sourceId: data.sourceId,
         sourceUrl: data.sourceUrl,
-        artistId: data.artistId,
         venueId: data.venueId,
         startDate: data.startDate,
         endDate: data.endDate,
@@ -152,29 +154,33 @@ export class PrismaPerformanceRepository implements IPerformanceRepository {
       },
     });
 
+    if (data.artistIds.length > 0) {
+      await this.prisma.performanceArtist.createMany({
+        data: data.artistIds.map((artistId) => ({ performanceId: created.id, artistId })),
+        skipDuplicates: true,
+      });
+    }
+
     return { performance: toPerformance(created), isNew: true };
   }
 
   async findUnmatched(): Promise<Array<{ id: number; title: string }>> {
     return this.prisma.performance.findMany({
-      where: { artistId: null },
+      where: { performanceArtists: { none: {} } },
       select: { id: true, title: true },
     });
   }
 
-  async updateArtist(id: number, artistId: number): Promise<void> {
-    await this.prisma.performance.update({
-      where: { id },
-      data: { artistId },
-    });
+  async setArtists(id: number, artistIds: number[]): Promise<void> {
+    await this.syncArtists(id, artistIds);
   }
 
   async findWithTicketOpenToday(): Promise<
     Array<{
       id: number;
       title: string;
-      artistId: number;
-      artist: { name: string } | null;
+      artistIds: number[];
+      artists: Array<{ id: number; name: string }>;
       imageUrl: string | null;
       sourceUrl: string;
     }>
@@ -187,21 +193,33 @@ export class PrismaPerformanceRepository implements IPerformanceRepository {
     const rows = await this.prisma.performance.findMany({
       where: {
         ticketOpenDate: { gte: today, lt: tomorrow },
-        artistId: { not: null },
+        performanceArtists: { some: {} },
       },
-      include: { artist: { select: { name: true } } },
+      include: {
+        performanceArtists: {
+          include: { artist: { select: { id: true, name: true } } },
+        },
+      },
     });
 
-    return rows
-      .filter((r) => r.artistId !== null)
-      .map((r) => ({
-        id: r.id,
-        title: r.title,
-        artistId: r.artistId as number,
-        artist: r.artist,
-        imageUrl: r.imageUrl,
-        sourceUrl: r.sourceUrl,
-      }));
+    return rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      artistIds: r.performanceArtists.map((pa) => pa.artistId),
+      artists: r.performanceArtists.map((pa) => pa.artist),
+      imageUrl: r.imageUrl,
+      sourceUrl: r.sourceUrl,
+    }));
+  }
+
+  private async syncArtists(performanceId: number, artistIds: number[]): Promise<void> {
+    await this.prisma.performanceArtist.deleteMany({ where: { performanceId } });
+    if (artistIds.length > 0) {
+      await this.prisma.performanceArtist.createMany({
+        data: artistIds.map((artistId) => ({ performanceId, artistId })),
+        skipDuplicates: true,
+      });
+    }
   }
 }
 
@@ -210,7 +228,6 @@ function toPerformance(row: {
   title: string;
   rawTitle: string;
   kopisId: string | null;
-  artistId: number | null;
   venueId: number | null;
   startDate: Date | null;
   endDate: Date | null;
@@ -228,7 +245,6 @@ function toPerformance(row: {
     title: row.title,
     rawTitle: row.rawTitle,
     kopisId: row.kopisId,
-    artistId: row.artistId,
     venueId: row.venueId,
     startDate: row.startDate,
     endDate: row.endDate,
@@ -248,7 +264,6 @@ function toListItem(row: {
   title: string;
   rawTitle: string;
   kopisId: string | null;
-  artistId: number | null;
   venueId: number | null;
   startDate: Date | null;
   endDate: Date | null;
@@ -260,12 +275,12 @@ function toListItem(row: {
   genre: string;
   status: string;
   createdAt: Date;
-  artist: { id: number; name: string; nameEn: string | null } | null;
+  performanceArtists: Array<{ artist: { id: number; name: string; nameEn: string | null } }>;
   venue: { id: number; name: string } | null;
 }): PerformanceListItem {
   return {
     ...toPerformance(row),
-    artist: row.artist,
+    artists: row.performanceArtists.map((pa) => pa.artist),
     venue: row.venue,
   };
 }

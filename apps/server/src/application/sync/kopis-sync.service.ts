@@ -2,16 +2,10 @@ import type { IArtistRepository } from "../../ports/out/artist.port.js";
 import type { IPerformanceRepository } from "../../ports/out/performance.port.js";
 import type { IVenueRepository } from "../../ports/out/venue.port.js";
 import type { ISyncLogRepository } from "../../ports/out/sync-log.port.js";
+import type { ISyncDlqRepository } from "../../ports/out/sync-dlq.port.js";
 import type { INotificationUseCase } from "../../ports/in/notification.use-case.js";
-import {
-  listPerformances,
-  listFacilities,
-  getPerformance,
-  getFacility,
-  type GenreCode,
-  type PerformanceDetail,
-} from "../../infrastructure/external/kopis.adapter.js";
-import { ArtistMatcher } from "./artist-matcher.js";
+import type { IEnrichArtistUseCase } from "../../ports/in/enrich-artist.use-case.js";
+import type { IKopisPort, GenreCode, PerformanceDetail } from "../../ports/out/kopis.port.js";
 import { classifyGenre } from "./genre-classifier.js";
 import { upsertPerformances } from "./performance-upsert.js";
 import type { PerformanceGenre } from "../../domain/enums.js";
@@ -74,25 +68,27 @@ export function parseCastNames(prfcast: string | null | undefined): string[] {
 }
 
 export class KopisSyncService {
-  private matcher: ArtistMatcher;
   private venueCache = new Map<string, number>();
 
   constructor(
+    private kopis: IKopisPort,
     private artists: IArtistRepository,
     private performances: IPerformanceRepository,
     private venues: IVenueRepository,
     private syncLogs: ISyncLogRepository,
-    private notifications: INotificationUseCase
-  ) {
-    this.matcher = new ArtistMatcher(artists);
-  }
+    private syncDlq: ISyncDlqRepository,
+    private notifications: INotificationUseCase,
+    private enrichArtist?: IEnrichArtistUseCase
+  ) {}
 
   async syncVenues(): Promise<void> {
     const log = await this.syncLogs.create("KOPIS_VENUE");
+    console.log(`[VenueSync] 시작 (logId=${log.id})`);
 
     try {
       const lastSuccess = await this.syncLogs.findLastSuccess("KOPIS_VENUE");
       const afterdate = lastSuccess ? formatDate(lastSuccess.startedAt) : undefined;
+      console.log(`[VenueSync] 기준일: ${afterdate ?? "전체"}`);
 
       let itemsFound = 0;
       let newItems = 0;
@@ -100,13 +96,17 @@ export class KopisSyncService {
       let page = 1;
 
       while (true) {
-        const facilities = await listFacilities({ cpage: page, rows: 100, afterdate });
+        const facilities = await this.kopis.listFacilities({ cpage: page, rows: 100, afterdate });
         if (facilities.length === 0) break;
         itemsFound += facilities.length;
+        console.log(`[VenueSync] p${page}: ${facilities.length}건 조회 (누적 ${itemsFound}건)`);
 
         for (const f of facilities) {
-          const detail = await getFacility(f.mt10id);
-          if (!detail) continue;
+          const detail = await this.kopis.getFacility(f.mt10id);
+          if (!detail) {
+            console.log(`[VenueSync]   ${f.mt10id} 상세 조회 실패, 스킵`);
+            continue;
+          }
 
           const existing = await this.venues.findByKopisId(f.mt10id);
           await this.venues.upsert({
@@ -122,8 +122,13 @@ export class KopisSyncService {
             gugun: detail.gugunnm || null,
           });
 
-          if (existing) updatedItems++;
-          else newItems++;
+          if (existing) {
+            updatedItems++;
+            console.log(`[VenueSync]   ~ 업데이트: ${detail.fcltynm}`);
+          } else {
+            newItems++;
+            console.log(`[VenueSync]   + 신규: ${detail.fcltynm}`);
+          }
         }
 
         if (facilities.length < 100) break;
@@ -131,18 +136,18 @@ export class KopisSyncService {
       }
 
       await this.syncLogs.markSuccess(log.id, { itemsFound, newItems, updatedItems });
-      console.log(`[VenueSync] Done: ${itemsFound} found, ${newItems} new, ${updatedItems} updated`);
+      console.log(`[VenueSync] 완료: ${itemsFound}건 조회, ${newItems}건 신규, ${updatedItems}건 업데이트`);
     } catch (error) {
       await this.syncLogs.markFailed(log.id, error instanceof Error ? error.message : String(error));
-      console.error("[VenueSync] Failed:", error);
+      console.error("[VenueSync] 실패:", error);
     }
   }
 
   async syncPerformances(): Promise<void> {
     const log = await this.syncLogs.create("KOPIS");
+    console.log(`[PerformanceSync] 시작 (logId=${log.id})`);
 
     try {
-      this.matcher.clearCache();
       this.venueCache.clear();
 
       let totalFound = 0;
@@ -151,22 +156,35 @@ export class KopisSyncService {
       const allNewIds: number[] = [];
 
       const windows = buildDateWindows();
+      const genreCount = SYNC_GENRE_CODES.length;
+      console.log(`[PerformanceSync] 장르 ${genreCount}개 × 날짜 윈도우 ${windows.length}개`);
 
-      for (const shcate of SYNC_GENRE_CODES) {
-        for (const { stdate, eddate } of windows) {
+      for (let gi = 0; gi < SYNC_GENRE_CODES.length; gi++) {
+        const shcate = SYNC_GENRE_CODES[gi];
+        console.log(`[PerformanceSync] 장르 [${gi + 1}/${genreCount}] ${shcate} 시작`);
+
+        for (let wi = 0; wi < windows.length; wi++) {
+          const { stdate, eddate } = windows[wi];
           let page = 1;
+          let windowFound = 0;
 
           while (true) {
-            const summaries = await listPerformances({ stdate, eddate, shcate, rows: 100, cpage: page });
+            const summaries = await this.kopis.listPerformances({ stdate, eddate, shcate, rows: 100, cpage: page });
             if (summaries.length === 0) break;
             totalFound += summaries.length;
+            windowFound += summaries.length;
+            console.log(`[PerformanceSync]   ${stdate}~${eddate} p${page}: ${summaries.length}건 조회`);
 
-            for (const summary of summaries) {
-              const detail = await getPerformance(summary.mt20id);
-              if (!detail) continue;
+            for (let si = 0; si < summaries.length; si++) {
+              const summary = summaries[si];
+              const detail = await this.kopis.getPerformance(summary.mt20id);
+              if (!detail) {
+                console.log(`[PerformanceSync]     ${summary.mt20id} 상세 조회 실패, 스킵`);
+                continue;
+              }
 
               const genre = mapGenre(shcate, detail.prfnm);
-              const artistId = await this.matchArtistForPerformance(detail);
+              const artistIds = await this.matchArtistsForPerformance(detail);
               const venueId = detail.mt10id ? await this.upsertVenue(detail.mt10id, detail.fcltynm) : null;
 
               const { newIds, updatedCount } = await upsertPerformances(
@@ -179,11 +197,17 @@ export class KopisSyncService {
                   poster: detail.poster,
                   relates: detail.relates,
                   genre,
-                  artistId,
+                  artistIds,
                   venueId,
                 },
                 this.performances
               );
+
+              if (newIds.length > 0) {
+                console.log(`[PerformanceSync]     + 신규: ${detail.prfnm} (${detail.mt20id})`);
+              } else if (updatedCount > 0) {
+                console.log(`[PerformanceSync]     ~ 업데이트: ${detail.prfnm} (${detail.mt20id})`);
+              }
 
               totalNew += newIds.length;
               totalUpdated += updatedCount;
@@ -193,12 +217,17 @@ export class KopisSyncService {
             if (summaries.length < 100) break;
             page++;
           }
+
+          console.log(`[PerformanceSync]   윈도우 [${wi + 1}/${windows.length}] ${stdate}~${eddate} 완료: ${windowFound}건`);
         }
+
+        console.log(`[PerformanceSync] 장르 ${shcate} 완료 (누적: ${totalFound}건 조회, ${totalNew}건 신규, ${totalUpdated}건 업데이트)`);
       }
 
       if (allNewIds.length > 0) {
+        console.log(`[PerformanceSync] 푸시 알림 발송 중 (${allNewIds.length}건)...`);
         const sent = await this.notifications.notifyNewPerformances(allNewIds);
-        console.log(`[PerformanceSync] ${sent} push notifications sent`);
+        console.log(`[PerformanceSync] 푸시 알림 ${sent}건 발송 완료`);
       }
 
       await this.syncLogs.markSuccess(log.id, {
@@ -206,20 +235,49 @@ export class KopisSyncService {
         newItems: totalNew,
         updatedItems: totalUpdated,
       });
-      console.log(`[PerformanceSync] Done: ${totalFound} found, ${totalNew} new, ${totalUpdated} updated`);
+      console.log(`[PerformanceSync] 완료: ${totalFound}건 조회, ${totalNew}건 신규, ${totalUpdated}건 업데이트`);
     } catch (error) {
       await this.syncLogs.markFailed(log.id, error instanceof Error ? error.message : String(error));
-      console.error("[PerformanceSync] Failed:", error);
+      console.error("[PerformanceSync] 실패:", error);
     }
   }
 
-  private async matchArtistForPerformance(detail: PerformanceDetail): Promise<number | null> {
+  private async matchArtistsForPerformance(detail: PerformanceDetail): Promise<number[]> {
     const castNames = parseCastNames(detail.prfcast);
-    for (const name of castNames) {
-      const artistId = await this.matcher.matchArtist(name);
-      if (artistId) return artistId;
+    const prfnm = detail.prfnm?.trim();
+
+    if (castNames.length === 0 || !prfnm) {
+      console.error(`[PerformanceSync] prfnm or prfcast 없음 (kopisId=${detail.mt20id}), DLQ 저장`);
+      await this.syncDlq.upsert({
+        kopisId: detail.mt20id,
+        reason: "prfnm or prfcast is null or empty",
+        rawData: detail as unknown as object,
+      });
+      return [];
     }
-    return this.matcher.matchArtist(detail.prfnm);
+
+    // 각 캐스트 이름별로 매칭 시도, 없으면 신규 생성
+    const artistIds: number[] = [];
+    for (const name of castNames) {
+      const existing = await this.artists.findByName(name);
+      if (existing) {
+        artistIds.push(existing.id);
+      } else {
+        const isEnglish = /^[a-zA-Z0-9\s\-.]+$/.test(name);
+        const newArtist = await this.artists.create({
+          name,
+          nameEn: isEnglish ? name : null,
+          aliases: [],
+        });
+        console.log(`[PerformanceSync] 신규 아티스트 생성: ${name}`);
+        if (this.enrichArtist) {
+          await this.enrichArtist.enrichOne(newArtist.id);
+        }
+        artistIds.push(newArtist.id);
+      }
+    }
+
+    return artistIds;
   }
 
   private async upsertVenue(mt10id: string, fallbackName: string): Promise<number> {
@@ -232,7 +290,7 @@ export class KopisSyncService {
       return existing.id;
     }
 
-    const facility = await getFacility(mt10id);
+    const facility = await this.kopis.getFacility(mt10id);
     const venue = await this.venues.upsert({
       name: facility?.fcltynm ?? fallbackName,
       kopisId: mt10id,

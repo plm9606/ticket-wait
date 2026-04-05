@@ -57,7 +57,7 @@ export interface PerformanceUpsertParams {
   poster: string;
   relates: RelateLink[];
   genre: PerformanceGenre;
-  artistId: number | null;
+  artistIds: number[];
   venueId: number | null;
 }
 
@@ -89,7 +89,7 @@ export async function upsertPerformances(
       source,
       sourceId,
       sourceUrl: relate.relateurl,
-      artistId: params.artistId,
+      artistIds: params.artistIds,
       venueId: params.venueId,
       startDate,
       endDate,
@@ -98,7 +98,7 @@ export async function upsertPerformances(
       status,
     });
 
-    if (isNew && params.artistId) {
+    if (isNew && params.artistIds.length > 0) {
       newIds.push(performance.id);
     } else if (!isNew) {
       updatedCount++;

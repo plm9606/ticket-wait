@@ -262,7 +262,7 @@ async function main() {
 
   for (const perf of performances) {
     const artistId = artistMap.get(perf.artistName) ?? null;
-    await prisma.performance.upsert({
+    const created = await prisma.performance.upsert({
       where: {
         source_sourceId: {
           source: perf.source,
@@ -279,7 +279,6 @@ async function main() {
       },
       create: {
         title: perf.title,
-        artistId,
         startDate: perf.startDate,
         endDate: perf.endDate,
         ticketOpenDate: perf.ticketOpenDate,
@@ -292,6 +291,13 @@ async function main() {
         status: perf.status as any,
       },
     });
+    if (artistId) {
+      await prisma.performanceArtist.upsert({
+        where: { performanceId_artistId: { performanceId: created.id, artistId } },
+        update: {},
+        create: { performanceId: created.id, artistId },
+      });
+    }
   }
 
   console.log(`Seeded ${performances.length} performances.`);

@@ -13,12 +13,20 @@ import { PrismaNotificationRepository } from "./infrastructure/persistence/notif
 import { PrismaUserRepository } from "./infrastructure/persistence/user.repository.js";
 import { PrismaVenueRepository } from "./infrastructure/persistence/venue.repository.js";
 import { PrismaSyncLogRepository } from "./infrastructure/persistence/sync-log.repository.js";
+import { PrismaSyncDlqRepository } from "./infrastructure/persistence/sync-dlq.repository.js";
 
 // Infrastructure — External
 import { FcmAdapter } from "./infrastructure/external/fcm.adapter.js";
+import { KopisAdapter } from "./infrastructure/external/kopis.adapter.js";
+import { KakaoAdapter } from "./infrastructure/external/kakao.adapter.js";
+import { MusicBrainzAdapter } from "./infrastructure/external/musicbrainz.adapter.js";
+import { AppleMusicAdapter } from "./infrastructure/external/apple-music.adapter.js";
+import { WikidataAdapter } from "./infrastructure/external/wikidata.adapter.js";
+import { ImageEnrichmentAdapter } from "./infrastructure/external/image-enrichment.adapter.js";
 
 // Application Services
 import { ArtistService } from "./application/artist/artist.service.js";
+import { EnrichArtistService } from "./application/artist/enrich-artist.service.js";
 import { PerformanceService } from "./application/performance/performance.service.js";
 import { SubscriptionService } from "./application/subscription/subscription.service.js";
 import { NotificationService } from "./application/notification/notification.service.js";
@@ -52,19 +60,27 @@ export async function buildApp() {
   const userRepo = new PrismaUserRepository(prisma);
   const venueRepo = new PrismaVenueRepository(prisma);
   const syncLogRepo = new PrismaSyncLogRepository(prisma);
+  const syncDlqRepo = new PrismaSyncDlqRepository(prisma);
 
-  // External adapters
+  // External adapters (leaf dependencies first)
   const fcm = new FcmAdapter();
+  const kopis = new KopisAdapter();
+  const kakaoAuth = new KakaoAdapter();
+  const musicbrainz = new MusicBrainzAdapter();
+  const appleMusic = new AppleMusicAdapter();
+  const wikidata = new WikidataAdapter(musicbrainz);
+  const imageEnrichment = new ImageEnrichmentAdapter(appleMusic, wikidata);
 
   // Application services
   const artistService = new ArtistService(artistRepo);
+  const enrichArtistService = new EnrichArtistService(artistRepo, imageEnrichment);
   const subscriptionService = new SubscriptionService(subscriptionRepo, artistRepo);
   const notificationService = new NotificationService(notificationRepo, userRepo, performanceRepo, fcm);
   const performanceService = new PerformanceService(performanceRepo, subscriptionRepo);
-  const syncService = new KopisSyncService(artistRepo, performanceRepo, venueRepo, syncLogRepo, notificationService);
+  const syncService = new KopisSyncService(kopis, artistRepo, performanceRepo, venueRepo, syncLogRepo, syncDlqRepo, notificationService, enrichArtistService);
 
   // ─── Routes ───────────────────────────────────────────────────────────────
-  await fastify.register(kakaoAuthRoutes, { userRepository: userRepo });
+  await fastify.register(kakaoAuthRoutes, { userRepository: userRepo, kakaoAuth });
   await fastify.register(artistRoutes, { artistService });
   await fastify.register(subscriptionRoutes, { subscriptionService });
   await fastify.register(performanceRoutes, { performanceService, artistService });

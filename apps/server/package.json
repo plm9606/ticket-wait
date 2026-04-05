@@ -10,7 +10,8 @@
     "lint": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:musicbrainz": "tsx src/scripts/seed-from-musicbrainz.ts"
+    "seed:musicbrainz": "tsx src/scripts/seed-from-musicbrainz.ts",
+    "sync:performances": "tsx --env-file=../../.env src/scripts/sync-performances.ts"
   },
   "dependencies": {
     "@concert-alert/shared": "workspace:*",

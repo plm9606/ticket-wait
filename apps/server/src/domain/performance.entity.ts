@@ -5,7 +5,6 @@ export interface Performance {
   title: string;
   rawTitle: string;
   kopisId: string | null;
-  artistId: number | null;
   venueId: number | null;
   startDate: Date | null;
   endDate: Date | null;
@@ -20,19 +19,19 @@ export interface Performance {
 }
 
 export interface PerformanceListItem extends Performance {
-  artist: { id: number; name: string; nameEn: string | null } | null;
+  artists: Array<{ id: number; name: string; nameEn: string | null }>;
   venue: { id: number; name: string } | null;
 }
 
 export interface PerformanceDetail extends Performance {
-  artist: {
+  artists: Array<{
     id: number;
     name: string;
     nameEn: string | null;
     imageUrl: string | null;
     aliases: string[];
     subscriberCount: number;
-  } | null;
+  }>;
   venue: {
     id: number;
     name: string;
@@ -62,7 +61,7 @@ export interface UpsertPerformanceInput {
   source: TicketSource;
   sourceId: string;
   sourceUrl: string;
-  artistId: number | null;
+  artistIds: number[];
   venueId: number | null;
   startDate: Date | null;
   endDate: Date | null;

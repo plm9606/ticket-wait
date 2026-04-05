@@ -17,7 +17,9 @@ export class PrismaNotificationRepository implements INotificationRepository {
             source: true,
             sourceUrl: true,
             imageUrl: true,
-            artist: { select: { id: true, name: true, nameEn: true } },
+            performanceArtists: {
+              select: { artist: { select: { id: true, name: true, nameEn: true } } },
+            },
           },
         },
       },
@@ -42,7 +44,7 @@ export class PrismaNotificationRepository implements INotificationRepository {
               source: n.performance.source,
               sourceUrl: n.performance.sourceUrl,
               imageUrl: n.performance.imageUrl,
-              artist: n.performance.artist,
+              artists: n.performance.performanceArtists.map((pa) => pa.artist),
             }
           : null,
       })),

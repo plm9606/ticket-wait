@@ -36,13 +36,20 @@ export class NotificationService implements INotificationUseCase {
 
   async notifyNewPerformance(performanceId: number): Promise<number> {
     const performance = await this.performances.findById(performanceId);
-    if (!performance || !performance.artistId || !performance.artist) return 0;
+    if (!performance || performance.artists.length === 0) return 0;
 
-    const subscribers = await this.users.findSubscribersByArtist(performance.artistId);
-    if (subscribers.length === 0) return 0;
+    // 모든 아티스트 구독자를 수집 (중복 제거)
+    const subscriberMap = new Map<number, Awaited<ReturnType<typeof this.users.findSubscribersByArtist>>[number]>();
+    for (const artist of performance.artists) {
+      const subs = await this.users.findSubscribersByArtist(artist.id);
+      for (const sub of subs) subscriberMap.set(sub.id, sub);
+    }
+    if (subscriberMap.size === 0) return 0;
 
+    const primaryArtist = performance.artists[0];
     let sentCount = 0;
-    for (const user of subscribers) {
+
+    for (const user of subscriberMap.values()) {
       await this.notifications.create({
         userId: user.id,
         performanceId: performance.id,
@@ -52,14 +59,14 @@ export class NotificationService implements INotificationUseCase {
       const tokens = user.fcmTokens.map((t) => t.token);
       if (tokens.length > 0) {
         const result = await this.push.sendPushBatch(tokens, {
-          title: `${performance.artist.name} 새 공연!`,
+          title: `${primaryArtist.name} 새 공연!`,
           body: performance.title,
           imageUrl: performance.imageUrl || undefined,
           data: {
             type: "NEW_CONCERT",
             performanceId: String(performance.id),
-            artistId: String(performance.artistId),
-            url: `/artist/${performance.artistId}`,
+            artistId: String(primaryArtist.id),
+            url: `/artist/${primaryArtist.id}`,
           },
         });
         sentCount += result.success;
@@ -85,9 +92,15 @@ export class NotificationService implements INotificationUseCase {
     let sentCount = 0;
 
     for (const perf of performances) {
-      const subscribers = await this.users.findSubscribersByArtist(perf.artistId);
+      const subscriberMap = new Map<number, Awaited<ReturnType<typeof this.users.findSubscribersByArtist>>[number]>();
+      for (const artistId of perf.artistIds) {
+        const subs = await this.users.findSubscribersByArtist(artistId);
+        for (const sub of subs) subscriberMap.set(sub.id, sub);
+      }
 
-      for (const user of subscribers) {
+      const primaryArtistName = perf.artists[0]?.name ?? "";
+
+      for (const user of subscriberMap.values()) {
         const alreadySent = await this.notifications.existsForUserPerformance(
           user.id,
           perf.id,
@@ -105,7 +118,7 @@ export class NotificationService implements INotificationUseCase {
         if (tokens.length > 0) {
           const result = await this.push.sendPushBatch(tokens, {
             title: "오늘 티켓 오픈!",
-            body: `${perf.artist?.name ?? ""} - ${perf.title}`,
+            body: `${primaryArtistName} - ${perf.title}`,
             imageUrl: perf.imageUrl || undefined,
             data: {
               type: "TICKET_OPEN_SOON",

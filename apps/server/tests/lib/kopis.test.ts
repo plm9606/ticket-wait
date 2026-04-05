@@ -3,7 +3,7 @@ import axios from "axios";
 
 vi.mock("axios");
 vi.mock("../../src/config/env.js", () => ({
-  env: { KOPIS_SERVICE_KEY: "test-service-key" },
+  env: { KOPIS_KEY: "test-service-key" },
 }));
 
 const mockedGet = vi.mocked(axios.get);
@@ -152,8 +152,14 @@ const FACILITY_DETAIL_XML = `<?xml version="1.0" encoding="UTF-8"?>
 </dbs>`;
 
 // import는 mock 이후에
-const { listPerformances, getPerformance, listFacilities, getFacility } =
-  await import("../../src/infrastructure/external/kopis.adapter.js");
+const { KopisAdapter } = await import("../../src/infrastructure/external/kopis.adapter.js");
+const adapter = new KopisAdapter();
+const { listPerformances, getPerformance, listFacilities, getFacility } = {
+  listPerformances: adapter.listPerformances.bind(adapter),
+  getPerformance: adapter.getPerformance.bind(adapter),
+  listFacilities: adapter.listFacilities.bind(adapter),
+  getFacility: adapter.getFacility.bind(adapter),
+};
 
 describe("kopis", () => {
   beforeEach(() => {
@@ -370,19 +376,20 @@ describe("kopis", () => {
   });
 
   describe("인증", () => {
-    it("KOPIS_SERVICE_KEY가 없으면 에러를 던진다", async () => {
+    it("KOPIS_KEY가 없으면 에러를 던진다", async () => {
       vi.doMock("../../src/config/env.js", () => ({
-        env: { KOPIS_SERVICE_KEY: "" },
+        env: { KOPIS_KEY: "" },
       }));
 
       // 모듈 캐시를 무효화하여 빈 키로 재로드
-      const { listPerformances: freshListPerformances } = await import(
+      const { KopisAdapter: FreshKopisAdapter } = await import(
         /* @vite-ignore */ "../../src/infrastructure/external/kopis.adapter.js?nocache=" + Date.now()
       );
+      const freshAdapter = new FreshKopisAdapter();
 
       await expect(
-        freshListPerformances({ stdate: "20260401", eddate: "20260430" })
-      ).rejects.toThrow("KOPIS_SERVICE_KEY is not configured");
+        freshAdapter.listPerformances({ stdate: "20260401", eddate: "20260430" })
+      ).rejects.toThrow("KOPIS_KEY is not configured");
     });
   });
 });

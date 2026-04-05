@@ -44,8 +44,23 @@ infrastructure → application → ports → domain
   ```typescript
   constructor(private artists: IArtistRepository) {}
   ```
-- Infrastructure 어댑터를 Application 계층에서 직접 import 금지
-  - 예외: `application/sync/` 는 `infrastructure/external/kopis.adapter.ts`를 직접 사용 가능 (sync 파이프라인 전용 외부 어댑터)
+- Infrastructure 어댑터를 Application 계층에서 직접 import 금지 (예외 없음)
+
+## 외부 어댑터 포트 매핑
+
+모든 외부 어댑터는 반드시 out port 인터페이스를 구현한다:
+
+| 어댑터 | 포트 | 용도 |
+|--------|------|------|
+| `KopisAdapter` | `IKopisPort` | KOPIS 공연/시설 API |
+| `KakaoAdapter` | `IKakaoAuthPort` | Kakao OAuth 인증 |
+| `FcmAdapter` | `IPushNotificationService` | FCM 푸시 알림 |
+| `ImageEnrichmentAdapter` | `IImageEnrichmentPort` | 아티스트 이미지 수집 |
+| `AppleMusicAdapter` | `IAppleMusicPort` | Apple Music 검색/스크래핑 |
+| `WikidataAdapter` | `IWikidataPort` | Wikidata 이미지 조회 |
+| `MusicBrainzAdapter` | `IMusicBrainzPort` | MusicBrainz 아티스트 검색 |
+
+`WikidataAdapter`는 `IMusicBrainzPort`를 생성자로 주입받는다 (MBID → Wikidata ID 조회).
 
 ## Prisma → Domain 변환
 
