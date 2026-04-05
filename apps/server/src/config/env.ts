@@ -10,8 +10,8 @@ function optionalEnv(name: string, fallback: string): string {
 
 function buildDatabaseUrl(): string {
   if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
-  const user = requireEnv("DATABASE_USER");
-  const password = requireEnv("DATABASE_PASSWORD");
+  const user = optionalEnv("DATABASE_USER", "postgres");
+  const password = optionalEnv("DATABASE_PASSWORD", "postgres");
   const host = optionalEnv("DATABASE_HOST", "localhost");
   const port = optionalEnv("DATABASE_PORT", "5432");
   const db = optionalEnv("DATABASE_NAME", "concert_alert");
