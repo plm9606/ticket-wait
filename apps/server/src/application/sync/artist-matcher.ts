@@ -1,6 +1,7 @@
 import { normalizeForMatch, removeConcertSuffixes } from "@concert-alert/shared";
 import type { IArtistRepository } from "../../ports/out/artist.port.js";
 import type { ArtistMatchData } from "../../domain/artist.entity.js";
+import type { IEnrichArtistUseCase } from "../../ports/in/enrich-artist.use-case.js";
 import { extractArtistName, NON_ARTIST_PATTERNS } from "./name-extractor.js";
 
 function escapeRegex(str: string): string {
@@ -10,7 +11,10 @@ function escapeRegex(str: string): string {
 export class ArtistMatcher {
   private cachedArtists: ArtistMatchData[] | null = null;
 
-  constructor(private artists: IArtistRepository) {}
+  constructor(
+    private artists: IArtistRepository,
+    private enrichService?: IEnrichArtistUseCase
+  ) {}
 
   clearCache(): void {
     this.cachedArtists = null;
@@ -26,10 +30,10 @@ export class ArtistMatcher {
    * 공연 제목에서 아티스트를 매칭
    * 우선순위: 한글 이름 → 영문 이름 → 별명 → 접미사 제거 후 재시도
    */
-  async matchArtist(title: string): Promise<number | null> {
+  async matchArtist(artistName: string): Promise<number | null> {
     const artistList = await this.loadArtists();
-    const normalizedTitle = normalizeForMatch(title);
-    const cleanedTitle = normalizeForMatch(removeConcertSuffixes(title));
+    const normalizedTitle = normalizeForMatch(artistName);
+    const cleanedTitle = normalizeForMatch(removeConcertSuffixes(artistName));
 
     // 1. 한글 이름 정확 매칭 (긴 이름 우선)
     const sortedByNameLength = [...artistList].sort(
@@ -58,7 +62,7 @@ export class ArtistMatcher {
           `(?:^|[\\s\\[\\(\\-])${escapeRegex(artist.nameEn)}(?:$|[\\s\\]\\)\\-'"])`,
           "i"
         );
-        if (regex.test(title)) return artist.id;
+        if (regex.test(artistName)) return artist.id;
       } else if (normalizedTitle.includes(normalizedEn)) {
         return artist.id;
       }
@@ -75,7 +79,7 @@ export class ArtistMatcher {
             `(?:^|[\\s\\[\\(\\-])${escapeRegex(alias)}(?:$|[\\s\\]\\)\\-'"])`,
             "i"
           );
-          if (regex.test(title)) return artist.id;
+          if (regex.test(artistName)) return artist.id;
         } else if (normalizedTitle.includes(normalizedAlias)) {
           return artist.id;
         }
@@ -99,11 +103,11 @@ export class ArtistMatcher {
    * 매칭 실패 시 아티스트 이름을 추출하여 신규 생성
    * 이미 존재하는 아티스트면 해당 ID 반환
    */
-  async matchOrCreate(title: string): Promise<number | null> {
-    let artistId = await this.matchArtist(title);
+  async matchOrCreate(artistName: string): Promise<number | null> {
+    let artistId = await this.matchArtist(artistName);
     if (artistId) return artistId;
 
-    const extracted = extractArtistName(title);
+    const extracted = extractArtistName(artistName);
     if (!extracted) return null;
 
     const normalizedExtracted = normalizeForMatch(extracted);
@@ -123,6 +127,10 @@ export class ArtistMatcher {
     artistId = newArtist.id;
     this.clearCache();
     console.log(`[Matcher] Created new artist: ${extracted}`);
+
+    if (this.enrichService) {
+      await this.enrichService.enrichOne(newArtist.id);
+    }
 
     return artistId;
   }

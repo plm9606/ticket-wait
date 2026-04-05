@@ -27,7 +27,7 @@ export const env = {
   PORT: Number(optionalEnv("PORT", "4000")),
   FRONTEND_URL: optionalEnv("FRONTEND_URL", "http://localhost:3000"),
   KAKAO_REDIRECT_URI_MOBILE: optionalEnv("KAKAO_REDIRECT_URI_MOBILE", ""),
-  KOPIS_SERVICE_KEY: optionalEnv("KOPIS_SERVICE_KEY", ""),
+  KOPIS_KEY: optionalEnv("KOPIS_KEY", ""),
   // Firebase (optional - push notifications)
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || "",
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || "",

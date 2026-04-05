@@ -20,7 +20,7 @@ vi.mock("../../src/application/sync/genre-classifier.js", () => ({
   }),
 }));
 vi.mock("../../src/config/env.js", () => ({
-  env: { KOPIS_SERVICE_KEY: "test-key" },
+  env: { KOPIS_KEY: "test-key" },
 }));
 
 const {
