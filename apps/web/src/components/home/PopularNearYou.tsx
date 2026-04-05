@@ -7,8 +7,8 @@ import { api } from "@/lib/api";
 interface Performance {
   id: number;
   title: string;
-  artist: { id: number; name: string; nameEn: string | null } | null;
-  venue: string | null;
+  artists: { id: number; name: string; nameEn: string | null }[];
+  venue: { id: number; name: string } | null;
   startDate: string | null;
   source: string;
   sourceUrl: string;
@@ -133,14 +133,14 @@ export function PopularNearYou({ genre }: PopularNearYouProps) {
                       >
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                       </svg>
-                      <span className="text-sm">{performance.venue}</span>
+                      <span className="text-sm">{performance.venue.name}</span>
                     </div>
                   )}
 
-                  {performance.artist && (
+                  {performance.artists.length > 0 && (
                     <div className="pt-6 mt-4 border-t border-outline-variant/10 flex items-center gap-4">
                       <span className="text-xs font-semibold text-on-surface-variant">
-                        {performance.artist.name}
+                        {performance.artists[0].name}
                       </span>
                     </div>
                   )}
