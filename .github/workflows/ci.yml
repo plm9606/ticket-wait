@@ -10,7 +10,23 @@ jobs:
   check:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: concert_alert
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/concert_alert
       JWT_SECRET: ci-secret
       KAKAO_REST_API_KEY: dummy
       KAKAO_CLIENT_SECRET: dummy
@@ -35,3 +51,15 @@ jobs:
 
       - name: Test
         run: pnpm --filter server test
+
+      - name: Build
+        run: pnpm --filter server build
+
+      - name: Smoke test
+        run: |
+          pnpm --filter server exec prisma migrate deploy
+          node apps/server/dist/index.js &
+          SERVER_PID=$!
+          sleep 3
+          curl -f http://localhost:4000/health
+          kill $SERVER_PID
