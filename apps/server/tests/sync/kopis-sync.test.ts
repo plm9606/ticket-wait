@@ -1,18 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // 순수 함수 테스트 — DB/API 의존성 없는 함수들을 mock 없이 직접 import
-vi.mock("../../src/lib/prisma.js", () => ({
+vi.mock("../../src/infrastructure/persistence/prisma.js", () => ({
   prisma: {},
 }));
-vi.mock("../../src/lib/kopis.js", () => ({
+vi.mock("../../src/infrastructure/external/kopis.adapter.js", () => ({
   listPerformances: vi.fn(),
   getPerformance: vi.fn(),
   getFacility: vi.fn(),
   listFacilities: vi.fn(),
 }));
-vi.mock("../../src/crawlers/matcher.js", () => ({
-  matchArtist: vi.fn(),
-  clearArtistCache: vi.fn(),
+vi.mock("../../src/application/sync/genre-classifier.js", () => ({
   classifyGenre: vi.fn((title: string) => {
     if (/페스티벌|festival/i.test(title)) return "FESTIVAL";
     if (/팬미팅|fanmeeting/i.test(title)) return "FANMEETING";
@@ -21,22 +19,22 @@ vi.mock("../../src/crawlers/matcher.js", () => ({
     return "CONCERT";
   }),
 }));
-vi.mock("../../src/services/notification.service.js", () => ({
-  notifyNewPerformances: vi.fn(),
-}));
 vi.mock("../../src/config/env.js", () => ({
   env: { KOPIS_SERVICE_KEY: "test-key" },
 }));
 
 const {
   parseCastNames,
-  mapRelateToSource,
-  extractSourceId,
   formatDate,
-  parseKopisDate,
   buildDateWindows,
   mapGenre,
-} = await import("../../src/sync/kopis-sync.js");
+} = await import("../../src/application/sync/kopis-sync.service.js");
+
+const {
+  mapRelateToSource,
+  extractSourceId,
+  parseKopisDate,
+} = await import("../../src/application/sync/performance-upsert.js");
 
 describe("kopis-sync 순수 함수", () => {
   // ─── parseCastNames ──────────────────────────────────────────────────────
@@ -300,7 +298,7 @@ describe("kopis-sync 순수 함수", () => {
     });
 
     it("알 수 없는 장르코드는 OTHER로 매핑한다", () => {
-      expect(mapGenre("ZZZZ" as any, "어떤 공연")).toBe("OTHER");
+      expect(mapGenre("ZZZZ" as never, "어떤 공연")).toBe("OTHER");
     });
   });
 });

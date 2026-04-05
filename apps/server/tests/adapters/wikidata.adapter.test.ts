@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { WikidataAdapter } from "../../src/adapters/wikidata.adapter.js";
+import { WikidataAdapter } from "../../src/infrastructure/external/wikidata.adapter.js";
 
 // ─── 모킹 ─────────────────────────────────────────────────────────────────────
 
@@ -10,7 +10,7 @@ vi.mock("axios", () => ({
   default: { get: mockAxiosGet },
 }));
 
-vi.mock("../../src/lib/musicbrainz.js", () => ({
+vi.mock("../../src/infrastructure/external/musicbrainz.adapter.js", () => ({
   getArtistWikidataId: mockGetArtistWikidataId,
 }));
 

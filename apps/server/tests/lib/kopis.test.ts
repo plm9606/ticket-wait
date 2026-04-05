@@ -153,7 +153,7 @@ const FACILITY_DETAIL_XML = `<?xml version="1.0" encoding="UTF-8"?>
 
 // import는 mock 이후에
 const { listPerformances, getPerformance, listFacilities, getFacility } =
-  await import("../../src/lib/kopis.js");
+  await import("../../src/infrastructure/external/kopis.adapter.js");
 
 describe("kopis", () => {
   beforeEach(() => {
@@ -377,7 +377,7 @@ describe("kopis", () => {
 
       // 모듈 캐시를 무효화하여 빈 키로 재로드
       const { listPerformances: freshListPerformances } = await import(
-        /* @vite-ignore */ "../../src/lib/kopis.js?nocache=" + Date.now()
+        /* @vite-ignore */ "../../src/infrastructure/external/kopis.adapter.js?nocache=" + Date.now()
       );
 
       await expect(
