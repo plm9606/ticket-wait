@@ -3,9 +3,9 @@ import { normalizeForMatch } from "@concert-alert/shared";
 import {
   fetchAllKoreanArtists,
   mapArtist,
-} from "../lib/musicbrainz.js";
-import { AppleMusicAdapter } from "../adapters/apple-music.adapter.js";
-import { WikidataAdapter } from "../adapters/wikidata.adapter.js";
+} from "../infrastructure/external/musicbrainz.adapter.js";
+import { AppleMusicAdapter } from "../infrastructure/external/apple-music.adapter.js";
+import { WikidataAdapter } from "../infrastructure/external/wikidata.adapter.js";
 
 const prisma = new PrismaClient();
 

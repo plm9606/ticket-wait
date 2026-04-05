@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { AppleMusicAdapter } from "../../src/adapters/apple-music.adapter.js";
+import { AppleMusicAdapter } from "../../src/infrastructure/external/apple-music.adapter.js";
 
 // ─── axios 모킹 ───────────────────────────────────────────────────────────────
 

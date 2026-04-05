@@ -15,7 +15,7 @@ pnpm lint
 pnpm test               # vitest run (단발)
 pnpm test:watch         # vitest watch
 # 단일 테스트 파일 실행
-pnpm vitest run tests/lib/kopis.test.ts
+pnpm vitest run tests/application/artist.test.ts
 
 # 빌드 & 실행
 pnpm build              # tsc → dist/
@@ -31,65 +31,85 @@ pnpm enrich:artists
 
 ## 아키텍처
 
+헥사고날 아키텍처(Ports & Adapters). 의존성 방향: `infrastructure → application → ports → domain`
+
+```
+src/
+├── domain/              # 순수 엔티티 타입 (Prisma 의존 없음)
+│   ├── enums.ts         # TicketSource, PerformanceGenre 등 공유 열거형
+│   └── *.entity.ts      # Artist, Performance, User 등
+├── ports/
+│   ├── in/              # Primary Port: Application이 외부에 노출하는 인터페이스
+│   │   └── *.use-case.ts
+│   └── out/             # Secondary Port: Application이 외부에 의존하는 인터페이스
+│       └── *.port.ts
+├── application/         # Use Case 구현 (ports/out 인터페이스만 의존)
+│   ├── artist/
+│   ├── performance/
+│   ├── subscription/
+│   ├── notification/
+│   └── sync/            # KOPIS 동기화 + 아티스트 매칭
+└── infrastructure/      # Port 구현체
+    ├── persistence/     # Prisma Repository (Prisma → Domain 변환 포함)
+    ├── external/        # 외부 API 어댑터 (kakao, fcm, kopis, musicbrainz)
+    └── http/            # Fastify 라우트 (Driving Adapter)
+```
+
 ### 앱 부트스트랩
 
 `src/index.ts` → `src/app.ts` (`buildApp()`)
 
-`buildApp()`은:
-1. CORS, Cookie, JWT 플러그인 등록
-2. `authPlugin` (`src/plugins/auth.ts`) 등록 — fastify 인스턴스에 `authenticate` 데코레이터 추가
-3. 라우트 모듈 등록 순서: auth → artists → subscriptions → concerts → notifications
+`buildApp()`에서 모든 의존성을 생성자 주입으로 조립:
+1. Prisma 클라이언트 → Repository 구현체 생성
+2. 외부 어댑터(FcmAdapter 등) 생성
+3. Application Service에 Repository 주입
+4. Fastify 라우트에 Application Service 주입
+
+```typescript
+// 의존성 조립 예시
+const artistRepo = new PrismaArtistRepository(prisma);
+const artistService = new ArtistService(artistRepo);
+await fastify.register(artistRoutes, { artistService });
+```
 
 ### 인증 패턴
 
 JWT를 `token` 쿠키(httpOnly)에 저장. 두 가지 적용 방식:
 - **모듈 전체 보호**: 라우트 파일 최상단에 `fastify.addHook("onRequest", fastify.authenticate)` — subscriptions, notifications 라우트에 사용
-- **개별 라우트 보호**: `{ onRequest: [fastify.authenticate] }` 옵션 — `GET /concerts/feed`, `GET /auth/me`에 사용
+- **개별 라우트 보호**: `{ onRequest: [fastify.authenticate] }` 옵션 — `GET /performances/feed`, `GET /auth/me`에 사용
 
 모바일 OAuth 콜백은 쿠키 대신 `concertalert://auth/callback?token=<jwt>` 딥링크로 토큰 전달.
 
-### 크롤러 파이프라인
+### KOPIS 동기화 파이프라인
 
-`BaseCrawler` 추상 클래스를 상속:
+`KopisSyncService` (`application/sync/kopis-sync.service.ts`):
 ```
-fetchConcerts() → 중복 제거(source+sourceId) → matchArtist() → classifyGenre() → Concert 생성 → FCM 알림
+syncVenues() → KOPIS Facility API → IVenueRepository.upsert()
+syncPerformances() → KOPIS Performance API → ArtistMatcher → upsertPerformances() → INotificationUseCase.notifyNewPerformances()
 ```
 
-`scheduler.ts`의 `runCrawlPipeline()`:
-1. `crawler.run()` — 크롤 + 저장
-2. `classifyUnclassifiedConcerts()` — 기존 CONCERT 장르 재분류
-3. `matchUnmatchedConcerts()` — 미매칭 공연 재시도
-4. 새로 매칭된 공연에 대해 `notifyNewConcerts()` 호출
+**아티스트 매칭** (`application/sync/artist-matcher.ts`):
+우선순위: 한글 정확 매칭(NFC, 긴 이름 우선) → 영문 → alias → 접미사 제거 후 재시도 → 이름 추출 → **새 아티스트 자동 생성**
 
-### 아티스트 매칭 (`matcher.ts`)
-
-우선순위 순서: 한글 정확 매칭(NFC, 긴 이름 우선) → 영문 → alias → 접미사 제거 후 재시도 → 정규식 추출 → **새 아티스트 자동 생성**
-
-크롤 실행 중 아티스트 목록을 캐싱 (`cachedArtists`). 새 아티스트 추가 시 캐시 초기화.
+`ArtistMatcher`는 인스턴스 내 캐시(`cachedArtists`)를 유지. 새 아티스트 추가 시 `clearCache()`.
 
 ### 알림 중복 방지
 
-`notifyNewConcert()` 내부에서 `Notification.findFirst({ type: "NEW_CONCERT", concertId })` 확인 후 발송. FCM 미설정 시 graceful degradation (경고 로그만, 에러 없음).
+`NotificationService.notifyNewPerformances()` 내부에서 `INotificationRepository.existsForPerformance()` 확인 후 발송.
+FCM 미설정 시 graceful degradation (경고 로그만, 에러 없음).
 
 ### 커서 페이지네이션 패턴
 
-모든 목록 API에서 동일하게:
+Repository 계층에서 `buildCursorPage()` 헬퍼로 통일 처리:
 ```typescript
-const take = Math.min(limit, 50);
-const results = await prisma.concert.findMany({
-  take: take + 1,
-  cursor: cursor ? { id: cursor } : undefined,
-  skip: cursor ? 1 : 0,
-});
-const hasMore = results.length > take;
+{ items: T[], nextCursor: number | null }
 ```
+최대 50개 제한 (`Math.min(limit, 50)`)은 Application Service 계층에서 강제.
 
 ### 에러 응답
 
-- 인증 실패: `reply.status(401).send({ error: "Unauthorized" })`
-- 리소스 없음: `reply.status(404).send({ error: "... not found" })`
-- 중복: `reply.status(409).send({ error: "Already subscribed" })`
-- 일부 라우트는 `throw { statusCode, message }` 형태 사용 (Fastify가 자동 처리)
+Application Service에서 `throw Object.assign(new Error("..."), { statusCode: 404 })` 패턴.
+라우트에서 `err.statusCode`로 분기하여 HTTP 응답 코드 설정.
 
 ## 환경 변수
 
