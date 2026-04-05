@@ -189,8 +189,8 @@ border-dashed 제거 → surface 배경색 차이로 구분
 Phase 7: 온보딩 - 아티스트 선택 (Screen 4)
 
 7-1. 백엔드 - 인기 아티스트 API 추가
-파일: 
-apps/server/src/routes/artists/search.ts
+파일:
+apps/server/src/infrastructure/http/artists/artist.route.ts
  (기존 파일에 추가)
 
 GET /artists 엔드포인트 추가: 구독자 수 기준 정렬, limit 파라미터
