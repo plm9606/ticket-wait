@@ -12,7 +12,7 @@ import {
   getNotifications,
   markNotificationRead,
   getUnreadCount,
-} from "./state";
+} from "./state.js";
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
