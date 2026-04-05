@@ -4,12 +4,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 vi.mock("../../src/infrastructure/persistence/prisma.js", () => ({
   prisma: {},
 }));
-vi.mock("../../src/infrastructure/external/kopis.adapter.js", () => ({
-  listPerformances: vi.fn(),
-  getPerformance: vi.fn(),
-  getFacility: vi.fn(),
-  listFacilities: vi.fn(),
-}));
 vi.mock("../../src/application/sync/genre-classifier.js", () => ({
   classifyGenre: vi.fn((title: string) => {
     if (/페스티벌|festival/i.test(title)) return "FESTIVAL";

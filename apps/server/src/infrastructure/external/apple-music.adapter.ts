@@ -1,6 +1,9 @@
 import axios from "axios";
 import { load } from "cheerio";
 import { normalizeForMatch } from "@concert-alert/shared";
+import type { IAppleMusicPort, AppleMusicArtist } from "../../ports/out/apple-music.port.js";
+
+export type { AppleMusicArtist } from "../../ports/out/apple-music.port.js";
 
 // ─── iTunes Search API 타입 ────────────────────────────────────────────────────
 
@@ -17,21 +20,13 @@ interface ITunesSearchResponse {
   results: ITunesArtistResult[];
 }
 
-// ─── 공개 타입 ────────────────────────────────────────────────────────────────
-
-export interface AppleMusicArtist {
-  appleMusicId: number;
-  name: string;
-  artistPageUrl: string;
-}
-
 // ─── Adapter ─────────────────────────────────────────────────────────────────
 
 const ITUNES_URL = "https://itunes.apple.com/search";
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
-export class AppleMusicAdapter {
+export class AppleMusicAdapter implements IAppleMusicPort {
   // ─── iTunes 아티스트 검색 ──────────────────────────────────────────────────
 
   async searchArtist(

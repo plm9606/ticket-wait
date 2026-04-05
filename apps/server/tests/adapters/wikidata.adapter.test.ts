@@ -1,18 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { WikidataAdapter } from "../../src/infrastructure/external/wikidata.adapter.js";
+import type { IMusicBrainzPort } from "../../src/ports/out/musicbrainz.port.js";
 
 // ─── 모킹 ─────────────────────────────────────────────────────────────────────
 
 const mockAxiosGet = vi.hoisted(() => vi.fn());
-const mockGetArtistWikidataId = vi.hoisted(() => vi.fn());
+const mockGetArtistWikidataId = vi.fn();
 
 vi.mock("axios", () => ({
   default: { get: mockAxiosGet },
 }));
 
-vi.mock("../../src/infrastructure/external/musicbrainz.adapter.js", () => ({
+const mockMusicbrainz: IMusicBrainzPort = {
   getArtistWikidataId: mockGetArtistWikidataId,
-}));
+  fetchAllKoreanArtists: vi.fn(),
+};
 
 // ─── 픽스처 ───────────────────────────────────────────────────────────────────
 
@@ -46,7 +48,7 @@ describe("WikidataAdapter", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    adapter = new WikidataAdapter();
+    adapter = new WikidataAdapter(mockMusicbrainz);
   });
 
   // ─── getImageUrl ──────────────────────────────────────────────────────────

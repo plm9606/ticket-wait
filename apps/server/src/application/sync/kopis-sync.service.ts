@@ -5,14 +5,7 @@ import type { ISyncLogRepository } from "../../ports/out/sync-log.port.js";
 import type { ISyncDlqRepository } from "../../ports/out/sync-dlq.port.js";
 import type { INotificationUseCase } from "../../ports/in/notification.use-case.js";
 import type { IEnrichArtistUseCase } from "../../ports/in/enrich-artist.use-case.js";
-import {
-  listPerformances,
-  listFacilities,
-  getPerformance,
-  getFacility,
-  type GenreCode,
-  type PerformanceDetail,
-} from "../../infrastructure/external/kopis.adapter.js";
+import type { IKopisPort, GenreCode, PerformanceDetail } from "../../ports/out/kopis.port.js";
 import { classifyGenre } from "./genre-classifier.js";
 import { upsertPerformances } from "./performance-upsert.js";
 import type { PerformanceGenre } from "../../domain/enums.js";
@@ -78,6 +71,7 @@ export class KopisSyncService {
   private venueCache = new Map<string, number>();
 
   constructor(
+    private kopis: IKopisPort,
     private artists: IArtistRepository,
     private performances: IPerformanceRepository,
     private venues: IVenueRepository,
@@ -102,13 +96,13 @@ export class KopisSyncService {
       let page = 1;
 
       while (true) {
-        const facilities = await listFacilities({ cpage: page, rows: 100, afterdate });
+        const facilities = await this.kopis.listFacilities({ cpage: page, rows: 100, afterdate });
         if (facilities.length === 0) break;
         itemsFound += facilities.length;
         console.log(`[VenueSync] p${page}: ${facilities.length}건 조회 (누적 ${itemsFound}건)`);
 
         for (const f of facilities) {
-          const detail = await getFacility(f.mt10id);
+          const detail = await this.kopis.getFacility(f.mt10id);
           if (!detail) {
             console.log(`[VenueSync]   ${f.mt10id} 상세 조회 실패, 스킵`);
             continue;
@@ -175,7 +169,7 @@ export class KopisSyncService {
           let windowFound = 0;
 
           while (true) {
-            const summaries = await listPerformances({ stdate, eddate, shcate, rows: 100, cpage: page });
+            const summaries = await this.kopis.listPerformances({ stdate, eddate, shcate, rows: 100, cpage: page });
             if (summaries.length === 0) break;
             totalFound += summaries.length;
             windowFound += summaries.length;
@@ -183,7 +177,7 @@ export class KopisSyncService {
 
             for (let si = 0; si < summaries.length; si++) {
               const summary = summaries[si];
-              const detail = await getPerformance(summary.mt20id);
+              const detail = await this.kopis.getPerformance(summary.mt20id);
               if (!detail) {
                 console.log(`[PerformanceSync]     ${summary.mt20id} 상세 조회 실패, 스킵`);
                 continue;
@@ -296,7 +290,7 @@ export class KopisSyncService {
       return existing.id;
     }
 
-    const facility = await getFacility(mt10id);
+    const facility = await this.kopis.getFacility(mt10id);
     const venue = await this.venues.upsert({
       name: facility?.fcltynm ?? fallbackName,
       kopisId: mt10id,

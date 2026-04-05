@@ -1,10 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { normalizeForMatch } from "@concert-alert/shared";
 import {
-  fetchAllKoreanArtists,
+  MusicBrainzAdapter,
   mapArtist,
 } from "../infrastructure/external/musicbrainz.adapter.js";
 import { PrismaArtistRepository } from "../infrastructure/persistence/artist.repository.js";
+import { AppleMusicAdapter } from "../infrastructure/external/apple-music.adapter.js";
+import { WikidataAdapter } from "../infrastructure/external/wikidata.adapter.js";
 import { ImageEnrichmentAdapter } from "../infrastructure/external/image-enrichment.adapter.js";
 
 const prisma = new PrismaClient();
@@ -77,7 +79,10 @@ async function main() {
   const { type, limit, dryRun } = parseArgs();
 
   const artistRepo = new PrismaArtistRepository(prisma);
-  const imageEnrichment = new ImageEnrichmentAdapter();
+  const musicbrainz = new MusicBrainzAdapter();
+  const appleMusic = new AppleMusicAdapter();
+  const wikidata = new WikidataAdapter(musicbrainz);
+  const imageEnrichment = new ImageEnrichmentAdapter(appleMusic, wikidata);
 
   console.log(
     `🎵 MusicBrainz 시드 시작 (type=${type ?? "all"}, limit=${limit}, dryRun=${dryRun})`
@@ -92,7 +97,7 @@ async function main() {
   let skipped = 0;
   let errors = 0;
 
-  for await (const batch of fetchAllKoreanArtists(type, limit)) {
+  for await (const batch of musicbrainz.fetchAllKoreanArtists(type, limit)) {
     for (const mbArtist of batch) {
       totalFetched++;
 

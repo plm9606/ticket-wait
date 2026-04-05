@@ -1,5 +1,6 @@
 import axios from "axios";
-import { getArtistWikidataId } from "../../infrastructure/external/musicbrainz.adapter.js";
+import type { IWikidataPort } from "../../ports/out/wikidata.port.js";
+import type { IMusicBrainzPort } from "../../ports/out/musicbrainz.port.js";
 
 const WIKIDATA_API = "https://www.wikidata.org/w/api.php";
 const COMMONS_FILE_PATH = "https://commons.wikimedia.org/wiki/Special:FilePath";
@@ -22,7 +23,9 @@ interface WikidataResponse {
   entities: Record<string, WikidataEntity>;
 }
 
-export class WikidataAdapter {
+export class WikidataAdapter implements IWikidataPort {
+  constructor(private musicbrainz: IMusicBrainzPort) {}
+
   // Wikidata Q ID → Wikimedia Commons 이미지 URL (P18 property)
   async getImageUrl(wikidataId: string): Promise<string | null> {
     const { data } = await axios.get<WikidataResponse>(WIKIDATA_API, {
@@ -42,7 +45,7 @@ export class WikidataAdapter {
 
   // MBID → MusicBrainz url-rels → Wikidata ID → Commons 이미지 URL
   async getImageUrlByMbid(mbid: string): Promise<string | null> {
-    const wikidataId = await getArtistWikidataId(mbid);
+    const wikidataId = await this.musicbrainz.getArtistWikidataId(mbid);
     if (!wikidataId) return null;
     return this.getImageUrl(wikidataId);
   }

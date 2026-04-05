@@ -1,10 +1,12 @@
 import type { IImageEnrichmentPort, ArtistImageData } from "../../ports/out/image-enrichment.port.js";
-import { AppleMusicAdapter } from "./apple-music.adapter.js";
-import { WikidataAdapter } from "./wikidata.adapter.js";
+import type { IAppleMusicPort } from "../../ports/out/apple-music.port.js";
+import type { IWikidataPort } from "../../ports/out/wikidata.port.js";
 
 export class ImageEnrichmentAdapter implements IImageEnrichmentPort {
-  private appleMusic = new AppleMusicAdapter();
-  private wikidata = new WikidataAdapter();
+  constructor(
+    private appleMusic: IAppleMusicPort,
+    private wikidata: IWikidataPort
+  ) {}
 
   async fetchImageData(artist: {
     name: string;

@@ -61,16 +61,31 @@ src/
 
 `buildApp()`에서 모든 의존성을 생성자 주입으로 조립:
 1. Prisma 클라이언트 → Repository 구현체 생성
-2. 외부 어댑터(FcmAdapter 등) 생성
-3. Application Service에 Repository 주입
+2. 외부 어댑터 생성 (leaf 의존성 먼저, 예: `MusicBrainzAdapter` → `WikidataAdapter`)
+3. Application Service에 Repository/Adapter 주입 (포트 인터페이스 타입으로)
 4. Fastify 라우트에 Application Service 주입
 
 ```typescript
-// 의존성 조립 예시
-const artistRepo = new PrismaArtistRepository(prisma);
-const artistService = new ArtistService(artistRepo);
-await fastify.register(artistRoutes, { artistService });
+// 외부 어댑터 조립 순서 (의존성 방향)
+const musicbrainz = new MusicBrainzAdapter();          // IMusicBrainzPort
+const appleMusic = new AppleMusicAdapter();            // IAppleMusicPort
+const wikidata = new WikidataAdapter(musicbrainz);     // IWikidataPort, IMusicBrainzPort 주입
+const imageEnrichment = new ImageEnrichmentAdapter(appleMusic, wikidata); // IImageEnrichmentPort
+const kopis = new KopisAdapter();                      // IKopisPort
+const kakaoAuth = new KakaoAdapter();                  // IKakaoAuthPort
 ```
+
+**외부 어댑터 포트 매핑** (모든 외부 어댑터는 out port를 구현):
+
+| 어댑터 | 포트 |
+|--------|------|
+| `KopisAdapter` | `IKopisPort` |
+| `KakaoAdapter` | `IKakaoAuthPort` |
+| `FcmAdapter` | `IPushNotificationService` |
+| `ImageEnrichmentAdapter` | `IImageEnrichmentPort` |
+| `AppleMusicAdapter` | `IAppleMusicPort` |
+| `WikidataAdapter` | `IWikidataPort` |
+| `MusicBrainzAdapter` | `IMusicBrainzPort` |
 
 ### 인증 패턴
 
@@ -84,8 +99,8 @@ JWT를 `token` 쿠키(httpOnly)에 저장. 두 가지 적용 방식:
 
 `KopisSyncService` (`application/sync/kopis-sync.service.ts`):
 ```
-syncVenues() → KOPIS Facility API → IVenueRepository.upsert()
-syncPerformances() → KOPIS Performance API → ArtistMatcher → upsertPerformances() → INotificationUseCase.notifyNewPerformances()
+syncVenues() → IKopisPort.listFacilities/getFacility → IVenueRepository.upsert()
+syncPerformances() → IKopisPort.listPerformances/getPerformance → ArtistMatcher → upsertPerformances() → INotificationUseCase.notifyNewPerformances()
 ```
 
 **아티스트 매칭** (`application/sync/artist-matcher.ts`):
