@@ -1,10 +1,10 @@
-import { mockArtists, type MockArtist } from "./data/artists.js";
-import { mockPerformances, type MockPerformance } from "./data/concerts.js";
+import { mockArtists, type MockArtist } from "./data/artists";
+import { mockPerformances, type MockPerformance } from "./data/concerts";
 import {
   mockNotifications,
   type MockNotification,
-} from "./data/notifications.js";
-import { mockUser } from "./data/user.js";
+} from "./data/notifications";
+import { mockUser } from "./data/user";
 
 // --- Mutable state ---
 

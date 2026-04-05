@@ -1,1 +1,1 @@
-export { mockApi } from "./handlers.js";
+export { mockApi } from "./handlers";
