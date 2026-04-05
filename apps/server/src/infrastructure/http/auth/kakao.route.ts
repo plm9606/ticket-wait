@@ -39,9 +39,6 @@ export async function kakaoAuthRoutes(
   );
 
   fastify.get("/auth/kakao/mobile", async (_request, reply) => {
-    if (!env.KAKAO_REDIRECT_URI_MOBILE) {
-      return reply.status(500).send({ error: "Mobile OAuth not configured" });
-    }
     reply.redirect(kakaoAuth.getAuthorizationUrl(env.KAKAO_REDIRECT_URI_MOBILE));
   });
 
