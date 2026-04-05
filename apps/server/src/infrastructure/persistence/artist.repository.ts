@@ -6,6 +6,7 @@ import type {
   ArtistWithPerformances,
   ArtistWithSubscriptionCount,
   CreateArtistInput,
+  UpdateArtistInput,
 } from "../../domain/artist.entity.js";
 
 export class PrismaArtistRepository implements IArtistRepository {
@@ -104,16 +105,74 @@ export class PrismaArtistRepository implements IArtistRepository {
     });
   }
 
+  async findByName(name: string): Promise<Artist | null> {
+    const row = await this.prisma.artist.findFirst({
+      where: {
+        OR: [
+          { name: { equals: name, mode: "insensitive" } },
+          { nameEn: { equals: name, mode: "insensitive" } },
+          { aliases: { has: name } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        nameEn: true,
+        aliases: true,
+        imageUrl: true,
+        musicbrainzId: true,
+        appleMusicId: true,
+        createdAt: true,
+      },
+    });
+
+    return row ? toArtist(row) : null;
+  }
+
+  async findAllWithoutImage(): Promise<Artist[]> {
+    const rows = await this.prisma.artist.findMany({
+      where: { imageUrl: null },
+      select: {
+        id: true,
+        name: true,
+        nameEn: true,
+        aliases: true,
+        imageUrl: true,
+        musicbrainzId: true,
+        appleMusicId: true,
+        createdAt: true,
+      },
+    });
+
+    return rows.map(toArtist);
+  }
+
   async create(data: CreateArtistInput): Promise<Artist> {
     const row = await this.prisma.artist.create({
       data: {
         name: data.name,
         nameEn: data.nameEn ?? null,
         aliases: data.aliases ?? [],
+        ...(data.musicbrainzId !== undefined ? { musicbrainzId: data.musicbrainzId } : {}),
+        ...(data.appleMusicId !== undefined ? { appleMusicId: data.appleMusicId } : {}),
+        ...(data.imageUrl !== undefined ? { imageUrl: data.imageUrl } : {}),
       },
     });
 
     return toArtist(row);
+  }
+
+  async update(id: number, data: UpdateArtistInput): Promise<void> {
+    await this.prisma.artist.update({
+      where: { id },
+      data: {
+        ...(data.nameEn !== undefined ? { nameEn: data.nameEn } : {}),
+        ...(data.imageUrl !== undefined ? { imageUrl: data.imageUrl } : {}),
+        ...(data.appleMusicId !== undefined ? { appleMusicId: data.appleMusicId } : {}),
+        ...(data.aliases !== undefined ? { aliases: data.aliases } : {}),
+        ...(data.musicbrainzId !== undefined ? { musicbrainzId: data.musicbrainzId } : {}),
+      },
+    });
   }
 }
 
