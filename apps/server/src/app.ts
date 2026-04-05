@@ -26,6 +26,7 @@ import { ImageEnrichmentAdapter } from "./infrastructure/external/image-enrichme
 
 // Application Services
 import { ArtistService } from "./application/artist/artist.service.js";
+import { CreateArtistService } from "./application/artist/create-artist.service.js";
 import { EnrichArtistService } from "./application/artist/enrich-artist.service.js";
 import { PerformanceService } from "./application/performance/performance.service.js";
 import { SubscriptionService } from "./application/subscription/subscription.service.js";
@@ -73,11 +74,12 @@ export async function buildApp() {
 
   // Application services
   const artistService = new ArtistService(artistRepo);
+  const createArtistService = new CreateArtistService(artistRepo, imageEnrichment, musicbrainz);
   const enrichArtistService = new EnrichArtistService(artistRepo, imageEnrichment);
   const subscriptionService = new SubscriptionService(subscriptionRepo, artistRepo);
   const notificationService = new NotificationService(notificationRepo, userRepo, performanceRepo, fcm);
   const performanceService = new PerformanceService(performanceRepo, subscriptionRepo);
-  const syncService = new KopisSyncService(kopis, artistRepo, performanceRepo, venueRepo, syncLogRepo, syncDlqRepo, notificationService, enrichArtistService);
+  const syncService = new KopisSyncService(kopis, artistRepo, performanceRepo, venueRepo, syncLogRepo, syncDlqRepo, notificationService, createArtistService);
 
   // ─── Routes ───────────────────────────────────────────────────────────────
   await fastify.register(kakaoAuthRoutes, { userRepository: userRepo, kakaoAuth });

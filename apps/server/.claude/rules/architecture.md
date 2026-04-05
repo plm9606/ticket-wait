@@ -66,3 +66,18 @@ infrastructure → application → ports → domain
 
 - Repository 구현체 내부에 `toEntityName()` 변환 함수를 정의
 - Prisma 타입이 `application/` 계층으로 유출되어선 안 됨
+
+## 헬퍼 함수 위치
+
+- 클래스 내부에서만 쓰이는 헬퍼 함수는 **클래스 밖 module-level 함수로 정의하지 않는다**.
+- `private static` 메서드로 클래스 안에 정의한다:
+  ```typescript
+  // ❌ 금지
+  function mapMBArtist(mb: MBArtist) { ... }
+  export class FooService { ... }
+
+  // ✅ 올바른 방식
+  export class FooService {
+    private static mapMBArtist(mb: MBArtist) { ... }
+  }
+  ```

@@ -38,6 +38,11 @@ export class MusicBrainzAdapter implements IMusicBrainzPort {
     this.lastRequestTime = Date.now();
   }
 
+  async searchByKeyword(name: string, limit = 10): Promise<MBArtist[]> {
+    const { artists } = await this.searchArtists(name, limit);
+    return artists;
+  }
+
   private async searchArtists(
     query: string,
     limit = 100,
