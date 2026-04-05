@@ -73,6 +73,14 @@ describe("kopis-sync 순수 함수", () => {
     it("단일 이름도 배열로 반환한다", () => {
       expect(parseCastNames("아이유")).toEqual(["아이유"]);
     });
+
+    it("마지막 항목의 '등' 접미사를 제거한다", () => {
+      expect(parseCastNames("조권, 선예, 민학철 등")).toEqual(["조권", "선예", "민학철"]);
+    });
+
+    it("'등' 앞 공백이 없어도 제거한다", () => {
+      expect(parseCastNames("조권, 선예등")).toEqual(["조권", "선예"]);
+    });
   });
 
   // ─── mapRelateToSource ───────────────────────────────────────────────────

@@ -28,6 +28,7 @@ export interface MappedArtist {
 }
 
 export interface IMusicBrainzPort {
+  searchByKeyword(name: string, limit?: number): Promise<MBArtist[]>;
   fetchAllKoreanArtists(
     type: "group" | "person" | null,
     maxCount?: number

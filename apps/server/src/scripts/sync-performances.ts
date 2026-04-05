@@ -13,7 +13,7 @@ import { AppleMusicAdapter } from "../infrastructure/external/apple-music.adapte
 import { WikidataAdapter } from "../infrastructure/external/wikidata.adapter.js";
 import { ImageEnrichmentAdapter } from "../infrastructure/external/image-enrichment.adapter.js";
 import { NotificationService } from "../application/notification/notification.service.js";
-import { EnrichArtistService } from "../application/artist/enrich-artist.service.js";
+import { CreateArtistService } from "../application/artist/create-artist.service.js";
 import { KopisSyncService } from "../application/sync/kopis-sync.service.js";
 
 async function main() {
@@ -32,8 +32,8 @@ async function main() {
   const wikidata = new WikidataAdapter(musicbrainz);
   const imageEnrichment = new ImageEnrichmentAdapter(appleMusic, wikidata);
   const notificationService = new NotificationService(notificationRepo, userRepo, performanceRepo, fcm);
-  const enrichArtistService = new EnrichArtistService(artistRepo, imageEnrichment);
-  const syncService = new KopisSyncService(kopis, artistRepo, performanceRepo, venueRepo, syncLogRepo, syncDlqRepo, notificationService, enrichArtistService);
+  const createArtistService = new CreateArtistService(artistRepo, imageEnrichment, musicbrainz);
+  const syncService = new KopisSyncService(kopis, artistRepo, performanceRepo, venueRepo, syncLogRepo, syncDlqRepo, notificationService, createArtistService);
 
   console.log("공연 동기화 시작...");
   await syncService.syncPerformances();

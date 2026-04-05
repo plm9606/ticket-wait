@@ -22,7 +22,12 @@ export class ImageEnrichmentAdapter implements IImageEnrichmentPort {
       const result = await this.appleMusic.searchArtist(artist.name, artist.nameEn, artist.aliases);
       if (result) {
         appleMusicId = result.appleMusicId;
-        imageUrl = await this.appleMusic.scrapeImageUrl(result.artistPageUrl).catch(() => null);
+        imageUrl = await this.appleMusic.scrapeImageUrl(result.artistPageUrl).catch((e) => {
+          console.warn(`[ImageEnrichment] Apple Music 이미지 스크래핑 실패 (${artist.name}):`, e instanceof Error ? e.message : e);
+          return null;
+        });
+      } else {
+        console.warn(`[ImageEnrichment] Apple Music 검색 결과 없음 (${artist.name})`);
       }
     } catch (e) {
       console.warn(`[ImageEnrichment] Apple Music 검색 실패 (${artist.name}):`, e instanceof Error ? e.message : e);

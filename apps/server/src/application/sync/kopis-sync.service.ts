@@ -4,7 +4,7 @@ import type { IVenueRepository } from "../../ports/out/venue.port.js";
 import type { ISyncLogRepository } from "../../ports/out/sync-log.port.js";
 import type { ISyncDlqRepository } from "../../ports/out/sync-dlq.port.js";
 import type { INotificationUseCase } from "../../ports/in/notification.use-case.js";
-import type { IEnrichArtistUseCase } from "../../ports/in/enrich-artist.use-case.js";
+import type { ICreateArtistUseCase } from "../../ports/in/create-artist.use-case.js";
 import type { IKopisPort, GenreCode, PerformanceDetail } from "../../ports/out/kopis.port.js";
 import { classifyGenre } from "./genre-classifier.js";
 import { upsertPerformances } from "./performance-upsert.js";
@@ -63,7 +63,7 @@ export function parseCastNames(prfcast: string | null | undefined): string[] {
   if (!prfcast || prfcast.trim() === "") return [];
   return prfcast
     .split(/[,，、]/)
-    .map((s) => s.trim())
+    .map((s) => s.trim().replace(/\s*등$/, ""))
     .filter((s) => s.length > 0);
 }
 
@@ -78,7 +78,7 @@ export class KopisSyncService {
     private syncLogs: ISyncLogRepository,
     private syncDlq: ISyncDlqRepository,
     private notifications: INotificationUseCase,
-    private enrichArtist?: IEnrichArtistUseCase
+    private createArtist: ICreateArtistUseCase
   ) {}
 
   async syncVenues(): Promise<void> {
@@ -263,16 +263,8 @@ export class KopisSyncService {
       if (existing) {
         artistIds.push(existing.id);
       } else {
-        const isEnglish = /^[a-zA-Z0-9\s\-.]+$/.test(name);
-        const newArtist = await this.artists.create({
-          name,
-          nameEn: isEnglish ? name : null,
-          aliases: [],
-        });
-        console.log(`[PerformanceSync] 신규 아티스트 생성: ${name}`);
-        if (this.enrichArtist) {
-          await this.enrichArtist.enrichOne(newArtist.id);
-        }
+        const newArtist = await this.createArtist.execute(name);
+        console.log(`[PerformanceSync] 신규 아티스트 생성: ${newArtist.name}`);
         artistIds.push(newArtist.id);
       }
     }
