@@ -708,6 +708,25 @@ components:
                 - type: array
                   items:
                     $ref: '#/components/schemas/RelateLink'
+        sty:
+          type: string
+          description: 줄거리
+        visit:
+          type: string
+          description: 내한 여부 (Y/N)
+          enum: [Y, N]
+        child:
+          type: string
+          description: 아동공연 여부 (Y/N)
+          enum: [Y, N]
+        daehakro:
+          type: string
+          description: 대학로 공연 여부 (Y/N)
+          enum: [Y, N]
+        festival:
+          type: string
+          description: 축제 여부 (Y/N)
+          enum: [Y, N]
 
     RelateLink:
       type: object
