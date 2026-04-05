@@ -64,6 +64,10 @@ export class KopisAdapter implements IKopisPort {
     return parsed.dbs as T;
   }
 
+  private toHttps(url: string): string {
+    return url.startsWith("http://") ? "https://" + url.slice(7) : url;
+  }
+
   private normalizeStyurls(raw: unknown): string[] {
     const r = raw as { styurls?: { styurl?: string | string[] } | string };
     if (!r.styurls) return [];
@@ -105,7 +109,7 @@ export class KopisAdapter implements IKopisPort {
       prfstate: params.prfstate,
       afterdate: params.afterdate,
     });
-    return result.db ?? [];
+    return (result.db ?? []).map((p) => ({ ...p, poster: this.toHttps(p.poster) }));
   }
 
   /**
@@ -121,6 +125,7 @@ export class KopisAdapter implements IKopisPort {
 
     return {
       ...raw,
+      poster: this.toHttps(raw.poster),
       styurls: this.normalizeStyurls(raw),
       relates: this.normalizeRelates(raw),
     };
