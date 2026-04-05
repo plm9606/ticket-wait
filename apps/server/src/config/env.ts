@@ -28,9 +28,6 @@ export const env = {
   FRONTEND_URL: optionalEnv("FRONTEND_URL", "http://localhost:3000"),
   KAKAO_REDIRECT_URI_MOBILE: optionalEnv("KAKAO_REDIRECT_URI_MOBILE", ""),
   KOPIS_SERVICE_KEY: optionalEnv("KOPIS_SERVICE_KEY", ""),
-  // Spotify (optional - artist image 실시간 조회)
-  SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID || "",
-  SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET || "",
   // Firebase (optional - push notifications)
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || "",
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || "",

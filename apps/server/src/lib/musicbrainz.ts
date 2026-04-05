@@ -99,6 +99,26 @@ export async function searchKoreanArtists(
 }
 
 /**
+ * MBID로 아티스트의 Wikidata ID 조회 (url-rels 포함)
+ * 없으면 null 반환
+ */
+export async function getArtistWikidataId(mbid: string): Promise<string | null> {
+  await rateLimit();
+  const { data } = await client.get(`/artist/${mbid}`, {
+    params: { inc: "url-rels", fmt: "json" },
+  });
+
+  const relations: Array<{ type: string; url?: { resource: string } }> =
+    data.relations ?? [];
+  const rel = relations.find((r) => r.type === "wikidata");
+  if (!rel?.url?.resource) return null;
+
+  // "https://www.wikidata.org/wiki/Q7266613" → "Q7266613"
+  const match = rel.url.resource.match(/\/wiki\/(Q\d+)$/);
+  return match?.[1] ?? null;
+}
+
+/**
  * 이름으로 아티스트 검색
  */
 export async function searchArtistByName(
