@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed:musicbrainz": "tsx src/scripts/seed-from-musicbrainz.ts",
-    "enrich:artists": "tsx src/scripts/enrich-artists.ts"
+    "enrich:artists": "tsx src/scripts/enrich-artists.ts",
+    "enrich:artists:spotify": "tsx src/scripts/enrich-artists-spotify.ts"
   },
   "dependencies": {
     "@concert-alert/shared": "workspace:*",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/node-cron": "^3.0.0",
+    "openapi-typescript": "^7.13.0",
     "prisma": "^6.4.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",

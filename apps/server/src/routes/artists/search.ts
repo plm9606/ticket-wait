@@ -1,7 +1,31 @@
 import type { FastifyInstance } from "fastify";
 import { prisma } from "../../lib/prisma.js";
+import type { ArtistImagePort } from "../../ports/artist-image.port.js";
 
-export default async function artistRoutes(fastify: FastifyInstance) {
+interface ArtistRouteOptions {
+  artistImagePort: ArtistImagePort | null;
+}
+
+async function resolveImage(
+  artist: { spotifyId: string | null; imageUrl: string | null },
+  port: ArtistImagePort | null
+): Promise<string | null> {
+  if (port && artist.spotifyId) {
+    try {
+      return await port.getImageUrl(artist.spotifyId);
+    } catch {
+      // Spotify 조회 실패 시 DB fallback
+    }
+  }
+  return artist.imageUrl;
+}
+
+export default async function artistRoutes(
+  fastify: FastifyInstance,
+  opts: ArtistRouteOptions
+) {
+  const { artistImagePort } = opts;
+
   // 아티스트 검색
   fastify.get<{ Querystring: { q?: string; limit?: string } }>(
     "/artists/search",
@@ -28,17 +52,20 @@ export default async function artistRoutes(fastify: FastifyInstance) {
           name: true,
           nameEn: true,
           imageUrl: true,
+          spotifyId: true,
           _count: { select: { subscriptions: true } },
         },
         orderBy: { subscriptions: { _count: "desc" } },
         take,
       });
 
-      return artists.map((a) => ({
+      const images = await Promise.all(artists.map((a) => resolveImage(a, artistImagePort)));
+
+      return artists.map((a, i) => ({
         id: a.id,
         name: a.name,
         nameEn: a.nameEn,
-        imageUrl: a.imageUrl,
+        imageUrl: images[i],
         subscriberCount: a._count.subscriptions,
       }));
     }
@@ -56,17 +83,20 @@ export default async function artistRoutes(fastify: FastifyInstance) {
           name: true,
           nameEn: true,
           imageUrl: true,
+          spotifyId: true,
           _count: { select: { subscriptions: true } },
         },
         orderBy: { subscriptions: { _count: "desc" } },
         take,
       });
 
-      return artists.map((a) => ({
+      const images = await Promise.all(artists.map((a) => resolveImage(a, artistImagePort)));
+
+      return artists.map((a, i) => ({
         id: a.id,
         name: a.name,
         nameEn: a.nameEn,
-        imageUrl: a.imageUrl,
+        imageUrl: images[i],
         subscriberCount: a._count.subscriptions,
       }));
     }
@@ -92,12 +122,14 @@ export default async function artistRoutes(fastify: FastifyInstance) {
         return reply.status(404).send({ error: "Artist not found" });
       }
 
+      const imageUrl = await resolveImage(artist, artistImagePort);
+
       return {
         id: artist.id,
         name: artist.name,
         nameEn: artist.nameEn,
         aliases: artist.aliases,
-        imageUrl: artist.imageUrl,
+        imageUrl,
         subscriberCount: artist._count.subscriptions,
         performances: artist.performances,
       };
