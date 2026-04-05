@@ -1,15 +1,23 @@
 import type { SyncStatus } from "../../domain/enums.js";
 
+export interface SyncCheckpoint {
+  genreIndex: number;
+  windowIndex: number;
+}
+
 export interface SyncLogEntry {
   id: number;
   source: string;
   startedAt: Date;
   status: SyncStatus;
+  checkpoint: SyncCheckpoint | null;
 }
 
 export interface ISyncLogRepository {
   create(source: string): Promise<SyncLogEntry>;
   findLastSuccess(source: string): Promise<SyncLogEntry | null>;
+  findLastFailed(source: string): Promise<SyncLogEntry | null>;
   markSuccess(id: number, stats: { itemsFound: number; newItems: number; updatedItems: number }): Promise<void>;
   markFailed(id: number, error: string): Promise<void>;
+  saveCheckpoint(id: number, checkpoint: SyncCheckpoint): Promise<void>;
 }

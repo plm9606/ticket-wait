@@ -144,6 +144,7 @@ model SyncLog {
   updatedItems Int         @default(0)
   errors       String?
   status       SyncStatus  @default(RUNNING)
+  checkpoint   String?
 }
 
 enum TicketSource {

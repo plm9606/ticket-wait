@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    env:
+      JWT_SECRET: ci-secret
+      KAKAO_REST_API_KEY: dummy
+      KAKAO_CLIENT_SECRET: dummy
+      KAKAO_REDIRECT_URI: http://localhost:4000/auth/kakao/callback
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter server lint
+
+      - name: Test
+        run: pnpm --filter server test

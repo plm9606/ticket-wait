@@ -61,7 +61,7 @@ export class PrismaPerformanceRepository implements IPerformanceRepository {
 
     return {
       ...toPerformance(row),
-      artists: row.performanceArtists.map((pa) => ({
+      artists: row.performanceArtists.map((pa: (typeof row.performanceArtists)[number]) => ({
         id: pa.artist.id,
         name: pa.artist.name,
         nameEn: pa.artist.nameEn,
@@ -202,11 +202,11 @@ export class PrismaPerformanceRepository implements IPerformanceRepository {
       },
     });
 
-    return rows.map((r) => ({
+    return rows.map((r: (typeof rows)[number]) => ({
       id: r.id,
       title: r.title,
-      artistIds: r.performanceArtists.map((pa) => pa.artistId),
-      artists: r.performanceArtists.map((pa) => pa.artist),
+      artistIds: r.performanceArtists.map((pa: (typeof r.performanceArtists)[number]) => pa.artistId),
+      artists: r.performanceArtists.map((pa: (typeof r.performanceArtists)[number]) => pa.artist),
       imageUrl: r.imageUrl,
       sourceUrl: r.sourceUrl,
     }));

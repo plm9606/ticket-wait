@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import type { ISyncLogRepository, SyncLogEntry } from "../../ports/out/sync-log.port.js";
+import type { ISyncLogRepository, SyncCheckpoint, SyncLogEntry } from "../../ports/out/sync-log.port.js";
 
 export class PrismaSyncLogRepository implements ISyncLogRepository {
   constructor(private prisma: PrismaClient) {}
@@ -37,6 +37,15 @@ export class PrismaSyncLogRepository implements ISyncLogRepository {
     });
   }
 
+  async findLastFailed(source: string): Promise<SyncLogEntry | null> {
+    const row = await this.prisma.syncLog.findFirst({
+      where: { source, status: "FAILED", checkpoint: { not: null } },
+      orderBy: { startedAt: "desc" },
+    });
+
+    return row ? toEntry(row) : null;
+  }
+
   async markFailed(id: number, error: string): Promise<void> {
     await this.prisma.syncLog.update({
       where: { id },
@@ -47,6 +56,13 @@ export class PrismaSyncLogRepository implements ISyncLogRepository {
       },
     });
   }
+
+  async saveCheckpoint(id: number, checkpoint: SyncCheckpoint): Promise<void> {
+    await this.prisma.syncLog.update({
+      where: { id },
+      data: { checkpoint: JSON.stringify(checkpoint) },
+    });
+  }
 }
 
 function toEntry(row: {
@@ -54,11 +70,13 @@ function toEntry(row: {
   source: string;
   startedAt: Date;
   status: string;
+  checkpoint: string | null;
 }): SyncLogEntry {
   return {
     id: row.id,
     source: row.source,
     startedAt: row.startedAt,
     status: row.status as SyncLogEntry["status"],
+    checkpoint: row.checkpoint ? (JSON.parse(row.checkpoint) as SyncCheckpoint) : null,
   };
 }
