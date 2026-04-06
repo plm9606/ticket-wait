@@ -59,12 +59,17 @@ export default function NotificationsScreen() {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [cursor, setCursor] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const router = useRouter();
 
   const load = useCallback(async (nextCursor?: number) => {
-    setLoading(true);
+    if (nextCursor) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     try {
       const params = new URLSearchParams({ limit: "20" });
       if (nextCursor) params.set("cursor", String(nextCursor));
@@ -80,8 +85,15 @@ export default function NotificationsScreen() {
       // ignore
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, []);
+
+  const handleEndReached = useCallback(() => {
+    if (!loadingMore && hasMore && cursor) {
+      load(cursor);
+    }
+  }, [loadingMore, hasMore, cursor, load]);
 
   useEffect(() => {
     if (user) load();
@@ -114,6 +126,8 @@ export default function NotificationsScreen() {
       data={notifications}
       keyExtractor={(item) => String(item.id)}
       contentContainerStyle={styles.listContent}
+      onEndReached={handleEndReached}
+      onEndReachedThreshold={0.5}
       ListHeaderComponent={
         <View style={styles.headline}>
           <Text style={styles.headlineTitle}>Alerts</Text>
@@ -162,18 +176,11 @@ export default function NotificationsScreen() {
         ) : null
       }
       ListFooterComponent={
-        loading ? (
+        loading || loadingMore ? (
           <ActivityIndicator
             style={styles.loader}
             color={colors.onSurfaceVariant}
           />
-        ) : hasMore ? (
-          <Pressable
-            style={styles.loadMore}
-            onPress={() => cursor && load(cursor)}
-          >
-            <Text style={styles.loadMoreText}>더 보기</Text>
-          </Pressable>
         ) : null
       }
     />
@@ -292,17 +299,5 @@ const styles = StyleSheet.create({
   },
   loader: {
     paddingVertical: 24,
-  },
-  loadMore: {
-    marginTop: 16,
-    paddingVertical: 14,
-    backgroundColor: colors.surfaceContainerHigh,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  loadMoreText: {
-    fontSize: 14,
-    fontFamily: "Inter-Medium",
-    color: colors.onSurfaceVariant,
   },
 });
