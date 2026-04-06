@@ -7,8 +7,8 @@ import { api } from "@/lib/api";
 interface Performance {
   id: number;
   title: string;
-  artist: { id: number; name: string; nameEn: string | null } | null;
-  venue: string | null;
+  artists: Array<{ id: number; name: string; nameEn: string | null }>;
+  venue: { id: number; name: string } | null;
   startDate: string | null;
   source: string;
   sourceUrl: string;
@@ -95,9 +95,9 @@ export function RecentConcerts() {
             <div className="text-xs font-medium leading-snug line-clamp-2">
               {performance.title}
             </div>
-            {performance.artist && (
+            {performance.artists[0] && (
               <div className="text-[10px] text-gray-500 mt-0.5">
-                {performance.artist.name}
+                {performance.artists[0].name}
               </div>
             )}
             <div className="flex items-center gap-1 mt-0.5">

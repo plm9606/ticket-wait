@@ -3,8 +3,8 @@ import Link from "next/link";
 interface Performance {
   id: number;
   title: string;
-  artist?: { id: number; name: string; nameEn: string | null } | null;
-  venue: string | null;
+  artists?: Array<{ id: number; name: string; nameEn: string | null }> | null;
+  venue: { id: number; name: string } | null;
   startDate: string | null;
   source: string;
   imageUrl: string | null;
@@ -55,15 +55,15 @@ export function PerformanceListCard({ performance }: { performance: Performance 
         <p className="font-bold text-sm tracking-tight text-on-surface line-clamp-2">
           {performance.title}
         </p>
-        {performance.artist && (
+        {performance.artists?.[0] && (
           <p className="text-xs text-on-surface-variant mt-1">
-            {performance.artist.name}
+            {performance.artists[0].name}
           </p>
         )}
         <div className="flex items-center gap-2 mt-1">
           {performance.venue && (
             <span className="text-xs text-on-surface-variant truncate">
-              {performance.venue}
+              {performance.venue.name}
             </span>
           )}
           {performance.startDate && (

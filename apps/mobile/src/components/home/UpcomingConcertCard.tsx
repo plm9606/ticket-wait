@@ -7,8 +7,8 @@ import { colors } from "@/theme/colors";
 interface Performance {
   id: number;
   title: string;
-  artist: { id: number; name: string; nameEn: string | null } | null;
-  venue: string | null;
+  artists: Array<{ id: number; name: string; nameEn: string | null }>;
+  venue: { id: number; name: string } | null;
   startDate: string | null;
   imageUrl: string | null;
   status: string;
@@ -76,7 +76,7 @@ export function UpcomingConcertCard({ performance }: { performance: Performance 
         <View style={styles.textOverlay}>
           <Text style={styles.metaText}>
             {formatDate(performance.startDate)}
-            {performance.venue ? ` · ${performance.venue}` : ""}
+            {performance.venue ? ` · ${performance.venue.name}` : ""}
           </Text>
           <Text style={styles.title} numberOfLines={2}>
             {performance.title}

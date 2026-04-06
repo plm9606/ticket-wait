@@ -24,7 +24,7 @@ const { width: screenWidth } = Dimensions.get("window");
 interface PerformanceDetail {
   id: number;
   title: string;
-  venue: string | null;
+  venue: { id: number; name: string; address: string | null } | null;
   startDate: string | null;
   endDate: string | null;
   ticketOpenDate: string | null;
@@ -33,13 +33,13 @@ interface PerformanceDetail {
   imageUrl: string | null;
   genre: string;
   status: string;
-  artist: {
+  artists: Array<{
     id: number;
     name: string;
     nameEn: string | null;
     imageUrl: string | null;
     subscriberCount: number;
-  } | null;
+  }>;
 }
 
 function formatDate(dateStr: string | null) {
@@ -164,7 +164,7 @@ export default function PerformanceDetailScreen() {
               </Text>
             )}
             {performance.venue && (
-              <Text style={styles.heroMetaText}>{performance.venue}</Text>
+              <Text style={styles.heroMetaText}>{performance.venue.name}</Text>
             )}
           </View>
         </View>
@@ -207,7 +207,7 @@ export default function PerformanceDetailScreen() {
         {performance.venue && (
           <View style={styles.infoItem}>
             <Text style={styles.sectionLabel}>VENUE</Text>
-            <Text style={styles.infoValue}>{performance.venue}</Text>
+            <Text style={styles.infoValue}>{performance.venue.name}</Text>
           </View>
         )}
         <View style={styles.infoItem}>
@@ -226,39 +226,39 @@ export default function PerformanceDetailScreen() {
       </View>
 
       {/* 아티스트 섹션 */}
-      {performance.artist && (
+      {performance.artists[0] && (
         <View style={styles.artistSection}>
           <Text style={styles.sectionLabel}>ARTIST</Text>
           <View style={styles.artistRow}>
-            <Pressable onPress={() => router.push(`/artist/${performance.artist!.id}`)}>
+            <Pressable onPress={() => router.push(`/artist/${performance.artists[0].id}`)}>
               <View style={styles.artistAvatar}>
-                {performance.artist.imageUrl ? (
+                {performance.artists[0].imageUrl ? (
                   <Image
-                    source={{ uri: performance.artist.imageUrl }}
+                    source={{ uri: performance.artists[0].imageUrl }}
                     style={StyleSheet.absoluteFill}
                     contentFit="cover"
                   />
                 ) : (
                   <Text style={styles.avatarText}>
-                    {performance.artist.name[0]}
+                    {performance.artists[0].name[0]}
                   </Text>
                 )}
               </View>
             </Pressable>
             <View style={styles.artistInfo}>
-              <Pressable onPress={() => router.push(`/artist/${performance.artist!.id}`)}>
-                <Text style={styles.artistName}>{performance.artist.name}</Text>
+              <Pressable onPress={() => router.push(`/artist/${performance.artists[0].id}`)}>
+                <Text style={styles.artistName}>{performance.artists[0].name}</Text>
               </Pressable>
-              {performance.artist.nameEn && (
+              {performance.artists[0].nameEn && (
                 <Text style={styles.artistNameEn}>
-                  {performance.artist.nameEn}
+                  {performance.artists[0].nameEn}
                 </Text>
               )}
               <Text style={styles.subscriberCount}>
-                구독자 {performance.artist.subscriberCount}명
+                구독자 {performance.artists[0].subscriberCount}명
               </Text>
             </View>
-            <SubscribeButton artistId={performance.artist.id} />
+            <SubscribeButton artistId={performance.artists[0].id} />
           </View>
         </View>
       )}

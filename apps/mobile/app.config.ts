@@ -17,7 +17,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   ios: {
     supportsTablet: false,
-    bundleIdentifier: "com.concertalert.app",
+    bundleIdentifier: "com.aram.concertalert.dev",
+    infoPlist: {
+      NSAppTransportSecurity: {
+        NSAllowsArbitraryLoads: false,
+        NSAllowsLocalNetworking: true,
+        NSExceptionDomains: {
+          "www.kopis.or.kr": {
+            NSExceptionAllowsInsecureHTTPLoads: true,
+            NSIncludesSubdomains: true,
+          },
+        },
+      },
+    },
   },
   android: {
     adaptiveIcon: {
@@ -33,7 +45,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-font",
   ],
   extra: {
-    apiUrl: process.env.API_URL || "http://localhost:4000",
+    apiUrl: process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000",
     eas: {
       projectId: process.env.EAS_PROJECT_ID || "",
     },
