@@ -24,15 +24,15 @@ interface NotificationItem {
     source: string;
     sourceUrl: string;
     imageUrl: string | null;
-    artist: { id: number; name: string; nameEn: string | null } | null;
-  };
+    artists: Array<{ id: number; name: string; nameEn: string | null }>;
+  } | null;
   read: boolean;
   createdAt: string;
 }
 
 interface NotificationResponse {
   items: NotificationItem[];
-  nextCursor: string | null;
+  nextCursor: number | null;
 }
 
 function typeLabel(type: string) {
@@ -59,15 +59,15 @@ export default function NotificationsScreen() {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cursor, setCursor] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const router = useRouter();
 
-  const load = useCallback(async (nextCursor?: string) => {
+  const load = useCallback(async (nextCursor?: number) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ limit: "20" });
-      if (nextCursor) params.set("cursor", nextCursor);
+      if (nextCursor) params.set("cursor", String(nextCursor));
       const data = await api<NotificationResponse>(
         `/notifications/history?${params}`
       );
@@ -87,7 +87,7 @@ export default function NotificationsScreen() {
     if (user) load();
   }, [user, load]);
 
-  const markAsRead = async (id: string) => {
+  const markAsRead = async (id: number) => {
     await api(`/notifications/${id}/read`, { method: "PATCH" });
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
@@ -96,7 +96,9 @@ export default function NotificationsScreen() {
 
   const handlePress = (item: NotificationItem) => {
     if (!item.read) markAsRead(item.id);
-    Linking.openURL(item.performance.sourceUrl);
+    if (item.performance?.sourceUrl) {
+      Linking.openURL(item.performance.sourceUrl);
+    }
   };
 
   if (!user) {
@@ -110,7 +112,7 @@ export default function NotificationsScreen() {
   return (
     <FlatList
       data={notifications}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => String(item.id)}
       contentContainerStyle={styles.listContent}
       ListHeaderComponent={
         <View style={styles.headline}>
@@ -123,7 +125,7 @@ export default function NotificationsScreen() {
           style={[styles.card, item.read && styles.readCard]}
           onPress={() => handlePress(item)}
         >
-          {item.performance.imageUrl && (
+          {item.performance?.imageUrl && (
             <View style={styles.thumbnail}>
               <Image
                 source={{ uri: item.performance.imageUrl }}
@@ -140,10 +142,10 @@ export default function NotificationsScreen() {
               <Text style={styles.timeText}>{timeAgo(item.createdAt)}</Text>
             </View>
             <Text style={styles.title} numberOfLines={2}>
-              {item.performance.title}
+              {item.performance?.title ?? "삭제된 공연"}
             </Text>
-            {item.performance.artist && (
-              <Text style={styles.artist}>{item.performance.artist.name}</Text>
+            {item.performance?.artists?.[0] && (
+              <Text style={styles.artist}>{item.performance.artists[0].name}</Text>
             )}
           </View>
           {!item.read && <View style={styles.unreadDot} />}

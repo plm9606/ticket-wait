@@ -90,7 +90,7 @@ export function RecentConcerts() {
       scrollEnabled={false}
       columnWrapperStyle={styles.row}
       contentContainerStyle={styles.list}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => String(item.id)}
       renderItem={({ item }) => (
         <Pressable
           style={[styles.item, { width: itemWidth }]}

@@ -30,7 +30,7 @@ interface Performance {
 
 interface PerformanceListResponse {
   items: Performance[];
-  nextCursor: string | null;
+  nextCursor: number | null;
 }
 
 const GENRE_FILTERS = [
@@ -48,17 +48,17 @@ const GENRE_FILTERS = [
 export default function ConcertsScreen() {
   const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cursor, setCursor] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [genre, setGenre] = useState("");
   const insets = useSafeAreaInsets();
 
   const loadPerformances = useCallback(
-    async (nextCursor?: string, genreFilter?: string) => {
+    async (nextCursor?: number, genreFilter?: string) => {
       setLoading(true);
       try {
         const params = new URLSearchParams({ limit: "20" });
-        if (nextCursor) params.set("cursor", nextCursor);
+        if (nextCursor) params.set("cursor", String(nextCursor));
         if (genreFilter) params.set("genre", genreFilter);
         const data = await api<PerformanceListResponse>(`/performances?${params}`);
         setPerformances((prev) =>
@@ -120,7 +120,7 @@ export default function ConcertsScreen() {
 
       <FlatList
         data={performances}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => <ConcertCard performance={item} />}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
