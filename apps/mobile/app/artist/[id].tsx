@@ -20,7 +20,6 @@ import { containerPadding } from "@/theme/spacing";
 interface Performance {
   id: number;
   title: string;
-  venue: string | null;
   startDate: string | null;
   endDate: string | null;
   source: string;
@@ -28,6 +27,7 @@ interface Performance {
   imageUrl: string | null;
   genre: string;
   status: string;
+  ticketOpenDate: string | null;
 }
 
 interface ArtistDetail {
@@ -136,7 +136,7 @@ export default function ArtistDetailScreen() {
   return (
     <FlatList
       data={artist.performances}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => String(item.id)}
       ListHeaderComponent={headerComponent}
       contentContainerStyle={styles.listContent}
       renderItem={({ item }) => <ConcertCard performance={item} />}

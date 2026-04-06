@@ -70,7 +70,7 @@ export function UpcomingForYou({ genre }: UpcomingForYouProps) {
           horizontal
           showsHorizontalScrollIndicator={false}
           data={performances}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => String(item.id)}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => <UpcomingConcertCard performance={item} />}
         />

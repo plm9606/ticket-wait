@@ -7,7 +7,7 @@ interface Performance {
   id: number;
   title: string;
   artists?: Array<{ id: number; name: string; nameEn: string | null }> | null;
-  venue: { id: number; name: string } | null;
+  venue?: { id: number; name: string } | null;
   startDate: string | null;
   source: string;
   imageUrl: string | null;

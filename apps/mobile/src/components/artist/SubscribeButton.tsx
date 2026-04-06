@@ -5,7 +5,7 @@ import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { colors } from "@/theme/colors";
 
 interface SubscribeButtonProps {
-  artistId: string;
+  artistId: number;
 }
 
 export function SubscribeButton({ artistId }: SubscribeButtonProps) {

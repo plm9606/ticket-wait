@@ -128,7 +128,7 @@ export default function MyScreen() {
         <FlatList
           data={subscriptions}
           numColumns={3}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => String(item.id)}
           columnWrapperStyle={styles.gridRow}
           contentContainerStyle={styles.gridList}
           renderItem={({ item }) => (

@@ -84,7 +84,7 @@ export default function SearchScreen() {
 
       <FlatList
         data={results}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         numColumns={3}
         columnWrapperStyle={styles.gridRow}
         contentContainerStyle={styles.gridContent}
