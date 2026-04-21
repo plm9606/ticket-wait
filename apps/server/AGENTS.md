@@ -35,6 +35,8 @@ pnpm start          # node dist/index.js
 | DB 스키마 | [docs/database.md](../../docs/database.md) |
 | 인증 플로우 & 환경변수 | [docs/auth.md](../../docs/auth.md) |
 | KOPIS 동기화 & 아티스트 매칭 | [docs/crawler.md](../../docs/crawler.md) |
+| 공연 데이터 수급 (KOPIS) | [docs/data-sourcing-performances.md](../../docs/data-sourcing-performances.md) |
+| 아티스트 데이터 수급 (MusicBrainz/Apple Music/Wikidata) | [docs/data-sourcing-artists.md](../../docs/data-sourcing-artists.md) |
 
 ## 로컬 규칙
 
