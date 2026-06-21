@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { api } from "@/lib/api";
 import { ConcertCard } from "@/components/concert/ConcertCard";
@@ -48,6 +49,7 @@ const GENRE_FILTERS = [
 export default function ConcertsScreen() {
   const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [cursor, setCursor] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [genre, setGenre] = useState("");
@@ -55,7 +57,11 @@ export default function ConcertsScreen() {
 
   const loadPerformances = useCallback(
     async (nextCursor?: number, genreFilter?: string) => {
-      setLoading(true);
+      if (nextCursor) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
       try {
         const params = new URLSearchParams({ limit: "20" });
         if (nextCursor) params.set("cursor", String(nextCursor));
@@ -70,10 +76,17 @@ export default function ConcertsScreen() {
         // ignore
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
     },
     []
   );
+
+  const handleEndReached = useCallback(() => {
+    if (!loadingMore && hasMore && cursor) {
+      loadPerformances(cursor, genre);
+    }
+  }, [loadingMore, hasMore, cursor, genre, loadPerformances]);
 
   useEffect(() => {
     setPerformances([]);
@@ -124,6 +137,8 @@ export default function ConcertsScreen() {
         contentContainerStyle={styles.list}
         renderItem={({ item }) => <ConcertCard performance={item} />}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.5}
         ListEmptyComponent={
           !loading ? (
             <View style={styles.empty}>
@@ -132,18 +147,11 @@ export default function ConcertsScreen() {
           ) : null
         }
         ListFooterComponent={
-          loading ? (
+          loading || loadingMore ? (
             <ActivityIndicator
               style={styles.loader}
               color={colors.onSurfaceVariant}
             />
-          ) : hasMore ? (
-            <Pressable
-              style={styles.loadMore}
-              onPress={() => cursor && loadPerformances(cursor, genre)}
-            >
-              <Text style={styles.loadMoreText}>더 보기</Text>
-            </Pressable>
           ) : null
         }
       />
@@ -217,17 +225,5 @@ const styles = StyleSheet.create({
   },
   loader: {
     paddingVertical: 24,
-  },
-  loadMore: {
-    marginTop: 24,
-    paddingVertical: 14,
-    backgroundColor: colors.surfaceContainerHigh,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  loadMoreText: {
-    fontSize: 14,
-    fontFamily: "Inter-Medium",
-    color: colors.onSurfaceVariant,
   },
 });
